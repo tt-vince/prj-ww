@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { asc } from 'drizzle-orm';
 import { requireSuperadmin } from '@/lib/dal';
 import { db } from '@/db';
@@ -30,6 +31,12 @@ export default async function UsersPage() {
 
   return (
     <div className="flex flex-col gap-4">
+      <Link
+        href="/dashboard"
+        className="w-fit text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        ← Back to dashboard
+      </Link>
       <div className="flex flex-col gap-1">
         <h1 className="font-serif text-2xl font-semibold tracking-tight">Users</h1>
         <p className="text-sm text-muted-foreground">
