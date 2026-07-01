@@ -1,6 +1,10 @@
 import { neon } from "@neondatabase/serverless";
 import { revalidatePath } from "next/cache";
 
+// Reads live comments on every request; never prerendered at build (so the
+// build does not require DATABASE_URL to be present).
+export const dynamic = "force-dynamic";
+
 // Server Component: reads comments from Neon at request time (dynamic).
 export default async function Home() {
   const sql = neon(process.env.DATABASE_URL!);
