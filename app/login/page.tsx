@@ -17,6 +17,7 @@ const ERROR_MESSAGES: Record<string, string> = {
   state: 'Your sign-in session expired. Please try again.',
   unverified: 'Your Google email is not verified.',
   auth: 'We could not sign you in. Please try again.',
+  denied: 'This Google account is not an authorized admin.',
 };
 
 function GoogleIcon(props: ComponentProps<'svg'>) {

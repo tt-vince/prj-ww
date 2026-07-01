@@ -113,7 +113,7 @@ Single table, defined in Drizzle. A Postgres enum `rsvp_status` backs the `statu
 
 ### Table: `users` (admin identities)
 
-Authenticated admin users only — guests never appear here. Populated on Google sign-in.
+Authenticated admin users only — guests never appear here. Rows are provisioned out-of-band (directly in the DB); Google sign-in only refreshes an existing row's profile, it never creates one.
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
@@ -134,7 +134,7 @@ user_role   = 'superadmin' | 'admin'
 user_status = 'pending' | 'active' | 'disabled'
 ```
 
-> **Exactly one superadmin.** A partial unique index `one_superadmin_idx ON users(role) WHERE role='superadmin'` guarantees at most one superadmin row can ever exist. The first user to sign in becomes that superadmin (auto `active`); everyone else is `admin`/`pending` until activated. No in-app recovery if that account is lost — recovery is a manual DB update.
+> **Exactly one superadmin.** A partial unique index `one_superadmin_idx ON users(role) WHERE role='superadmin'` guarantees at most one superadmin row can ever exist. Admins are **not** self-provisioned: sign-in only authenticates a user already present in `users` (matched by `google_sub`); an unknown Google account is denied, no row created. New admins — including the initial superadmin — are provisioned out-of-band via a manual DB insert. No in-app recovery if that account is lost — recovery is likewise a manual DB update.
 
 > The `comments` table (proof-of-concept) remains in the DB but is **not** managed by Drizzle — left as-is.
 
@@ -182,11 +182,11 @@ and the Server Action both infer from them, so types are declared once.
 | `components/rsvp-form.tsx` | Client RSVP form (shadcn/ui). |
 | `lib/session.ts` | Pure `jose` encrypt/decrypt + cookie name/age (safe to import in `proxy.ts`). |
 | `lib/oauth.ts` | Google OAuth: PKCE/state/nonce, token exchange, id_token verify (JWKS). |
-| `lib/users.ts` | `upsertUserOnLogin` — first-user→superadmin, race-safe. |
+| `lib/users.ts` | `updateUserOnLogin` — refresh an existing admin on login; returns `null` for unknown accounts (no self-sign-up). |
 | `lib/dal.ts` | `getCurrentUser` / `requireUser` / `requireSuperadmin` (React `cache()`). |
 | `proxy.ts` | Optimistic redirect for `/dashboard/*` (replaces `middleware.ts`). |
 | `app/api/auth/google/route.ts` | Initiate OAuth (GET → redirect to Google). |
-| `app/api/auth/callback/google/route.ts` | OAuth callback: verify, upsert, gate, session. |
+| `app/api/auth/callback/google/route.ts` | OAuth callback: verify, authenticate existing user, gate, session. |
 | `app/api/auth/logout/route.ts` | POST → clear session cookie. |
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging. |
 | `app/(protected)/layout.tsx` | Dashboard shell (nav + sign out). |
@@ -225,12 +225,14 @@ None.
 
 ### Admin gate — `/dashboard` (Google OAuth)
 
-Admins sign in with Google. There is **no shared password**. Access model:
+Admins sign in with Google. There is **no shared password**, and **no self-sign-up**. Access model:
 
-- The **first** user ever to sign in becomes the **`superadmin`** (auto `active`).
-- Every later sign-in creates an **`admin`** with status **`pending`** — they cannot access the
-  dashboard until the superadmin **activates** them from `/dashboard/users`.
-- Exactly one superadmin, DB-enforced (`one_superadmin_idx`). No role-change UI.
+- Sign-in only authenticates a user that **already exists** in `users` (matched by Google `sub`).
+  An unknown Google account is **denied** (`/login?error=denied`) — no row is created.
+- New admins — including the initial `superadmin` — are provisioned **out-of-band** via a manual DB
+  insert. Exactly one superadmin, DB-enforced (`one_superadmin_idx`). No role-change UI.
+- A pre-existing `pending` admin still can't access the dashboard until the superadmin
+  **activates** them from `/dashboard/users`.
 
 Flow:
 
@@ -239,11 +241,12 @@ Flow:
    stores them in short-lived `httpOnly` cookies, and redirects to Google.
 3. `app/api/auth/callback/google/route.ts` verifies `state` (CSRF), exchanges the code (with the
    PKCE verifier + client secret), verifies the `id_token` against Google's JWKS via `jose`
-   (`iss`/`aud`/`exp`/`nonce`/`email_verified`), then `upsertUserOnLogin` (first-user race handled
-   by the partial unique index).
-4. **Gate:** if the user is not `active` → redirect to `/login?pending=1`, **no session issued**.
-   If `active` → set an `httpOnly`, `secure` (prod), `sameSite=lax`, 7-day `jose` JWT cookie
-   (payload = `{ userId }` only) and redirect to `/dashboard`.
+   (`iss`/`aud`/`exp`/`nonce`/`email_verified`), then `updateUserOnLogin` refreshes the matching
+   user's profile (returns `null` when no user matches the Google `sub`).
+4. **Gate:** unknown account (`null`) → redirect to `/login?error=denied`; a matched but non-`active`
+   user → `/login?pending=1`; both with **no session issued**. If `active` → set an `httpOnly`,
+   `secure` (prod), `sameSite=lax`, 7-day `jose` JWT cookie (payload = `{ userId }` only) and
+   redirect to `/dashboard`.
 5. `proxy.ts` does an **optimistic** cookie check on `/dashboard/*`; `lib/dal.ts` does the
    **authoritative** check on every page/action (re-reads the user, enforces `status === 'active'`,
    loads `role`) so deactivation takes effect immediately.
@@ -322,9 +325,10 @@ integration, not a Claude MCP. `docx`/`pdf` skills considered and excluded.
 
 - **Fields:** name, email, phone, status, plus `guest_count` and `note`.
 - **Contact:** email **required**, phone optional. (Drops the earlier "at-least-one-contact" rule.)
-- **Viewing responses & managing admins:** Google-authenticated `/dashboard`. First sign-in →
-  superadmin (auto-active); later sign-ins → pending admins the superadmin activates. Exactly one
-  superadmin, DB-enforced. No shared password.
+- **Viewing responses & managing admins:** Google-authenticated `/dashboard`. No self-sign-up —
+  admins (incl. the initial superadmin) are provisioned via manual DB insert; sign-in only
+  authenticates existing users, unknown accounts are denied. Exactly one superadmin, DB-enforced.
+  No shared password.
 
 ---
 

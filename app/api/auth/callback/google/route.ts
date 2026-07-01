@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { exchangeCode, verifyIdToken } from '@/lib/oauth';
-import { upsertUserOnLogin } from '@/lib/users';
+import { updateUserOnLogin } from '@/lib/users';
 import { encrypt, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session';
 
 const OAUTH_COOKIES = ['oauth_state', 'oauth_nonce', 'oauth_verifier'];
@@ -9,8 +9,9 @@ function clearTxnCookies(res: NextResponse) {
   for (const name of OAUTH_COOKIES) res.cookies.set(name, '', { path: '/', maxAge: 0 });
 }
 
-/** Google OAuth callback: verify state/PKCE/id_token, upsert the user, gate on
- *  status, and issue the session cookie for active users. */
+/** Google OAuth callback: verify state/PKCE/id_token, authenticate the existing
+ *  user, gate on status, and issue the session cookie for active users. No
+ *  self-sign-up — an unknown Google account is denied, no user is created. */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const appUrl = process.env.APP_URL ?? url.origin;
@@ -36,7 +37,8 @@ export async function GET(request: NextRequest) {
     const profile = await verifyIdToken(idToken, nonce);
     if (!profile.emailVerified) return redirectTo('/login?error=unverified');
 
-    const user = await upsertUserOnLogin(profile);
+    const user = await updateUserOnLogin(profile);
+    if (!user) return redirectTo('/login?error=denied');
     if (user.status !== 'active') return redirectTo('/login?pending=1');
 
     const token = await encrypt({ userId: user.id });

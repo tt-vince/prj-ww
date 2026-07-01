@@ -52,10 +52,13 @@ Open [http://localhost:3000](http://localhost:3000). Sign in at [/login](http://
 
 ## Admin access model
 
-- The **first** person to sign in with Google becomes the **superadmin** (auto-activated).
-- Everyone who signs in after that is created as a **pending admin** and **cannot** access the
-  dashboard until the superadmin approves them at `/dashboard/users`.
-- There is exactly one superadmin (enforced by a database index).
+- **No self-sign-up.** Signing in with Google only authenticates an admin that **already exists**
+  in the `users` table (matched by their Google identity). An unknown Google account is **denied** —
+  no account is created.
+- The admin roster is managed **directly in the database**, not through the app. There is exactly
+  one superadmin (enforced by a database index); see [Superadmin recovery](#superadmin-recovery-escape-hatch)
+  for the promote-by-SQL pattern.
+- A `pending` admin can't access the dashboard until the superadmin activates them at `/dashboard/users`.
 
 ### Superadmin recovery (escape hatch)
 
