@@ -1,6 +1,6 @@
 # Wedding RSVP Site — Project Spec (Option A)
 
-> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD at `/dashboard/guests`. The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
+> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported Claude Design `Wedding RSVP Dashboard.dc.html` (“pastel wisteria & fig”, mobile/iPad responsive). The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
 > **For Claude / agents:** Read this file before designing or writing any RSVP-related code.
 > When code and this spec disagree, treat it as a bug — fix one of them, don't silently diverge.
 > Update this spec in the same change whenever a decision here changes.
@@ -76,7 +76,7 @@ Server Action  submitRsvp()         (runs on Vercel — no separate service)
 Neon Postgres  (DATABASE_URL injected by Vercel Marketplace)
    ▲
    │  read-only
-Admin dashboard  /dashboard  (Google-authenticated)  →  lists RSVPs + manages admin users
+Admin dashboard  /dashboard  (Google-authenticated)  →  single-page "Manage RSVP" (guest + label CRUD) + admin users
 
 Admin auth:  /login → Google OAuth (PKCE+state+nonce) → /api/auth/callback/google → jose session cookie
    proxy.ts  = optimistic redirect for /dashboard/*    ·    lib/dal.ts = authoritative status/role check
@@ -235,15 +235,19 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/api/auth/callback/google/route.ts` | OAuth callback: verify, authenticate existing user, gate, session. |
 | `app/api/auth/logout/route.ts` | POST → clear session cookie. |
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging. |
-| `app/(protected)/layout.tsx` | Dashboard shell (nav + sign out). |
-| `app/(protected)/dashboard/page.tsx` | Dashboard home. |
-| `app/(protected)/dashboard/guests/page.tsx` | Guest list + CRUD entry (replaces the old read-only RSVP list). |
-| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete). |
-| `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog). |
+| `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-7xl` container on the wisteria bg + top-right `AccountMenu`. |
+| `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
+| `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions. |
+| `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
+| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); revalidate `/dashboard`. |
+| `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
+| `components/account-menu.tsx` | Avatar dropdown (shadcn `DropdownMenu`) — superadmin Users link + sign out (replaces the sidebar nav). |
 | `lib/guest-token.ts` | Short unguessable invite-token generator (crypto). |
 | `app/(protected)/dashboard/users/page.tsx` | User management (superadmin only). |
 | `app/(protected)/dashboard/users/actions.ts` | activate/deactivate Server Actions. |
-| `components/ui/*` | shadcn components pulled via skill/MCP. |
+| `components/ui/*` | shadcn components pulled via skill/MCP (now incl. `dropdown-menu`, `progress`, `toggle-group`). |
+
+> **Removed with the single-page redesign:** `app/(protected)/dashboard/guests/page.tsx` (folded into `/dashboard`; the `guests/` folder now holds only the reused client components + `actions.ts`), `components/app-sidebar.tsx`, and the now-unused `components/ui/{sidebar,sheet}.tsx` + `hooks/use-mobile.ts`.
 | `drizzle/` | Generated migration output (Drizzle Kit). |
 
 ### Files to update

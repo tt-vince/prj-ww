@@ -88,7 +88,6 @@ export async function createGuest(
       .values(input.labelIds.map((labelId) => ({ guestId: row.id, labelId })));
   }
 
-  revalidatePath('/dashboard/guests');
   revalidatePath('/dashboard');
   return OK;
 }
@@ -125,7 +124,6 @@ export async function updateGuest(
       .values(input.labelIds.map((labelId) => ({ guestId: id.data, labelId })));
   }
 
-  revalidatePath('/dashboard/guests');
   revalidatePath('/dashboard');
   return OK;
 }
@@ -134,7 +132,6 @@ export async function deleteGuest(formData: FormData): Promise<void> {
   await requireUser();
   const guestId = guestIdSchema.parse(formData.get('guestId'));
   await db.delete(guests).where(eq(guests.id, guestId)); // cascade clears guest_labels
-  revalidatePath('/dashboard/guests');
   revalidatePath('/dashboard');
 }
 
@@ -150,7 +147,7 @@ export async function createLabel(
   } catch {
     return { ok: false, fieldErrors: { name: 'That label already exists.' } };
   }
-  revalidatePath('/dashboard/guests');
+  revalidatePath('/dashboard');
   return OK;
 }
 
@@ -168,7 +165,7 @@ export async function renameLabel(
   } catch {
     return { ok: false, fieldErrors: { name: 'That label already exists.' } };
   }
-  revalidatePath('/dashboard/guests');
+  revalidatePath('/dashboard');
   return OK;
 }
 
@@ -176,5 +173,5 @@ export async function deleteLabel(formData: FormData): Promise<void> {
   await requireUser();
   const labelId = labelIdSchema.parse(formData.get('labelId'));
   await db.delete(labels).where(eq(labels.id, labelId)); // cascade clears guest_labels
-  revalidatePath('/dashboard/guests');
+  revalidatePath('/dashboard');
 }
