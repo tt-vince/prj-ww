@@ -52,7 +52,7 @@ export default async function LoginPage({
   const errorMessage = params.error ? ERROR_MESSAGES[params.error] ?? 'Something went wrong.' : null;
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-gradient-to-br from-accent/40 via-background to-secondary/40 p-6">
+    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-gradient-to-br from-accent/40 via-background to-secondary/40 p-6">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-primary/15 blur-3xl"
