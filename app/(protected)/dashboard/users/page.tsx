@@ -31,7 +31,7 @@ export default async function UsersPage() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold">Users</h1>
+        <h1 className="font-serif text-2xl font-semibold tracking-tight">Users</h1>
         <p className="text-sm text-muted-foreground">
           Approve pending admins so they can sign in. You cannot change your own account.
         </p>
