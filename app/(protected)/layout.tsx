@@ -1,34 +1,14 @@
 import type { ReactNode } from "react";
-import { getCurrentUser } from "@/lib/dal";
-import { AccountMenu } from "@/components/account-menu";
 
 /**
- * Sidebar-less admin shell (per the imported single-page design): a full-width,
- * centered container on the wisteria background. Navigation/logout live in a
- * compact account menu in the top-right so the RSVP page reads as one clean page.
+ * Sidebar-less admin shell (imported single-page design): a full-width, centered
+ * container on the wisteria gradient background. Page-level chrome (the account
+ * menu, actions) lives inside each page's header.
  */
-export default async function ProtectedLayout({
-  children,
-}: {
-  children: ReactNode;
-}) {
-  const user = await getCurrentUser();
-
+export default function ProtectedLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="flex-1 bg-background">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
-        {user ? (
-          <div className="mb-4 flex items-center justify-end">
-            <AccountMenu
-              user={{
-                name: user.name,
-                email: user.email,
-                role: user.role,
-                picture: user.picture,
-              }}
-            />
-          </div>
-        ) : null}
+    <div className="flex-1">
+      <div className="mx-auto w-full max-w-[1300px] px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
         {children}
       </div>
     </div>

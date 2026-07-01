@@ -1,27 +1,26 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Playfair_Display, Caveat } from "next/font/google";
+import { DM_Sans, Gilda_Display, Pinyon_Script } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
   display: "swap",
 });
 
-// Handwritten accent for the couple's-note line on the dashboard (design `.note`).
-const caveat = Caveat({
-  variable: "--font-caveat",
+// Elegant serif for display headings + stat numbers (design `Gilda Display`).
+const gilda = Gilda_Display({
+  variable: "--font-gilda",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+// Calligraphic accent for the couple's names (design `Pinyon Script`).
+const pinyon = Pinyon_Script({
+  variable: "--font-pinyon",
+  weight: "400",
   subsets: ["latin"],
   display: "swap",
 });
@@ -39,7 +38,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} ${caveat.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${gilda.variable} ${pinyon.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
         <TooltipProvider>{children}</TooltipProvider>

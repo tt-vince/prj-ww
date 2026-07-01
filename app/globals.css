@@ -7,11 +7,11 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-playfair), ui-serif, Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --font-serif: var(--font-gilda), ui-serif, Georgia, "Times New Roman", serif;
   --font-heading: var(--font-serif);
-  --font-script: var(--font-caveat), ui-sans-serif, cursive;
+  --font-script: var(--font-pinyon), ui-serif, cursive;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -33,6 +33,10 @@
   --color-stat-pending-bar: var(--stat-pending-bar);
   --color-stat-invited: var(--stat-invited);
   --color-stat-invited-bar: var(--stat-invited-bar);
+  --color-dot-going: var(--dot-going);
+  --color-dot-declined: var(--dot-declined);
+  --color-dot-pending: var(--dot-pending);
+  --color-dot-invited: var(--dot-invited);
   --color-ring: var(--ring);
   --color-input: var(--input);
   --color-border: var(--border);
@@ -58,56 +62,63 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Light “pastel wisteria & fig” palette — from the imported Wedding RSVP Dashboard design. */
+/* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (DM Sans / Gilda Display / Pinyon Script). */
 :root {
-  --background: #eae4ea;
-  --foreground: #4a3340;
-  --card: #fdfbfc;
+  --background: #ece6ec;
+  --foreground: #4a2f3a;
+  --card: #ffffff;
   --card-foreground: #3a2c34;
   --popover: #ffffff;
   --popover-foreground: #3a2c34;
   --primary: #8a76b0;
   --primary-foreground: #ffffff;
-  --secondary: #f1eaef;
-  --secondary-foreground: #6b5f68;
-  --muted: #f4eef2;
-  --muted-foreground: #8f8390;
-  --accent: #efe6ee;
-  --accent-foreground: #4a3340;
+  --secondary: #f3edf1;
+  --secondary-foreground: #8a7d86;
+  --muted: #f7f2f6;
+  --muted-foreground: #9a8b96;
+  --accent: #f3edf1;
+  --accent-foreground: #4a2f3a;
   --destructive: #b06a4f;
-  --border: #e8dfe6;
+  --border: #ece3ea;
   --input: #e2d8e0;
   --ring: #8a76b0;
   --chart-1: #8a76b0;
   --chart-2: #7a9a5c;
   --chart-3: #dcb25f;
-  --chart-4: #c9a99d;
-  --chart-5: #a98cc0;
-  --radius: 0.85rem;
-  --sidebar: #f4eef2;
-  --sidebar-foreground: #4a3340;
+  --chart-4: #c9a1ad;
+  --chart-5: #b07d8c;
+  --radius: 0.7rem;
+  --sidebar: #f7f2f6;
+  --sidebar-foreground: #4a2f3a;
   --sidebar-primary: #8a76b0;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #efe6ee;
-  --sidebar-accent-foreground: #4a3340;
-  --sidebar-border: #e8dfe6;
+  --sidebar-accent: #f3edf1;
+  --sidebar-accent-foreground: #4a2f3a;
+  --sidebar-border: #ece3ea;
   --sidebar-ring: #8a76b0;
 
-  /* Stat-card + status-pill palette (design “wisteria & fig”). */
+  /* Couple-name script accent. */
+  --script: #b07d8c;
+
+  /* Stat numbers, progress bars, status dots, and status pills (hi-fi). */
   --stat-going: #5f7a48;
   --stat-going-bar: #7a9a5c;
   --stat-declined: #b06a4f;
-  --stat-declined-bar: #c9a99d;
+  --stat-declined-bar: #c9a1ad;
   --stat-pending: #a9832f;
   --stat-pending-bar: #dcb25f;
   --stat-invited: #8a76b0;
   --stat-invited-bar: #b6a6d6;
-  --pill-going-bg: #edf3e4;
-  --pill-going-fg: #55703f;
-  --pill-pending-bg: #f8efd9;
-  --pill-pending-fg: #997527;
-  --pill-declined-bg: #f4e4dd;
-  --pill-declined-fg: #a35c41;
+  --dot-going: #7a9a5c;
+  --dot-declined: #c58fa0;
+  --dot-pending: #d9b25f;
+  --dot-invited: #8a76b0;
+  --pill-going-bg: #eaf0e2;
+  --pill-going-fg: #5f7a48;
+  --pill-pending-bg: #faf1dc;
+  --pill-pending-fg: #a9832f;
+  --pill-declined-bg: #f5e7e3;
+  --pill-declined-fg: #b06a4f;
 }
 
 /* Dark wisteria variant (no in-app toggle yet, but kept coherent). */
@@ -152,6 +163,11 @@
   --stat-pending-bar: #dcb25f;
   --stat-invited: #b6a6d6;
   --stat-invited-bar: #8a76b0;
+  --script: #d3a7b5;
+  --dot-going: #8fae6f;
+  --dot-declined: #d3927a;
+  --dot-pending: #e0bd73;
+  --dot-invited: #b6a6d6;
   --pill-going-bg: #2f3a26;
   --pill-going-fg: #b6d69a;
   --pill-pending-bg: #3a3320;
@@ -165,7 +181,11 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(180deg, #efe9ef 0%, #e8e0e8 100%) fixed;
+  }
+  .dark body {
+    background: linear-gradient(180deg, #241d28 0%, #1c161f 100%) fixed;
   }
   html {
     @apply font-sans;

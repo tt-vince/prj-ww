@@ -73,8 +73,8 @@ export function GuestDialog({
       <DialogTrigger
         render={
           mode === 'create' ? (
-            <Button size="sm">
-              <Plus /> Add person
+            <Button className="shadow-[0_4px_14px_rgba(138,118,176,0.32)]">
+              <Plus /> Add guest
             </Button>
           ) : (
             <Button variant="ghost" size="icon-sm" aria-label={`Edit ${guest?.name ?? ''}`}>
@@ -117,7 +117,7 @@ function GuestForm({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>{mode === 'create' ? 'Add person' : 'Edit person'}</DialogTitle>
+        <DialogTitle>{mode === 'create' ? 'Add guest' : 'Edit guest'}</DialogTitle>
         <DialogDescription>
           {mode === 'create'
             ? 'Create an invitee and generate their personal RSVP link.'
@@ -199,7 +199,7 @@ function GuestForm({
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
           <Button type="submit" disabled={pending}>
-            {pending ? 'Saving…' : mode === 'create' ? 'Add person' : 'Save changes'}
+            {pending ? 'Saving…' : mode === 'create' ? 'Add guest' : 'Save changes'}
           </Button>
         </DialogFooter>
       </form>
