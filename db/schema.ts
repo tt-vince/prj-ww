@@ -14,10 +14,11 @@ export const userStatus = pgEnum('user_status', ['pending', 'active', 'disabled'
 export const rsvpStatus = pgEnum('rsvp_status', ['attending', 'not_attending', 'maybe']);
 
 /**
- * Authenticated admin users (Google-identified). The very first user to sign in
- * becomes an `active` `superadmin`; everyone else is created `pending`/`admin`
- * and must be activated by the superadmin. The partial unique index guarantees
- * at most one superadmin can ever exist.
+ * Authenticated admin users (Google-identified). Rows are provisioned
+ * out-of-band (directly in the DB) — there is no self-sign-up; Google sign-in
+ * only authenticates a user that already exists here (matched by `google_sub`)
+ * and refreshes their profile. The partial unique index guarantees at most one
+ * `superadmin` can ever exist.
  */
 export const users = pgTable(
   'users',
