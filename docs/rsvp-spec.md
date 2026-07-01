@@ -1,6 +1,6 @@
 # Wedding RSVP Site — Project Spec (Option A)
 
-> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported Claude Design `Wedding RSVP Dashboard.dc.html` (“pastel wisteria & fig”, mobile/iPad responsive). The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
+> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive). The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
 > **For Claude / agents:** Read this file before designing or writing any RSVP-related code.
 > When code and this spec disagree, treat it as a bug — fix one of them, don't silently diverge.
 > Update this spec in the same change whenever a decision here changes.
@@ -241,7 +241,7 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
 | `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); revalidate `/dashboard`. |
 | `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
-| `components/account-menu.tsx` | Avatar dropdown (shadcn `DropdownMenu`) — superadmin Users link + sign out (replaces the sidebar nav). |
+| `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`), the superadmin Users link, and sign out (replaces the sidebar nav). |
 | `lib/guest-token.ts` | Short unguessable invite-token generator (crypto). |
 | `app/(protected)/dashboard/users/page.tsx` | User management (superadmin only). |
 | `app/(protected)/dashboard/users/actions.ts` | activate/deactivate Server Actions. |

@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { LogOut } from 'lucide-react';
 import { asc } from 'drizzle-orm';
 import { requireSuperadmin } from '@/lib/dal';
 import { db } from '@/db';
@@ -31,12 +32,19 @@ export default async function UsersPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link
-        href="/dashboard"
-        className="w-fit text-sm text-muted-foreground transition-colors hover:text-foreground"
-      >
-        ← Back to dashboard
-      </Link>
+      <div className="flex items-center justify-between gap-3">
+        <Link
+          href="/dashboard"
+          className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          ← Back to dashboard
+        </Link>
+        <form action="/api/auth/logout" method="post">
+          <Button type="submit" variant="ghost" size="sm" className="text-muted-foreground">
+            <LogOut /> Log out
+          </Button>
+        </form>
+      </div>
       <div className="flex flex-col gap-1">
         <h1 className="font-serif text-2xl font-semibold tracking-tight">Users</h1>
         <p className="text-sm text-muted-foreground">

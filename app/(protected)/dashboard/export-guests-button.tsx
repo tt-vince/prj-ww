@@ -65,7 +65,7 @@ export function ExportGuestsButton({
   }
 
   return (
-    <Button variant="outline" size="sm" onClick={exportCsv} disabled={rows.length === 0}>
+    <Button variant="outline" onClick={exportCsv} disabled={rows.length === 0}>
       <Download /> Export CSV
     </Button>
   );

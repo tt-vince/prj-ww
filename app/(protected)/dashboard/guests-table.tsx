@@ -5,7 +5,9 @@ import { Search } from "lucide-react";
 import type { Label as LabelRow } from "@/db/schema";
 
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
@@ -43,16 +45,39 @@ export type GuestRow = {
 };
 
 const STATUS: Record<GuestStatus, { label: string; className: string }> = {
-  going: { label: "Going", className: "bg-(--pill-going-bg) text-(--pill-going-fg)" },
+  going: { label: "Attending", className: "bg-(--pill-going-bg) text-(--pill-going-fg)" },
   pending: {
     label: "Awaiting",
     className: "bg-(--pill-pending-bg) text-(--pill-pending-fg)",
   },
   not_going: {
-    label: "Not going",
+    label: "Declined",
     className: "bg-(--pill-declined-bg) text-(--pill-declined-fg)",
   },
 };
+
+// Soft tints cycled per guest so avatars read as distinct people (design detail).
+const AV = [
+  { bg: "#ece6f3", fg: "#6f5b95" },
+  { bg: "#f6e6ec", fg: "#b07d8c" },
+  { bg: "#e9f0e2", fg: "#5f7a48" },
+  { bg: "#f7efda", fg: "#a9832f" },
+  { bg: "#e6eef0", fg: "#5b8390" },
+];
+function tint(name: string) {
+  let h = 0;
+  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return AV[h % AV.length];
+}
+function initials(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  return (parts.length >= 2 ? parts[0][0] + parts[1][0] : name.slice(0, 2)).toUpperCase();
+}
+
+const PILL =
+  "h-7 rounded-full border border-input px-3.5 text-[12.5px] text-muted-foreground aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground";
+
+const TH = "text-[10.5px] font-semibold tracking-wider text-muted-foreground uppercase";
 
 export function GuestsTable({
   rows,
@@ -80,19 +105,14 @@ export function GuestsTable({
   }, [rows, query, activeLabel]);
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Toolbar: search + label filter pills */}
-      <div className="flex flex-wrap items-center gap-2">
-        <div className="relative min-w-48 flex-1">
-          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search guests…"
-            className="pl-9"
-            aria-label="Search guests"
-          />
-        </div>
+    <Card className="gap-0 overflow-hidden rounded-[18px] py-0">
+      {/* Card header: title + count + filter pills + search */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 pt-5 pb-4 sm:px-6">
+        <h2 className="font-serif text-[21px] leading-none text-foreground">Guest list</h2>
+        <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
+          {filtered.length} of {rows.length}
+        </span>
+        <div className="hidden flex-1 lg:block" />
         {labels.length > 0 ? (
           <ToggleGroup
             value={[activeLabel]}
@@ -110,41 +130,54 @@ export function GuestsTable({
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-        ) : null}
+        ) : (
+          <div className="flex-1" />
+        )}
+        <div className="relative w-full sm:w-56">
+          <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search guests…"
+            className="pl-9"
+            aria-label="Search guests"
+          />
+        </div>
       </div>
 
       {filtered.length === 0 ? (
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>
-              {rows.length === 0 ? "No guests yet" : "No matches"}
-            </EmptyTitle>
-            <EmptyDescription>
-              {rows.length === 0
-                ? "Add your first invitee to generate their RSVP link."
-                : "Try a different search or clear the filter."}
-            </EmptyDescription>
-          </EmptyHeader>
-        </Empty>
+        <div className="border-t px-6 py-10">
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>{rows.length === 0 ? "No guests yet" : "No matches"}</EmptyTitle>
+              <EmptyDescription>
+                {rows.length === 0
+                  ? "Add your first invitee to generate their RSVP link."
+                  : "Try a different search or clear the filter."}
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl ring-1 ring-foreground/10">
+        <div className="overflow-x-auto border-t">
           <Table>
             <TableHeader className="bg-muted">
               <TableRow>
-                <TableHead className="hidden w-10 sm:table-cell">#</TableHead>
-                <TableHead>Guest</TableHead>
-                <TableHead className="hidden md:table-cell">Contact</TableHead>
-                <TableHead>Party</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden lg:table-cell">Tags</TableHead>
-                <TableHead className="hidden xl:table-cell">Note</TableHead>
-                <TableHead className="hidden lg:table-cell">Replied</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className={cn(TH, "hidden w-10 sm:table-cell")}>#</TableHead>
+                <TableHead className={TH}>Guest</TableHead>
+                <TableHead className={cn(TH, "hidden md:table-cell")}>Contact</TableHead>
+                <TableHead className={TH}>Party</TableHead>
+                <TableHead className={TH}>Status</TableHead>
+                <TableHead className={cn(TH, "hidden lg:table-cell")}>Tags</TableHead>
+                <TableHead className={cn(TH, "hidden xl:table-cell")}>Note</TableHead>
+                <TableHead className={cn(TH, "hidden lg:table-cell")}>Replied</TableHead>
+                <TableHead className={cn(TH, "text-right")}>Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filtered.map((row, i) => {
                 const status = STATUS[row.status];
+                const av = tint(row.name);
                 const guestData = {
                   id: row.id,
                   name: row.name,
@@ -160,16 +193,26 @@ export function GuestsTable({
                     <TableCell className="hidden text-muted-foreground tabular-nums sm:table-cell">
                       {i + 1}
                     </TableCell>
-                    <TableCell className="font-medium">{row.name}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Avatar className="size-9">
+                          <AvatarFallback
+                            style={{ background: av.bg, color: av.fg }}
+                            className="text-xs font-semibold"
+                          >
+                            {initials(row.name)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-foreground">{row.name}</span>
+                      </div>
+                    </TableCell>
                     <TableCell className="hidden text-muted-foreground md:table-cell">
                       <div className="flex flex-col leading-tight">
                         <span>{row.email ?? "—"}</span>
-                        {row.phone ? (
-                          <span className="text-xs">{row.phone}</span>
-                        ) : null}
+                        {row.phone ? <span className="text-xs">{row.phone}</span> : null}
                       </div>
                     </TableCell>
-                    <TableCell className="tabular-nums">
+                    <TableCell className="font-medium tabular-nums">
                       {row.partySize ?? "—"}
                       <span className="text-muted-foreground"> / {row.maxGuests}</span>
                     </TableCell>
@@ -184,21 +227,21 @@ export function GuestsTable({
                           <span className="text-muted-foreground">—</span>
                         ) : (
                           row.labels.map((l) => (
-                            <Badge key={l.id} variant="outline">
+                            <Badge key={l.id} variant="secondary">
                               {l.name}
                             </Badge>
                           ))
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="hidden max-w-48 truncate text-muted-foreground xl:table-cell">
+                    <TableCell className="hidden max-w-48 truncate text-muted-foreground italic xl:table-cell">
                       {row.adminNote ?? "—"}
                     </TableCell>
                     <TableCell className="hidden text-muted-foreground tabular-nums lg:table-cell">
                       {row.respondedAt ? row.respondedAt.slice(0, 10) : "—"}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-end gap-1">
+                      <div className="flex items-center justify-end gap-1.5">
                         <CopyLinkButton token={row.token} baseUrl={baseUrl} />
                         <GuestDialog mode="edit" labels={labels} guest={guestData} />
                         <DeleteGuestButton guestId={row.id} name={row.name} />
@@ -211,10 +254,6 @@ export function GuestsTable({
           </Table>
         </div>
       )}
-    </div>
+    </Card>
   );
 }
-
-// Active filter pill = wisteria (base-ui Toggle marks the on-state via aria-pressed / data-[state=on]).
-const PILL =
-  "aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground data-[state=on]:border-primary data-[state=on]:bg-primary data-[state=on]:text-primary-foreground";

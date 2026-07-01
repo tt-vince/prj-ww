@@ -17,16 +17,28 @@ import { Input } from '@/components/ui/input';
 
 const INITIAL: ActionState = { ok: false };
 
-export function LabelsManager({ labels }: { labels: LabelRow[] }) {
+export function LabelsManager({
+  labels,
+  open,
+  onOpenChange,
+  trigger = true,
+}: {
+  labels: LabelRow[];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  trigger?: boolean;
+}) {
   return (
-    <Dialog>
-      <DialogTrigger
-        render={
-          <Button variant="outline" size="sm">
-            <Tag /> Labels
-          </Button>
-        }
-      />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      {trigger ? (
+        <DialogTrigger
+          render={
+            <Button variant="outline" size="sm">
+              <Tag /> Labels
+            </Button>
+          }
+        />
+      ) : null}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Manage labels</DialogTitle>
