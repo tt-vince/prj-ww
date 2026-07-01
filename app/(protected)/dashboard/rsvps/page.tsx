@@ -25,7 +25,7 @@ export default async function RsvpsPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <h1 className="text-2xl font-semibold">RSVPs</h1>
+      <h1 className="font-serif text-2xl font-semibold tracking-tight">RSVPs</h1>
       {rows.length === 0 ? (
         <Empty>
           <EmptyHeader>
