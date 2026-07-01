@@ -1,4 +1,4 @@
-import { sql } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import {
   pgTable,
   pgEnum,
@@ -7,11 +7,14 @@ import {
   integer,
   timestamp,
   uniqueIndex,
+  primaryKey,
 } from 'drizzle-orm/pg-core';
 
 export const userRole = pgEnum('user_role', ['superadmin', 'admin']);
 export const userStatus = pgEnum('user_status', ['pending', 'active', 'disabled']);
-export const rsvpStatus = pgEnum('rsvp_status', ['attending', 'not_attending', 'maybe']);
+
+/** RSVP reply state. Fixed set (not runtime-editable). `pending` = awaiting reply. */
+export const rsvpStatus = pgEnum('rsvp_status', ['pending', 'going', 'not_going']);
 
 /**
  * Authenticated admin users (Google-identified). Rows are provisioned
@@ -40,19 +43,72 @@ export const users = pgTable(
   ],
 );
 
-export const rsvps = pgTable('rsvps', {
+/**
+ * Editable tags the couple manages (e.g. "Bride's family", "College friends").
+ * Attached to guests many-to-many via `guestLabels`.
+ */
+export const labels = pgTable('labels', {
   id: uuid('id').primaryKey().defaultRandom(),
-  name: text('name').notNull(),
-  email: text('email').notNull(),
+  name: text('name').notNull().unique(),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+});
+
+/**
+ * Invitees ("people"). Admin-managed: the couple adds a party/household with a
+ * `token` used in the wedding-site link (`?id=<token>`) and a `maxGuests`
+ * allotment. The `status`/`partySize`/`guestNote`/`respondedAt` columns hold the
+ * guest's response — nullable/default and NOT written yet (guest form deferred).
+ */
+export const guests = pgTable('guests', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  token: text('token').notNull().unique(), // short URL-safe token → ?id=<token>
+  name: text('name').notNull(), // party / household name
+  maxGuests: integer('max_guests').notNull().default(1), // seat allotment (1–20)
+
+  // admin-only
+  email: text('email'),
   phone: text('phone'),
-  status: rsvpStatus('status').notNull(),
-  guestCount: integer('guest_count').notNull().default(1),
-  note: text('note'),
+  adminNote: text('admin_note'),
+
+  // guest response — filled later by the (deferred) guest form
+  status: rsvpStatus('status').notNull().default('pending'),
+  partySize: integer('party_size'), // # attending, ≤ maxGuests
+  guestNote: text('guest_note'),
+  respondedAt: timestamp('responded_at', { withTimezone: true }),
+
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+/** guest ↔ label join (many-to-many). Cascades so deleting either side is clean. */
+export const guestLabels = pgTable(
+  'guest_labels',
+  {
+    guestId: uuid('guest_id')
+      .notNull()
+      .references(() => guests.id, { onDelete: 'cascade' }),
+    labelId: uuid('label_id')
+      .notNull()
+      .references(() => labels.id, { onDelete: 'cascade' }),
+  },
+  (table) => [primaryKey({ columns: [table.guestId, table.labelId] })],
+);
+
+export const guestsRelations = relations(guests, ({ many }) => ({
+  guestLabels: many(guestLabels),
+}));
+export const labelsRelations = relations(labels, ({ many }) => ({
+  guestLabels: many(guestLabels),
+}));
+export const guestLabelsRelations = relations(guestLabels, ({ one }) => ({
+  guest: one(guests, { fields: [guestLabels.guestId], references: [guests.id] }),
+  label: one(labels, { fields: [guestLabels.labelId], references: [labels.id] }),
+}));
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
-export type Rsvp = typeof rsvps.$inferSelect;
-export type NewRsvp = typeof rsvps.$inferInsert;
+export type Label = typeof labels.$inferSelect;
+export type NewLabel = typeof labels.$inferInsert;
+export type Guest = typeof guests.$inferSelect;
+export type NewGuest = typeof guests.$inferInsert;
+export type GuestLabel = typeof guestLabels.$inferSelect;

@@ -44,7 +44,7 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },
-  { title: "RSVPs", href: "/dashboard/rsvps", icon: ClipboardList },
+  { title: "Guests", href: "/dashboard/guests", icon: ClipboardList },
   { title: "Users", href: "/dashboard/users", icon: Users, superadmin: true },
 ];
 

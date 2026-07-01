@@ -8,6 +8,13 @@
       "when": 1782902881838,
       "tag": "0000_vengeful_bruce_banner",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1782989281838,
+      "tag": "0001_guest_management",
+      "breakpoints": true
     }
   ]
 }
