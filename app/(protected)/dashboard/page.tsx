@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import { count, eq, sum } from 'drizzle-orm';
-import { ArrowRight, ClipboardList, Heart, UserPlus, Users } from 'lucide-react';
+import { ArrowRight, ClipboardList, Clock, Heart, UserCheck, UserPlus, Users } from 'lucide-react';
 import { requireUser } from '@/lib/dal';
 import { db } from '@/db';
-import { rsvps, users } from '@/db/schema';
+import { guests, users } from '@/db/schema';
 import {
   Card,
   CardAction,
@@ -16,10 +16,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const isSuperadmin = user.role === 'superadmin';
 
-  const [totalRes, attendingRes, guestRes] = await Promise.all([
-    db.select({ v: count() }).from(rsvps),
-    db.select({ v: count() }).from(rsvps).where(eq(rsvps.status, 'attending')),
-    db.select({ v: sum(rsvps.guestCount) }).from(rsvps).where(eq(rsvps.status, 'attending')),
+  const [invitedRes, goingRes, expectedRes, awaitingRes] = await Promise.all([
+    db.select({ v: count() }).from(guests),
+    db.select({ v: count() }).from(guests).where(eq(guests.status, 'going')),
+    db.select({ v: sum(guests.partySize) }).from(guests).where(eq(guests.status, 'going')),
+    db.select({ v: count() }).from(guests).where(eq(guests.status, 'pending')),
   ]);
 
   let pendingUsers = 0;
@@ -28,14 +29,16 @@ export default async function DashboardPage() {
     pendingUsers = Number(p?.v ?? 0);
   }
 
-  const totalRsvps = totalRes[0]?.v ?? 0;
-  const attending = attendingRes[0]?.v ?? 0;
-  const expectedGuests = Number(guestRes[0]?.v ?? 0);
+  const invited = invitedRes[0]?.v ?? 0;
+  const going = goingRes[0]?.v ?? 0;
+  const expectedGuests = Number(expectedRes[0]?.v ?? 0);
+  const awaiting = awaitingRes[0]?.v ?? 0;
 
   const stats = [
-    { label: 'Total responses', value: totalRsvps, icon: ClipboardList },
-    { label: 'Attending', value: attending, icon: Heart },
-    { label: 'Expected guests', value: expectedGuests, icon: Users },
+    { label: 'Invited', value: invited, icon: Users },
+    { label: 'Going', value: going, icon: Heart },
+    { label: 'Expected guests', value: expectedGuests, icon: UserCheck },
+    { label: 'Awaiting reply', value: awaiting, icon: Clock },
     ...(isSuperadmin
       ? [{ label: 'Pending approvals', value: pendingUsers, icon: UserPlus }]
       : []),
@@ -73,14 +76,14 @@ export default async function DashboardPage() {
       <div className="flex flex-col gap-3">
         <h2 className="text-sm font-medium text-muted-foreground">Manage</h2>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Link href="/dashboard/rsvps" className="group block">
+          <Link href="/dashboard/guests" className="group block">
             <Card className="h-full transition-all hover:-translate-y-0.5 hover:shadow-md hover:ring-primary/30">
               <CardHeader>
                 <div className="mb-1 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <ClipboardList className="size-5" />
                 </div>
-                <CardTitle>RSVPs</CardTitle>
-                <CardDescription>View and track guest responses.</CardDescription>
+                <CardTitle>Guests</CardTitle>
+                <CardDescription>Add invitees and share their RSVP links.</CardDescription>
                 <CardAction>
                   <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
                 </CardAction>

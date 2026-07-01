@@ -1,6 +1,6 @@
 # Wedding RSVP Site — Project Spec (Option A)
 
-> **Status:** Admin auth + dashboard **built** (Google OAuth, `users` table, `/dashboard`). Guest RSVP form still pending. This is the source of truth for the RSVP feature.
+> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD at `/dashboard/guests`. The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
 > **For Claude / agents:** Read this file before designing or writing any RSVP-related code.
 > When code and this spec disagree, treat it as a bug — fix one of them, don't silently diverge.
 > Update this spec in the same change whenever a decision here changes.
@@ -9,8 +9,10 @@
 
 ## 1. Overview
 
-A single-purpose wedding RSVP website. Guests open the site, fill one form, and submit
-their attendance. The couple views submitted responses on a Google-authenticated admin dashboard (`/dashboard`).
+An **invite-only** wedding RSVP website. The couple pre-registers each invitee (a party/household)
+in a Google-authenticated admin dashboard (`/dashboard`), which mints a per-person link
+(`?id=<token>`). Each invitee later opens their personalized link and submits attendance. The
+couple manages invitees + tags and (once the guest form is built) reviews responses in the dashboard.
 
 - **Repo:** `github.com/tt-vince/prj-ww`
 - **Hosting:** Vercel
@@ -20,10 +22,10 @@ their attendance. The couple views submitted responses on a Google-authenticated
 
 ### Non-goals (explicitly out of scope for v1)
 
-- **Guest** accounts / guest login (email is an identifier, not an auth credential). Admins **do** authenticate — via Google sign-in (§7).
+- **Guest** accounts / guest login. The per-person `token` is a **capability link**, not a credential — anyone holding the URL can fill that invitee's RSVP. Admins **do** authenticate — via Google sign-in (§7).
 - Editing or deleting an existing RSVP from the guest side.
 - Email confirmations / notifications.
-- Multi-event or plus-one-by-name management (a numeric `guest_count` covers party size).
+- Multi-event or plus-one-**by-name** management (a numeric `max_guests` allotment + `party_size` reply covers party size).
 - Internationalization.
 
 ---
@@ -86,30 +88,62 @@ The "backend" is `submitRsvp()`, the admin read/manage queries, and the Google O
 
 ## 4. Data model
 
-Single table, defined in Drizzle. A Postgres enum `rsvp_status` backs the `status` column.
+Three feature tables (`guests`, `labels`, `guest_labels`) plus the `users` admin table, defined in
+Drizzle. A Postgres enum `rsvp_status` backs `guests.status`. **This build ships the admin
+management side only** — the reply columns (`status`/`party_size`/`guest_note`/`responded_at`)
+exist but nothing writes them yet (the guest-facing form is deferred, §13).
 
-### Table: `rsvps`
+### Table: `guests` (invitees / "people")
+
+Admin-managed. Each row is a party/household with a stable, unguessable `token` used in the
+wedding-site link (`?id=<token>`) and a `max_guests` seat allotment.
 
 | Column | Type | Constraints | Notes |
 |---|---|---|---|
 | `id` | `uuid` | PK, default `gen_random_uuid()` | |
-| `name` | `text` | **not null** | Guest / party name |
-| `email` | `text` | **not null**, format-validated | Required contact + soft identifier |
-| `phone` | `text` | nullable | Optional secondary contact |
-| `status` | `rsvp_status` enum | **not null** | `attending` \| `not_attending` \| `maybe` |
-| `guest_count` | `integer` | not null, default `1` | Party size incl. the guest; ≥ 1 |
-| `note` | `text` | nullable | Dietary needs / message to couple |
+| `token` | `text` | **not null, unique** | Short URL-safe token → `?id=<token>` (capability link) |
+| `name` | `text` | **not null** | Party / household name |
+| `max_guests` | `integer` | not null, default `1` | Seat allotment (1–20) |
+| `email` | `text` | nullable | Admin-only contact |
+| `phone` | `text` | nullable | Admin-only contact |
+| `admin_note` | `text` | nullable | Private, dashboard-only |
+| `status` | `rsvp_status` enum | not null, default `pending` | Guest reply — set later by the form |
+| `party_size` | `integer` | nullable | # attending, ≤ `max_guests` — set later |
+| `guest_note` | `text` | nullable | Guest's message — set later |
+| `responded_at` | `timestamptz` | nullable | Set later |
 | `created_at` | `timestamptz` | not null, default `now()` | |
 | `updated_at` | `timestamptz` | not null, default `now()` | Set on write |
 
 ### Enum: `rsvp_status`
 
 ```
-'attending' | 'not_attending' | 'maybe'
+'pending' | 'going' | 'not_going'
 ```
 
-> No unique constraint on `email` in v1 — a guest submitting twice creates two rows.
-> De-duplication (if wanted) is an admin-side concern, not enforced by the schema.
+`pending` = awaiting reply. **Fixed set — not runtime-editable.** Dashboard head-count counts rows
+where `status = 'going'` (`party_size` summed for "expected guests").
+
+### Table: `labels` (editable tags)
+
+Admin-managed tags (e.g. "Bride's family", "College friends"), attached to guests many-to-many.
+Add / rename / delete at runtime from the dashboard.
+
+| Column | Type | Constraints |
+|---|---|---|
+| `id` | `uuid` | PK, default `gen_random_uuid()` |
+| `name` | `text` | **not null, unique** |
+| `created_at` | `timestamptz` | not null, default `now()` |
+
+### Table: `guest_labels` (join, many-to-many)
+
+| Column | Type | Constraints |
+|---|---|---|
+| `guest_id` | `uuid` | FK → `guests.id`, **on delete cascade** |
+| `label_id` | `uuid` | FK → `labels.id`, **on delete cascade** |
+| — | — | composite PK (`guest_id`, `label_id`) |
+
+> No unique constraint on guest `email` — the invite `token` is the identity, and one guest = one
+> editable row (future upsert). Deleting a guest or a label cascades the join rows automatically.
 
 ### Table: `users` (admin identities)
 
@@ -142,26 +176,38 @@ user_status = 'pending' | 'active' | 'disabled'
 
 ## 5. Validation / DTOs
 
-zod schemas live in `lib/validation.ts` and are the **single source of type truth** — the form
-and the Server Action both infer from them, so types are declared once.
+zod schemas live in `lib/validation.ts` and are the **single source of type truth** — the admin
+forms and the Server Actions both infer from them, so types are declared once.
 
-### `rsvpInputSchema` (write DTO — form + action input)
+### `guestInputSchema` (admin create/edit)
 
 | Field | Rule |
 |---|---|
-| `name` | string, trimmed, non-empty (min 1), max ~120 |
-| `email` | string, **required**, valid email format |
-| `phone` | string, optional, sane length cap |
-| `status` | enum `attending` \| `not_attending` \| `maybe`, required |
-| `guestCount` | integer, ≥ 1, reasonable max (e.g. ≤ 20), default 1 |
-| `note` | string, optional, max ~1000 |
+| `name` | string, trimmed, non-empty, max 120 |
+| `maxGuests` | integer, 1–20 (coerced; blank → 1) |
+| `email` | optional, valid email, max 200 (blank → omitted) |
+| `phone` | optional, trimmed, max 30 |
+| `adminNote` | optional, trimmed, max 1000 |
+| `status` | enum `pending` \| `going` \| `not_going`, default `pending` |
+| `labelIds` | array of uuid, default `[]` |
 
-- Type: `type RsvpInput = z.infer<typeof rsvpInputSchema>` — this **is** the Server Action's input type.
-- The earlier "at least one contact method" rule is **dropped** because email is mandatory.
+- Type: `type GuestInput = z.infer<typeof guestInputSchema>`. `rsvpStatusValues` mirrors the pg enum.
 
-### `rsvpRecord` (read DTO — admin list)
+### `labelInputSchema` (add/rename tag)
 
-- Drizzle-inferred select type of the `rsvps` row (`typeof rsvps.$inferSelect`), used by the dashboard RSVP list.
+| Field | Rule |
+|---|---|
+| `name` | string, trimmed, non-empty, max 40 |
+
+### id schemas
+
+`guestIdSchema` / `labelIdSchema` / `userIdSchema` = `z.string().uuid()`.
+
+### Read model
+
+Drizzle-inferred types (`Guest`, `Label`, `GuestLabel` = `typeof …$inferSelect`) power the dashboard
+list, which uses the relations query (`db.query.guests.findMany` with `guestLabels.label`). The
+guest **response** DTO (attendance-form input) is deferred with the form.
 
 ---
 
@@ -191,7 +237,10 @@ and the Server Action both infer from them, so types are declared once.
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging. |
 | `app/(protected)/layout.tsx` | Dashboard shell (nav + sign out). |
 | `app/(protected)/dashboard/page.tsx` | Dashboard home. |
-| `app/(protected)/dashboard/rsvps/page.tsx` | RSVP list (read-only). |
+| `app/(protected)/dashboard/guests/page.tsx` | Guest list + CRUD entry (replaces the old read-only RSVP list). |
+| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete). |
+| `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog). |
+| `lib/guest-token.ts` | Short unguessable invite-token generator (crypto). |
 | `app/(protected)/dashboard/users/page.tsx` | User management (superadmin only). |
 | `app/(protected)/dashboard/users/actions.ts` | activate/deactivate Server Actions. |
 | `components/ui/*` | shadcn components pulled via skill/MCP. |
@@ -320,11 +369,18 @@ integration, not a Claude MCP. `docx`/`pdf` skills considered and excluded.
 
 ## 12. Locked-in decisions
 
-- **Fields:** name, email, phone, status, plus `guest_count` and `note`.
-- **Contact:** email **required**, phone optional. (Drops the earlier "at-least-one-contact" rule.)
-- **Viewing responses & managing admins:** Google-authenticated `/dashboard`. First sign-in →
-  superadmin (auto-active); later sign-ins → pending admins the superadmin activates. Exactly one
-  superadmin, DB-enforced. No shared password.
+- **Invite-only.** The couple pre-registers invitees; each gets an unguessable `token` used as
+  `?id=<token>`. No open/anonymous form.
+- **Guest fields:** name, `max_guests` allotment, optional email/phone, optional `admin_note`, plus
+  editable **labels** (tags, many-to-many). Reply stored as `status` + `party_size` + `guest_note`
+  (deferred form writes these).
+- **Status:** fixed enum `pending | going | not_going` (default `pending`). Not runtime-editable.
+- **Labels:** admin-editable tag set (add / rename / delete), many per guest.
+- **One editable reply per guest** (future upsert). No `email` uniqueness.
+- **Admin access:** any **active** admin manages guests + labels (`requireUser`); user activation
+  stays superadmin-only. Google-authenticated `/dashboard`; first sign-in → superadmin (auto-active);
+  later sign-ins → pending admins the superadmin activates. Exactly one superadmin, DB-enforced.
+- **Build order:** management side first (this build); the guest-facing RSVP form is deferred (§13).
 
 ---
 
