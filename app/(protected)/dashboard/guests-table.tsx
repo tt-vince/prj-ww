@@ -23,6 +23,15 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
   Table,
   TableBody,
   TableCell,
@@ -89,6 +98,21 @@ function initials(name: string) {
 }
 
 const TH = "text-[10.5px] font-semibold tracking-wider text-muted-foreground uppercase";
+
+const PAGE_SIZE = 20;
+
+/** First and last pages always render; a one-page window around current, ellipsis between. */
+function pageItems(current: number, pageCount: number): (number | "ellipsis")[] {
+  if (pageCount <= 7) return Array.from({ length: pageCount }, (_, i) => i + 1);
+  const items: (number | "ellipsis")[] = [1];
+  if (current > 3) items.push("ellipsis");
+  for (let p = Math.max(2, current - 1); p <= Math.min(pageCount - 1, current + 1); p++) {
+    items.push(p);
+  }
+  if (current < pageCount - 2) items.push("ellipsis");
+  items.push(pageCount);
+  return items;
+}
 
 type SortKey = "name" | "replied";
 type SortState = { key: SortKey; dir: "asc" | "desc" } | null;
@@ -180,6 +204,8 @@ function GuestCard({
     email: row.email,
     phone: row.phone,
     adminNote: row.adminNote,
+    adults: row.adults,
+    kids: row.kids,
     status: row.status,
     labelIds: row.labels.map((l) => l.id),
   };
@@ -309,6 +335,7 @@ export function GuestsTable({
   const [labelSel, setLabelSel] = useState<Selection>(null);
   const [statusSel, setStatusSel] = useState<Selection>(null);
   const [sort, setSort] = useState<SortState>(null);
+  const [page, setPage] = useState(1);
 
   const labelIds = useMemo(() => labels.map((l) => l.id), [labels]);
   const statusIds = STATUS_OPTIONS.map((s) => s.id);
@@ -338,10 +365,19 @@ export function GuestsTable({
     });
   }, [filtered, sort]);
 
+  const pageCount = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  // Clamp rather than trusting `page`: filters can shrink results below the current page.
+  const current = Math.min(page, pageCount);
+  const paged = useMemo(
+    () => sorted.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE),
+    [sorted, current],
+  );
+
   function toggleSort(key: SortKey) {
     setSort((s) =>
       s?.key !== key ? { key, dir: "asc" } : s.dir === "asc" ? { key, dir: "desc" } : null,
     );
+    setPage(1);
   }
 
   return (
@@ -359,21 +395,30 @@ export function GuestsTable({
               prefix="Tags"
               options={labels.map((l) => ({ id: l.id, name: l.name }))}
               selected={labelSel}
-              onToggle={(id) => setLabelSel((s) => toggleSelection(s, labelIds, id))}
+              onToggle={(id) => {
+                setLabelSel((s) => toggleSelection(s, labelIds, id));
+                setPage(1);
+              }}
             />
           ) : null}
           <FilterDropdown
             prefix="Status"
             options={STATUS_OPTIONS}
             selected={statusSel}
-            onToggle={(id) => setStatusSel((s) => toggleSelection(s, statusIds, id))}
+            onToggle={(id) => {
+              setStatusSel((s) => toggleSelection(s, statusIds, id));
+              setPage(1);
+            }}
           />
         </div>
         <div className="relative w-full sm:w-56">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search guests…"
             className="pl-9"
             aria-label="Search guests"
@@ -398,7 +443,7 @@ export function GuestsTable({
         <>
           {/* Mobile: card list */}
           <div className="flex flex-col gap-3 border-t px-4 py-4 md:hidden">
-            {sorted.map((row) => (
+            {paged.map((row) => (
               <GuestCard
                 key={row.id}
                 row={row}
@@ -430,7 +475,7 @@ export function GuestsTable({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sorted.map((row, i) => {
+              {paged.map((row, i) => {
                 const status = STATUS[row.status];
                 const av = tint(row.name);
                 const guestData = {
@@ -440,13 +485,15 @@ export function GuestsTable({
                   email: row.email,
                   phone: row.phone,
                   adminNote: row.adminNote,
+                  adults: row.adults,
+                  kids: row.kids,
                   status: row.status,
                   labelIds: row.labels.map((l) => l.id),
                 };
                 return (
                   <TableRow key={row.id}>
                     <TableCell className="hidden text-muted-foreground tabular-nums sm:table-cell">
-                      {i + 1}
+                      {(current - 1) * PAGE_SIZE + i + 1}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
@@ -545,6 +592,59 @@ export function GuestsTable({
             </TableBody>
           </Table>
           </div>
+
+          {pageCount > 1 ? (
+            <div className="border-t px-5 py-3 sm:px-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      href="#"
+                      aria-disabled={current === 1}
+                      className={current === 1 ? "pointer-events-none opacity-50" : undefined}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(Math.max(1, current - 1));
+                      }}
+                    />
+                  </PaginationItem>
+                  {pageItems(current, pageCount).map((item, idx) =>
+                    item === "ellipsis" ? (
+                      <PaginationItem key={`ellipsis-${idx}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={item}>
+                        <PaginationLink
+                          href="#"
+                          isActive={item === current}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setPage(item);
+                          }}
+                        >
+                          {item}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ),
+                  )}
+                  <PaginationItem>
+                    <PaginationNext
+                      href="#"
+                      aria-disabled={current === pageCount}
+                      className={
+                        current === pageCount ? "pointer-events-none opacity-50" : undefined
+                      }
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(Math.min(pageCount, current + 1));
+                      }}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          ) : null}
         </>
       )}
     </Card>

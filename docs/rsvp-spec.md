@@ -108,9 +108,9 @@ wedding-site link (`?id=<token>`) and a `max_guests` seat allotment.
 | `email` | `text` | nullable | Admin-only contact |
 | `phone` | `text` | nullable | Admin-only contact |
 | `admin_note` | `text` | nullable | Private, dashboard-only |
-| `status` | `rsvp_status` enum | not null, default `pending` | Guest reply — set later by the form |
-| `adults` | `integer` | nullable | # adults attending — set later |
-| `kids` | `integer` | nullable | # kids attending — set later; total (`adults` + `kids`) ≤ `max_guests` |
+| `status` | `rsvp_status` enum | not null, default `pending` | Guest reply — set by the form; admin-editable in **Edit guest** (not on create) |
+| `adults` | `integer` | nullable | # adults attending — set by the form or the admin dialog |
+| `kids` | `integer` | nullable | # kids attending — set by the form or the admin dialog; total (`adults` + `kids`) ≤ `max_guests` |
 | `guest_note` | `text` | nullable | Guest's message — set later |
 | `responded_at` | `timestamptz` | nullable | Set later |
 | `created_at` | `timestamptz` | not null, default `now()` | |
@@ -181,19 +181,33 @@ user_status = 'pending' | 'active' | 'disabled'
 zod schemas live in `lib/validation.ts` and are the **single source of type truth** — the admin
 forms and the Server Actions both infer from them, so types are declared once.
 
-### `guestInputSchema` (admin create/edit)
+### `guestCreateSchema` / `guestUpdateSchema` (admin create/edit)
+
+Shared base (`guestBaseSchema`):
 
 | Field | Rule |
 |---|---|
 | `name` | string, trimmed, non-empty, max 120 |
 | `maxGuests` | integer, 1–20 (coerced; blank → 1) |
+| `adults` | optional integer, 0–20 (coerced; blank → omitted → stored `null`) |
+| `kids` | optional integer, 0–20 (coerced; blank → omitted → stored `null`) |
 | `email` | optional, valid email, max 200 (blank → omitted) |
 | `phone` | optional, trimmed, max 30 |
 | `adminNote` | optional, trimmed, max 1000 |
-| `status` | enum `pending` \| `going` \| `not_going`, default `pending` |
 | `labelIds` | array of uuid, default `[]` |
 
-- Type: `type GuestInput = z.infer<typeof guestInputSchema>`. `rsvpStatusValues` mirrors the pg enum.
+- **Create** (`guestCreateSchema`): **no `status` field** — a new invitee always starts `pending`.
+  The admin may pre-fill the expected party count (`adults`/`kids`).
+- **Edit** (`guestUpdateSchema`): extends the base with `status` (enum `pending` \| `going` \|
+  `not_going`, required). Saving `not_going` zeroes `adults`/`kids` server-side (same as the
+  guest form).
+- **Cross-field party rules** (both schemas, via `superRefine`, reported under `partySize`):
+  party size = `adults + kids`; when either count is given it must be ≤ `maxGuests`; when
+  `status = 'going'` the party size must be ≥ 1. The dialog mirrors these checks live; the
+  Server Action re-validates and returns them as form field errors.
+- Types: `GuestCreateInput` / `GuestUpdateInput`. `rsvpStatusValues` mirrors the pg enum.
+- The **Add/Edit guest dialog** is a sectioned form (Guest details / Party count·RSVP reply /
+  Contact / Labels / Notes); labels are toggleable badge chips, not checkboxes.
 
 ### `labelInputSchema` (add/rename tag)
 
@@ -240,10 +254,10 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging; redirects already-signed-in active admins to `/dashboard`. |
 | `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (page-corner floral sprays sit in their own `absolute inset-0 overflow-hidden` layer so their bleed clips without cutting page chrome; horizontal scroll guarded on `<body>`); top-right `AccountMenu`. |
 | `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
-| `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions. |
+| `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions, client-side pagination (20/page, shadcn `Pagination`). |
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
 | `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); invalidate via `updateTag('guests'/'labels')`. |
-| `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
+| `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/badge label-chips/alert-dialog; sectioned guest form), reused by the single page. |
 | `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`, hidden for `viewer`), the superadmin Users link, and sign out (replaces the sidebar nav). |
 | `components/dashboard-florals.tsx` | Decorative floral SVG art (server component) from the hi-fi design — exported flourishes (`PageFloralTopLeft/BottomRight`, `NameSprig`, `AccountSprigTopLeft/BottomRight`, `CardSprayTopRight/BottomLeft`) rendered by `(protected)/layout.tsx` (page corners) and `dashboard/page.tsx` (name/account/card). Built from `Blossom` + `Leaf` primitives; `aria-hidden`, `pointer-events-none`, art colors hardcoded to match design. |
 | `lib/guest-token.ts` | Short unguessable invite-token generator (crypto). |
