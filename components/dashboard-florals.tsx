@@ -226,124 +226,53 @@ export function AccountGarland({ className }: SvgProps) {
  * as garlanded — per the kanban design's per-column vine layer.
  */
 export type Corner = "tl" | "tr" | "bl" | "br";
-type Side = "top" | "right" | "bottom" | "left";
 
-// Fractions along each edge where a leaf+flower cluster is planted. Enough to
-// read as a continuous vine of leaves and flowers, not a bare line.
-const EDGE_T = [0.12, 0.31, 0.5, 0.69, 0.88] as const;
-
-// One small leaf-pair + blossom, centered exactly on its (x, y) edge point via a
-// -50%/-50% shift so it sits ON the outline. Varied per index so the field isn't
-// uniform. viewBox is un-stretched (its own square) so nothing distorts.
-function GarlandNode({ i, style }: { i: number; style: CSSProperties }) {
-  const petal = i % 3 === 0 ? "#c9a1ad" : i % 3 === 1 ? "#d9b6c4" : "#e0c58f";
-  const s = 0.82 + (i % 3) * 0.12;
-  return (
-    <span
-      aria-hidden="true"
-      className="pointer-events-none absolute block"
-      style={{ ...style, transform: "translate(-50%, -50%)" }}
-    >
-      <svg width={38} height={38} viewBox="-19 -19 38 38" className="overflow-visible">
-        <Leaf cx={-8} cy={5} rx={3.4} ry={8.5} rot={38} fill="#7a9a5c" />
-        <Leaf cx={8} cy={6} rx={3.2} ry={8} rot={-40} fill="#8fae6e" />
-        <Blossom x={0} y={-2} s={s} pts={PETALS_MED} r={5.4} cr={4.5} petal={petal} />
-      </svg>
-    </span>
-  );
-}
-
-// Stem path (in a 0..100 box, stretched to the parent) tracing exactly the
-// requested edges. Full set = rounded rect; a corner pair = an L along its two
-// edges.
-function stemPath(sides: readonly Side[]): string {
-  const has = (s: Side) => sides.includes(s);
-  if (has("top") && has("right") && has("bottom") && has("left")) {
-    return "M3 1 L97 1 A2 2 0 0 1 99 3 L99 97 A2 2 0 0 1 97 99 L3 99 A2 2 0 0 1 1 97 L1 3 A2 2 0 0 1 3 1 Z";
-  }
-  // Corner pairs (two adjacent edges) — draw the far end → corner → far end.
-  if (has("top") && has("left")) return "M99 1 L3 1 A2 2 0 0 0 1 3 L1 99";
-  if (has("top") && has("right")) return "M1 1 L97 1 A2 2 0 0 1 99 3 L99 99";
-  if (has("bottom") && has("left")) return "M99 99 L3 99 A2 2 0 0 1 1 97 L1 1";
-  if (has("bottom") && has("right")) return "M1 99 L97 99 A2 2 0 0 0 99 97 L99 1";
-  return "";
-}
-
-/**
- * Vine that sits ON a component's outline. An SVG stem (non-scaling stroke,
- * `preserveAspectRatio: none`) stretches to trace the exact border of the
- * parent, and leaf+flower nodes are anchored to each requested edge so the vine
- * follows the outline at any size. Give the parent `position: relative`.
- *
- * HARD RULE: vines are always edge-anchored here — never floated near a corner.
- */
-function OutlineGarland({ sides }: { sides: readonly Side[] }) {
-  const nodes: CSSProperties[] = [];
-  if (sides.includes("top")) EDGE_T.forEach((t) => nodes.push({ top: 0, left: `${t * 100}%` }));
-  if (sides.includes("bottom"))
-    EDGE_T.forEach((t) => nodes.push({ bottom: 0, left: `${t * 100}%` }));
-  if (sides.includes("left")) EDGE_T.forEach((t) => nodes.push({ left: 0, top: `${t * 100}%` }));
-  if (sides.includes("right")) EDGE_T.forEach((t) => nodes.push({ right: 0, top: `${t * 100}%` }));
-  // Corner accents so adjacent edges connect visually.
-  const corner = (a: Side, b: Side, style: CSSProperties) => {
-    if (sides.includes(a) && sides.includes(b)) nodes.push(style);
-  };
-  corner("top", "left", { top: 0, left: 0 });
-  corner("top", "right", { top: 0, right: 0 });
-  corner("bottom", "left", { bottom: 0, left: 0 });
-  corner("bottom", "right", { bottom: 0, right: 0 });
-
-  return (
-    <div className="pointer-events-none absolute inset-0 z-0 overflow-visible" aria-hidden="true">
-      <svg
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="absolute inset-0 h-full w-full overflow-visible"
-      >
-        <path
-          d={stemPath(sides)}
-          fill="none"
-          stroke="#7d9163"
-          strokeWidth={2}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-      {nodes.map((style, i) => (
-        <GarlandNode key={i} i={i} style={style} />
-      ))}
-    </div>
-  );
-}
-
-const CORNER_SIDES: Record<Corner, Side[]> = {
-  tl: ["top", "left"],
-  tr: ["top", "right"],
-  bl: ["bottom", "left"],
-  br: ["bottom", "right"],
-};
-
-// Awaiting-reply column (design vineBL): vine on the bottom + left edges.
+// Awaiting-reply column (design vineBL): the leafy bottom-left corner frame,
+// hugging the column's bottom + left edges.
 export function ColumnVineBottomLeft() {
-  return <OutlineGarland sides={["bottom", "left"]} />;
+  return (
+    <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[18px] -left-[16px] z-0 h-[230px] w-auto" />
+  );
 }
 
-// Declined column (design vineTR): vine on the top + right edges.
+// Declined column (design vineTR): the leafy top-right corner frame, hugging the
+// top + right edges.
 export function ColumnVineTopRight() {
-  return <OutlineGarland sides={["top", "right"]} />;
+  return (
+    <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[18px] -right-[16px] z-0 h-[230px] w-auto" />
+  );
 }
 
-// Attending column (design vineFull): vine tracing the WHOLE outline, leaves and
-// flowers all the way around.
+// Attending column (design vineFull): BOTH leafy frames — top-right traces the
+// top + right edges, bottom-left traces the bottom + left edges, so the leafy
+// vine wraps the whole outline (leaves and flowers all the way around).
 export function ColumnVineFull() {
-  return <OutlineGarland sides={["top", "right", "bottom", "left"]} />;
+  return (
+    <>
+      <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[18px] -right-[16px] z-0 h-[300px] w-auto" />
+      <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[18px] -left-[16px] z-0 h-[300px] w-auto" />
+    </>
+  );
 }
 
-// Card-scale vine on one guest card (mobile): traces the two edges of one
-// rounded corner. The caller cycles the corner per item.
+// Card-scale leafy corner frame for one guest card (mobile): traces the two
+// edges of one rounded corner. Built by flipping the top-right / bottom-left
+// spray art. The caller cycles the corner per item.
 export function CardCornerFrame({ corner }: { corner: Corner }) {
-  return <OutlineGarland sides={CORNER_SIDES[corner]} />;
+  const bottom = corner === "bl" || corner === "br";
+  const flipX = corner === "tl" || corner === "br";
+  const pos = {
+    tl: "top-0 left-0",
+    tr: "top-0 right-0",
+    bl: "bottom-0 left-0",
+    br: "bottom-0 right-0",
+  }[corner];
+  const cls = cn(
+    "pointer-events-none absolute z-0 h-[128px] w-auto",
+    pos,
+    flipX && "-scale-x-100",
+  );
+  return bottom ? <CardSprayBottomLeft className={cls} /> : <CardSprayTopRight className={cls} />;
 }
 
 // Large botanical frame at the guest-list card's top-right corner.
