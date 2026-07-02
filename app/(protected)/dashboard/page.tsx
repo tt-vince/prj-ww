@@ -1,12 +1,7 @@
 import { requireUser, canEdit } from "@/lib/dal";
 import { getGuestsWithLabels, getAllLabels } from "@/lib/data";
 import { AccountMenu } from "@/components/account-menu";
-import {
-  AccountGarland,
-  CardSprayBottomLeft,
-  CardSprayTopRight,
-  NameSprig,
-} from "@/components/dashboard-florals";
+import { AccountGarland, NameSprig } from "@/components/dashboard-florals";
 import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
@@ -79,17 +74,13 @@ export default async function DashboardPage() {
         </div>
       </header>
 
-      {/* Kanban board (imported design) — column headers carry the counts. */}
-      <div className="relative">
-        <CardSprayTopRight />
-        <CardSprayBottomLeft />
-        <GuestsBoard
-          rows={guestRows}
-          labels={allLabels}
-          baseUrl={baseUrl}
-          canEdit={canEdit(user.role)}
-        />
-      </div>
+      {/* Kanban board (imported design) — per-column vines + counts live inside. */}
+      <GuestsBoard
+        rows={guestRows}
+        labels={allLabels}
+        baseUrl={baseUrl}
+        canEdit={canEdit(user.role)}
+      />
 
       {/* Mobile: fixed bottom action bar (per hi-fi mobile design) */}
       {canEdit(user.role) ? (
