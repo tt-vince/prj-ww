@@ -107,7 +107,7 @@ export function PageFloralTopLeft({ className, style }: SvgProps) {
         className ??
         // Hidden on phones (the mobile design uses a single top-right spray);
         // tablet shows a 240px version, desktop the full 340px.
-        "wind-sway pointer-events-none absolute -top-[30px] -left-[40px] hidden h-[240px] w-[240px] opacity-50 md:block lg:-top-[46px] lg:-left-[58px] lg:h-[340px] lg:w-[340px]"
+        "pointer-events-none absolute -top-[30px] -left-[40px] hidden h-[240px] w-[240px] opacity-50 md:block lg:-top-[46px] lg:-left-[58px] lg:h-[340px] lg:w-[340px]"
       }
       style={style}
     >
@@ -143,7 +143,7 @@ export function PageFloralBottomRight({ className, style }: SvgProps) {
       focusable="false"
       className={
         className ??
-        "wind-sway pointer-events-none absolute -right-[46px] -bottom-[52px] hidden -scale-x-100 opacity-[0.42] lg:block"
+        "pointer-events-none absolute -right-[46px] -bottom-[52px] hidden -scale-x-100 opacity-[0.42] lg:block"
       }
       style={style}
     >
@@ -192,7 +192,10 @@ export function AccountGarland({ className }: SvgProps) {
       aria-hidden="true"
       focusable="false"
       className={
-        className ?? "wind-sway pointer-events-none absolute -top-4 -left-4 z-[5] hidden lg:block"
+        // Right-anchored: the garland's arc was drawn around the chip's right
+        // edge (chip is ~170px in the design but ours varies with the user's
+        // name), so pinning the right side keeps the wreath hugging the outline.
+        className ?? "pointer-events-none absolute -top-4 -right-[21px] z-[5] hidden lg:block"
       }
     >
       <path
