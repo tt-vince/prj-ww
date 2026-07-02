@@ -64,7 +64,7 @@
 
 /* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (DM Sans / Gilda Display / Pinyon Script). */
 :root {
-  --background: #ece6ec;
+  --background: #ffffff;
   --foreground: #4a2f3a;
   --card: #ffffff;
   --card-foreground: #3a2c34;
@@ -182,7 +182,7 @@
   }
   body {
     @apply text-foreground;
-    background: linear-gradient(180deg, #efe9ef 0%, #e8e0e8 100%) fixed;
+    background: #ffffff;
   }
   .dark body {
     background: linear-gradient(180deg, #241d28 0%, #1c161f 100%) fixed;

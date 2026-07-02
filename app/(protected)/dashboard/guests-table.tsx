@@ -158,6 +158,106 @@ function FilterDropdown({
   );
 }
 
+// Mobile guest card (design: "Wedding RSVP Dashboard - Mobile.dc.html") — the
+// table collapses into these below `md`.
+function GuestCard({
+  row,
+  labels,
+  baseUrl,
+}: {
+  row: GuestRow;
+  labels: LabelRow[];
+  baseUrl: string;
+}) {
+  const status = STATUS[row.status];
+  const av = tint(row.name);
+  const guestData = {
+    id: row.id,
+    name: row.name,
+    maxGuests: row.maxGuests,
+    email: row.email,
+    phone: row.phone,
+    adminNote: row.adminNote,
+    status: row.status,
+    labelIds: row.labels.map((l) => l.id),
+  };
+  return (
+    <div className="rounded-2xl border bg-card p-4 shadow-[0_2px_12px_rgba(74,47,58,0.05)]">
+      <div className="flex items-start gap-3">
+        <Avatar className="size-11">
+          <AvatarFallback
+            style={{ background: av.bg, color: av.fg }}
+            className="text-xs font-semibold"
+          >
+            {initials(row.name)}
+          </AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center justify-between gap-2">
+            <span className="truncate text-[15px] font-semibold text-foreground">{row.name}</span>
+            <Badge className={cn("shrink-0 border-transparent", status.className)}>
+              {status.label}
+            </Badge>
+          </div>
+          <div className="mt-0.5 truncate text-xs text-muted-foreground">{row.email ?? "—"}</div>
+          {row.labels.length > 0 ? (
+            <div className="mt-1.5 flex flex-wrap gap-1">
+              {row.labels.map((l) => (
+                <Badge key={l.id} variant="secondary">
+                  {l.name}
+                </Badge>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-4 border-t pt-3 text-[12.5px] text-muted-foreground">
+        <span>
+          Party{" "}
+          <b className="font-semibold text-foreground tabular-nums">
+            {row.adults == null && row.kids == null
+              ? "—"
+              : (row.adults ?? 0) + (row.kids ?? 0)}
+            /{row.maxGuests}
+          </b>
+        </span>
+        <span>
+          Replied{" "}
+          <b className="font-semibold text-foreground tabular-nums">
+            {row.respondedAt ? row.respondedAt.slice(0, 10) : "—"}
+          </b>
+        </span>
+        <div className="flex-1" />
+        <div className="flex items-center gap-1">
+          <CopyLinkButton token={row.token} baseUrl={baseUrl} />
+          <GuestDialog mode="edit" labels={labels} guest={guestData} />
+          <DeleteGuestButton guestId={row.id} name={row.name} />
+        </div>
+      </div>
+      {row.guestNote || row.adminNote ? (
+        <div className="mt-2.5 flex flex-col gap-1.5 rounded-[10px] bg-muted px-3 py-2">
+          {row.guestNote ? (
+            <div className="flex min-w-0 flex-col">
+              <span className="text-[9px] font-semibold tracking-wider text-(--pill-going-fg) uppercase">
+                Guest
+              </span>
+              <span className="text-xs text-foreground/80 italic">“{row.guestNote}”</span>
+            </div>
+          ) : null}
+          {row.adminNote ? (
+            <div className="flex min-w-0 flex-col">
+              <span className="text-[9px] font-semibold tracking-wider text-muted-foreground uppercase">
+                Admin
+              </span>
+              <span className="text-xs text-muted-foreground italic">{row.adminNote}</span>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 function SortHead({
   label,
   k,
@@ -286,7 +386,16 @@ export function GuestsTable({
           </Empty>
         </div>
       ) : (
-        <div className="overflow-x-auto border-t">
+        <>
+          {/* Mobile: card list */}
+          <div className="flex flex-col gap-3 border-t px-4 py-4 md:hidden">
+            {sorted.map((row) => (
+              <GuestCard key={row.id} row={row} labels={labels} baseUrl={baseUrl} />
+            ))}
+          </div>
+
+          {/* Tablet & up: table */}
+          <div className="hidden overflow-x-auto border-t md:block">
           <Table>
             <TableHeader className="bg-muted">
               <TableRow>
@@ -294,12 +403,12 @@ export function GuestsTable({
                 <TableHead className={TH}>
                   <SortHead label="Guest" k="name" sort={sort} onToggle={toggleSort} />
                 </TableHead>
-                <TableHead className={cn(TH, "hidden md:table-cell")}>Contact</TableHead>
+                <TableHead className={cn(TH, "hidden xl:table-cell")}>Contact</TableHead>
                 <TableHead className={TH}>Party</TableHead>
                 <TableHead className={TH}>Status</TableHead>
                 <TableHead className={cn(TH, "hidden lg:table-cell")}>Tags</TableHead>
                 <TableHead className={cn(TH, "hidden xl:table-cell")}>Note</TableHead>
-                <TableHead className={cn(TH, "hidden lg:table-cell")}>
+                <TableHead className={cn(TH, "hidden md:table-cell")}>
                   <SortHead label="Replied" k="replied" sort={sort} onToggle={toggleSort} />
                 </TableHead>
                 <TableHead className={cn(TH, "text-right")}>Actions</TableHead>
@@ -337,7 +446,7 @@ export function GuestsTable({
                         <span className="font-medium text-foreground">{row.name}</span>
                       </div>
                     </TableCell>
-                    <TableCell className="hidden text-muted-foreground md:table-cell">
+                    <TableCell className="hidden text-muted-foreground xl:table-cell">
                       <div className="flex flex-col leading-tight">
                         <span>{row.email ?? "—"}</span>
                         {row.phone ? <span className="text-xs">{row.phone}</span> : null}
@@ -401,7 +510,7 @@ export function GuestsTable({
                         <span className="text-muted-foreground">—</span>
                       )}
                     </TableCell>
-                    <TableCell className="hidden text-muted-foreground tabular-nums lg:table-cell">
+                    <TableCell className="hidden text-muted-foreground tabular-nums md:table-cell">
                       {row.respondedAt ? row.respondedAt.slice(0, 10) : "—"}
                     </TableCell>
                     <TableCell>
@@ -416,7 +525,8 @@ export function GuestsTable({
               })}
             </TableBody>
           </Table>
-        </div>
+          </div>
+        </>
       )}
     </Card>
   );
