@@ -2,7 +2,7 @@
 
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { GuestRow } from "./guests-table";
+import type { GuestRow } from "./guests-board";
 
 const STATUS_TEXT: Record<GuestRow["status"], string> = {
   going: "Going",
