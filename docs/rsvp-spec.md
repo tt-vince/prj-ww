@@ -235,7 +235,7 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/api/auth/callback/google/route.ts` | OAuth callback: verify, authenticate existing user, gate, session. |
 | `app/api/auth/logout/route.ts` | POST → clear session cookie. |
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging. |
-| `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (full-bleed `relative overflow-hidden` wrapper holds the page-corner floral sprays); top-right `AccountMenu`. |
+| `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (page-corner floral sprays sit in their own `absolute inset-0 overflow-hidden` layer so their bleed clips without cutting page chrome; horizontal scroll guarded on `<body>`); top-right `AccountMenu`. |
 | `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
 | `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions. |
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
