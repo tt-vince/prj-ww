@@ -227,45 +227,43 @@ export function AccountGarland({ className }: SvgProps) {
  */
 export type Corner = "tl" | "tr" | "bl" | "br";
 
-// Awaiting-reply column (design vineBL): the leafy bottom-left corner frame,
-// hugging the column's bottom + left edges.
+/**
+ * STRICT ALIGNMENT RULE — vine stems sit exactly ON the component outline.
+ * The spray art's stems are inset 42/420 (10%) of the art's height from the
+ * edges it hugs, so shifting the rendered frame by -10% of its height puts the
+ * stem line precisely on the border: 230px column frame → -23px offsets,
+ * 128px card frame → -13px offsets. Do not eyeball these — recompute
+ * (height × 0.1) if the frame height changes.
+ */
+
+// Awaiting-reply column (design vineBL): leafy bottom-left frame, stem on the
+// column's bottom + left border lines.
 export function ColumnVineBottomLeft() {
   return (
-    <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[18px] -left-[16px] z-0 h-[230px] w-auto" />
+    <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[23px] -left-[23px] z-0 h-[230px] w-auto" />
   );
 }
 
-// Declined column (design vineTR): the leafy top-right corner frame, hugging the
-// top + right edges.
+// Declined column (design vineTR): leafy top-right frame, stem on the column's
+// top + right border lines.
 export function ColumnVineTopRight() {
   return (
-    <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[18px] -right-[16px] z-0 h-[230px] w-auto" />
+    <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[23px] -right-[23px] z-0 h-[230px] w-auto" />
   );
 }
 
-// Attending column (design vineFull): BOTH leafy frames — top-right traces the
-// top + right edges, bottom-left traces the bottom + left edges, so the leafy
-// vine wraps the whole outline (leaves and flowers all the way around).
-export function ColumnVineFull() {
-  return (
-    <>
-      <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[18px] -right-[16px] z-0 h-[300px] w-auto" />
-      <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[18px] -left-[16px] z-0 h-[300px] w-auto" />
-    </>
-  );
-}
-
-// Card-scale leafy corner frame for one guest card (mobile): traces the two
-// edges of one rounded corner. Built by flipping the top-right / bottom-left
-// spray art. The caller cycles the corner per item.
+// Card-scale leafy corner frame for one guest card (mobile list): the stem
+// traces two edges of one rounded corner, on the card's border line. Built by
+// flipping the top-right / bottom-left spray art; the caller cycles the corner
+// per item.
 export function CardCornerFrame({ corner }: { corner: Corner }) {
   const bottom = corner === "bl" || corner === "br";
   const flipX = corner === "tl" || corner === "br";
   const pos = {
-    tl: "top-0 left-0",
-    tr: "top-0 right-0",
-    bl: "bottom-0 left-0",
-    br: "bottom-0 right-0",
+    tl: "-top-[13px] -left-[13px]",
+    tr: "-top-[13px] -right-[13px]",
+    bl: "-bottom-[13px] -left-[13px]",
+    br: "-bottom-[13px] -right-[13px]",
   }[corner];
   const cls = cn(
     "pointer-events-none absolute z-0 h-[128px] w-auto",

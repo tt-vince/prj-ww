@@ -23,7 +23,6 @@ import {
 import {
   CardCornerFrame,
   ColumnVineBottomLeft,
-  ColumnVineFull,
   ColumnVineTopRight,
   type Corner,
 } from "@/components/dashboard-florals";
@@ -32,12 +31,13 @@ import { GuestDialog } from "./guests/guest-dialog";
 import { DeleteGuestButton } from "./guests/delete-guest-button";
 import { CopyLinkButton } from "./guests/copy-link-button";
 
-// Per-column vine layer (design): Awaiting gets a bottom-left sprig, Declined a
-// top-right sprig, and Attending the full four-corner garland.
+// Per-column vine layer: Awaiting gets the bottom-left frame, Declined the
+// top-right frame — stems on the column outline. Attending has NO vine
+// (explicit decision after the full-outline attempts failed review).
 function ColumnVine({ status }: { status: GuestStatus }) {
-  if (status === "going") return <ColumnVineFull />;
   if (status === "pending") return <ColumnVineBottomLeft />;
-  return <ColumnVineTopRight />;
+  if (status === "not_going") return <ColumnVineTopRight />;
+  return null;
 }
 
 export type GuestStatus = "pending" | "going" | "not_going";
@@ -207,7 +207,9 @@ function GuestCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       className={cn(
-        "relative overflow-hidden rounded-[13px] border bg-card p-3.5 shadow-[0_1px_3px_rgba(61,51,43,0.06)] transition-opacity",
+        // No overflow-hidden: the corner frame's stem sits on the border line
+        // with a slight outward bleed (like the design) and must not be clipped.
+        "relative rounded-[13px] border bg-card p-3.5 shadow-[0_1px_3px_rgba(61,51,43,0.06)] transition-opacity",
         draggable && "cursor-grab active:cursor-grabbing",
         dragging && "opacity-40",
       )}
@@ -572,9 +574,9 @@ export function GuestsBoard({
         })}
       </div>
 
-      {/* Mobile: active tab card list */}
+      {/* Mobile: active tab card list — vines live on the cards themselves
+          (CardCornerFrame per item), never floating on this borderless list. */}
       <div className="relative flex flex-col gap-3 md:hidden">
-        <ColumnVine status={tab} />
         <div className="relative z-[1] flex flex-col gap-3">
         <ColumnStats
           size="sm"
