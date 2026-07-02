@@ -5,6 +5,13 @@ import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AccountMenu } from "@/components/account-menu";
+import {
+  AccountSprigBottomRight,
+  AccountSprigTopLeft,
+  CardSprayBottomLeft,
+  CardSprayTopRight,
+  NameSprig,
+} from "@/components/dashboard-florals";
 import { GuestsTable, type GuestRow } from "./guests-table";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
@@ -167,7 +174,10 @@ export default async function DashboardPage() {
       {/* Header */}
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
-          <div className="font-script text-[38px] leading-none text-(--script)">{COUPLE}</div>
+          <div className="flex items-center gap-3">
+            <div className="font-script text-[38px] leading-none text-(--script)">{COUPLE}</div>
+            <NameSprig />
+          </div>
           <h1 className="mt-1 font-serif text-[42px] leading-[1.02] text-foreground">
             Manage RSVP
           </h1>
@@ -176,15 +186,19 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="flex flex-col items-end gap-3.5">
-          <AccountMenu
-            user={{
-              name: user.name,
-              email: user.email,
-              role: user.role,
-              picture: user.picture,
-            }}
-            labels={allLabels}
-          />
+          <div className="relative">
+            <AccountSprigTopLeft />
+            <AccountSprigBottomRight />
+            <AccountMenu
+              user={{
+                name: user.name,
+                email: user.email,
+                role: user.role,
+                picture: user.picture,
+              }}
+              labels={allLabels}
+            />
+          </div>
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             <ExportGuestsButton rows={guestRows} baseUrl={baseUrl} />
             <GuestDialog mode="create" labels={allLabels} />
@@ -207,7 +221,11 @@ export default async function DashboardPage() {
       </div>
 
       {/* Guest list */}
-      <GuestsTable rows={guestRows} labels={allLabels} baseUrl={baseUrl} />
+      <div className="relative">
+        <CardSprayTopRight />
+        <CardSprayBottomLeft />
+        <GuestsTable rows={guestRows} labels={allLabels} baseUrl={baseUrl} />
+      </div>
     </div>
   );
 }
