@@ -1,6 +1,6 @@
 # Wedding RSVP Site — Project Spec (Option A)
 
-> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive; **decorative floral layer** — page-corner sprays, a name sprig, account-chip sprigs, and guest-card corner frames from the design, in `components/dashboard-florals.tsx`). The guest-facing RSVP form (the page a `?id=<token>` link opens) is **built** at `/` (unstyled for now): reads the invitee by token, shows a personalized greeting, hides the form when no/unknown token, and shows a confirmation when already answered. This is the source of truth for the RSVP feature.
+> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (**kanban board** — see below — with search + label filter and CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive; **decorative floral layer** — page-corner sprays, a name sprig, account-chip sprigs, and guest-card corner frames from the design, in `components/dashboard-florals.tsx`). The guest list follows the imported **kanban** designs (`Wedding RSVP - Kanban{,- Tablet,- Mobile}.dc.html`): desktop/tablet show three drag-and-drop status columns (Awaiting reply / Attending / Declined — warm tinted, dashed borders, per-column guest + seat counts; dragging a card calls `moveGuestStatus`); phones swap the board for three status tab pills over the same card list (no drag — status changes via the edit dialog). The former stat-card row and paginated table were replaced by the board; column headers carry the counts, and long columns paginate with a per-column “Show more” (20 at a time). The guest-facing RSVP form (the page a `?id=<token>` link opens) is **built** at `/` (unstyled for now): reads the invitee by token, shows a personalized greeting, hides the form when no/unknown token, and shows a confirmation when already answered. This is the source of truth for the RSVP feature.
 > **For Claude / agents:** Read this file before designing or writing any RSVP-related code.
 > When code and this spec disagree, treat it as a bug — fix one of them, don't silently diverge.
 > Update this spec in the same change whenever a decision here changes.
@@ -254,9 +254,9 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging; redirects already-signed-in active admins to `/dashboard`. |
 | `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (page-corner floral sprays sit in their own `absolute inset-0 overflow-hidden` layer so their bleed clips without cutting page chrome; horizontal scroll guarded on `<body>`); top-right `AccountMenu`. |
 | `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
-| `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions, client-side pagination (20/page, shadcn `Pagination`). |
+| `app/(protected)/dashboard/guests-board.tsx` | Client kanban board (imported design): 3 drag-and-drop status columns on `md+` (HTML5 dnd, `useOptimistic` status flip → `moveGuestStatus`), status tab pills + card list on phones; search + label-filter dropdown; per-column “Show more” (20 at a time). Column tints/inks hardcoded from the design (like the floral art). |
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
-| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); invalidate via `updateTag('guests'/'labels')`. |
+| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete, plus `moveGuestStatus` for kanban drags); invalidate via `updateTag('guests'/'labels')`. |
 | `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/badge label-chips/alert-dialog; sectioned guest form), reused by the single page. |
 | `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`, hidden for `viewer`), the superadmin Users link, and sign out (replaces the sidebar nav). |
 | `components/dashboard-florals.tsx` | Decorative floral SVG art (server component) from the hi-fi design — exported flourishes (`PageFloralTopLeft/BottomRight`, `NameSprig`, `AccountSprigTopLeft/BottomRight`, `CardSprayTopRight/BottomLeft`) rendered by `(protected)/layout.tsx` (page corners) and `dashboard/page.tsx` (name/account/card). Built from `Blossom` + `Leaf` primitives; `aria-hidden`, `pointer-events-none`, art colors hardcoded to match design. |
@@ -265,7 +265,7 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/(protected)/dashboard/users/actions.ts` | activate/deactivate Server Actions. |
 | `components/ui/*` | shadcn components pulled via skill/MCP (now incl. `dropdown-menu`, `progress`, `toggle-group`). |
 
-> **Removed with the single-page redesign:** `app/(protected)/dashboard/guests/page.tsx` (folded into `/dashboard`; the `guests/` folder now holds only the reused client components + `actions.ts`), `components/app-sidebar.tsx`, and the now-unused `components/ui/{sidebar,sheet}.tsx` + `hooks/use-mobile.ts`.
+> **Removed with the single-page redesign:** `app/(protected)/dashboard/guests/page.tsx` (folded into `/dashboard`; the `guests/` folder now holds only the reused client components + `actions.ts`), `components/app-sidebar.tsx`, and the now-unused `components/ui/{sidebar,sheet}.tsx` + `hooks/use-mobile.ts`. **Removed with the kanban redesign:** `app/(protected)/dashboard/guests-table.tsx` (table + stat cards folded into `guests-board.tsx`).
 | `drizzle/` | Generated migration output (Drizzle Kit). |
 
 ### Files to update
@@ -298,6 +298,15 @@ None.
 - On validation failure: return `{ ok: false, errors }` (field-level) — do not throw for expected
   user error; the form renders the messages.
 - JSDoc the action (per §10 conventions).
+
+### `moveGuestStatus(guestId, status)` — kanban drag
+
+- `requireEditor()`; validates the id + `rsvp_status` value.
+- Sets `status` only: `not_going` zeroes `adults`/`kids` (same as the forms); `pending` clears
+  `respondedAt`; first move into `going`/`not_going` stamps `respondedAt`. Party counts are
+  otherwise untouched — the edit dialog owns them, so a card dragged to Attending may show the
+  allotment (`×maxGuests`) until counts are filled in.
+- `updateTag('guests')`; returns the shared `ActionState`.
 
 ### Admin gate — `/dashboard` (Google OAuth)
 

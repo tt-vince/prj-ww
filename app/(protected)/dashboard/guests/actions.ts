@@ -12,6 +12,7 @@ import {
   guestIdSchema,
   labelInputSchema,
   labelIdSchema,
+  rsvpStatusValues,
 } from '@/lib/validation';
 import { generateToken } from '@/lib/guest-token';
 
@@ -134,6 +135,43 @@ export async function updateGuest(
       .insert(guestLabels)
       .values(input.labelIds.map((labelId) => ({ guestId: id.data, labelId })));
   }
+
+  updateTag('guests');
+  return OK;
+}
+
+/**
+ * Kanban move: set a guest's RSVP status directly (drag between columns, or
+ * the mobile tab flow). Mirrors the form semantics — `not_going` zeroes the
+ * party counts, moving back to `pending` clears `respondedAt`, and a first
+ * move into a replied status stamps `respondedAt`. Party counts are otherwise
+ * left untouched (the edit dialog owns them).
+ */
+export async function moveGuestStatus(
+  guestIdRaw: string,
+  statusRaw: string,
+): Promise<ActionState> {
+  await requireEditor();
+  const id = guestIdSchema.safeParse(guestIdRaw);
+  const status = z.enum(rsvpStatusValues).safeParse(statusRaw);
+  if (!id.success || !status.success) return { ok: false, error: 'Invalid move.' };
+
+  const [row] = await db
+    .select({ status: guests.status, respondedAt: guests.respondedAt })
+    .from(guests)
+    .where(eq(guests.id, id.data));
+  if (!row) return { ok: false, error: 'Guest not found.' };
+  if (row.status === status.data) return OK;
+
+  await db
+    .update(guests)
+    .set({
+      status: status.data,
+      ...(status.data === 'not_going' ? { adults: 0, kids: 0 } : {}),
+      respondedAt: status.data === 'pending' ? null : (row.respondedAt ?? new Date()),
+      updatedAt: new Date(),
+    })
+    .where(eq(guests.id, id.data));
 
   updateTag('guests');
   return OK;
