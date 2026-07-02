@@ -35,7 +35,8 @@ export type GuestRow = {
   token: string;
   name: string;
   maxGuests: number;
-  partySize: number | null;
+  adults: number | null;
+  kids: number | null;
   status: GuestStatus;
   email: string | null;
   phone: string | null;
@@ -213,7 +214,9 @@ export function GuestsTable({
                       </div>
                     </TableCell>
                     <TableCell className="font-medium tabular-nums">
-                      {row.partySize ?? "—"}
+                      {row.adults == null && row.kids == null
+                        ? "—"
+                        : `${(row.adults ?? 0) + (row.kids ?? 0)} (${row.adults ?? 0}A · ${row.kids ?? 0}K)`}
                       <span className="text-muted-foreground"> / {row.maxGuests}</span>
                     </TableCell>
                     <TableCell>
