@@ -40,7 +40,7 @@ function Blossom({
   const transform = `translate(${x} ${y})${s === 1 ? "" : ` scale(${s})`}`;
   // Deterministic per-blossom phase so the field doesn't rustle in lockstep.
   const delay = ((Math.abs(x * 13 + y * 7) % 36) / 10).toFixed(1);
-  const duration = (3.5 + (Math.abs(x + y) % 3) * 0.5).toFixed(1);
+  const duration = (2.7 + (Math.abs(x + y) % 3) * 0.4).toFixed(1);
   return (
     <g
       className="wind-rustle"
@@ -74,7 +74,7 @@ function Leaf({
   // Deterministic per-leaf phase/speed — same idea as Blossom, so leaves flutter
   // out of sync like a real breeze.
   const delay = ((Math.abs(cx * 7 + cy * 13) % 42) / 10).toFixed(1);
-  const duration = (2.7 + (Math.abs(cx + cy) % 4) * 0.4).toFixed(1);
+  const duration = (2.1 + (Math.abs(cx + cy) % 4) * 0.3).toFixed(1);
   return (
     <g
       className="wind-rustle"
