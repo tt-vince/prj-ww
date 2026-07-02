@@ -198,13 +198,13 @@
 @keyframes wind-rustle {
   0%,
   100% {
-    transform: rotate(-2.9deg);
+    transform: rotate(-4.35deg);
   }
   35% {
-    transform: rotate(3.4deg);
+    transform: rotate(5.1deg);
   }
   70% {
-    transform: rotate(-1.1deg);
+    transform: rotate(-1.65deg);
   }
 }
 .wind-rustle {
