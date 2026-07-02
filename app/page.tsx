@@ -1,10 +1,5 @@
-import { eq } from 'drizzle-orm';
-import { db } from '@/db';
-import { guests } from '@/db/schema';
+import { getGuestByToken } from '@/lib/data';
 import { RsvpForm } from '@/components/rsvp-form';
-
-// Reads the invitee by token on every request; never prerendered at build.
-export const dynamic = 'force-dynamic';
 
 /**
  * Landing page = the RSVP questionnaire. The invitee is identified by the
@@ -18,19 +13,7 @@ export default async function Home({
 }) {
   const { id: token } = await searchParams;
 
-  const guest = token
-    ? (
-        await db
-          .select({
-            name: guests.name,
-            maxGuests: guests.maxGuests,
-            status: guests.status,
-            token: guests.token,
-          })
-          .from(guests)
-          .where(eq(guests.token, token))
-      )[0]
-    : undefined;
+  const guest = token ? await getGuestByToken(token) : undefined;
 
   return (
     <main style={{ maxWidth: 560, margin: '0 auto', padding: '3rem 1.5rem' }}>

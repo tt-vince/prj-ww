@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { exchangeCode, verifyIdToken } from '@/lib/oauth';
 import { updateUserOnLogin } from '@/lib/users';
 import { encrypt, SESSION_COOKIE_NAME, SESSION_MAX_AGE } from '@/lib/session';
@@ -39,6 +40,10 @@ export async function GET(request: NextRequest) {
 
     const user = await updateUserOnLogin(profile);
     if (!user) return redirectTo('/login?error=denied');
+    // Profile fields (name/picture/lastLoginAt) changed — refresh cached user
+    // data in the background ('max' = serve stale while revalidating).
+    revalidateTag(`user:${user.id}`, 'max');
+    revalidateTag('users', 'max');
     if (user.status !== 'active') return redirectTo('/login?pending=1');
 
     const token = await encrypt({ userId: user.id });

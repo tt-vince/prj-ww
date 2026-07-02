@@ -231,17 +231,18 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `lib/session.ts` | Pure `jose` encrypt/decrypt + cookie name/age (safe to import in `proxy.ts`). |
 | `lib/oauth.ts` | Google OAuth: PKCE/state/nonce, token exchange, id_token verify (JWKS). |
 | `lib/users.ts` | `updateUserOnLogin` — refresh an existing admin on login; returns `null` for unknown accounts (no self-sign-up). |
-| `lib/dal.ts` | `getCurrentUser` / `requireUser` / `requireSuperadmin` (React `cache()`). |
+| `lib/dal.ts` | `getCurrentUser` / `requireUser` / `requireSuperadmin` (React `cache()` per request; user row via `lib/data.ts` `getUserById`, cached cross-request under tag `user:<id>`). |
+| `lib/data.ts` | Cached query layer — `'use cache'` functions (`getGuestsWithLabels`, `getAllLabels`, `getUsers`, `getUserById`, `getGuestByToken`) tagged for precise invalidation (see Caching section). |
 | `proxy.ts` | Optimistic redirect for `/dashboard/*` (replaces `middleware.ts`). |
 | `app/api/auth/google/route.ts` | Initiate OAuth (GET → redirect to Google). |
 | `app/api/auth/callback/google/route.ts` | OAuth callback: verify, authenticate existing user, gate, session. |
-| `app/api/auth/logout/route.ts` | POST → clear session cookie. |
-| `app/login/page.tsx` | "Continue with Google" + pending/error messaging. |
+| `app/api/auth/logout/route.ts` | POST → clear session cookie + leftover OAuth txn cookies. |
+| `app/login/page.tsx` | "Continue with Google" + pending/error messaging; redirects already-signed-in active admins to `/dashboard`. |
 | `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (page-corner floral sprays sit in their own `absolute inset-0 overflow-hidden` layer so their bleed clips without cutting page chrome; horizontal scroll guarded on `<body>`); top-right `AccountMenu`. |
 | `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
 | `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions. |
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
-| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); revalidate `/dashboard`. |
+| `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); invalidate via `updateTag('guests'/'labels')`. |
 | `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
 | `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`, hidden for `viewer`), the superadmin Users link, and sign out (replaces the sidebar nav). |
 | `components/dashboard-florals.tsx` | Decorative floral SVG art (server component) from the hi-fi design — exported flourishes (`PageFloralTopLeft/BottomRight`, `NameSprig`, `AccountSprigTopLeft/BottomRight`, `CardSprayTopRight/BottomLeft`) rendered by `(protected)/layout.tsx` (page corners) and `dashboard/page.tsx` (name/account/card). Built from `Blossom` + `Leaf` primitives; `aria-hidden`, `pointer-events-none`, art colors hardcoded to match design. |
@@ -279,7 +280,7 @@ None.
 - Directive `"use server"`.
 - Input: `RsvpInput` (from FormData or a typed object), re-validated server-side with
   `rsvpInputSchema` — **never trust the client**.
-- On success: insert one row via Drizzle, return `{ ok: true }`. Optionally `revalidatePath('/admin')`.
+- On success: insert one row via Drizzle, `updateTag('guests')` (refreshes the admin dashboard and the token's cached lookup), return `{ ok: true }`.
 - On validation failure: return `{ ok: false, errors }` (field-level) — do not throw for expected
   user error; the form renders the messages.
 - JSDoc the action (per §10 conventions).
@@ -297,7 +298,10 @@ Admins sign in with Google. There is **no shared password**, and **no self-sign-
 
 Flow:
 
-1. `/login` shows "Continue with Google" (plain `<a>` to `/api/auth/google`, never prefetched).
+1. `/login` first runs the authoritative `getCurrentUser()`: a signed-in **active** admin is
+   redirected to `/dashboard` (disabled/deleted → `null` → page renders — no redirect loop; the
+   proxy is deliberately *not* used for this, an optimistic cookie check would loop). Otherwise it
+   shows "Continue with Google" (plain `<a>` to `/api/auth/google`, never prefetched).
 2. `app/api/auth/google/route.ts` generates `state` + `nonce` + PKCE `code_verifier`/`code_challenge`,
    stores them in short-lived `httpOnly` cookies, and redirects to Google.
 3. `app/api/auth/callback/google/route.ts` verifies `state` (CSRF), exchanges the code (with the
@@ -308,15 +312,38 @@ Flow:
    user → `/login?pending=1`; both with **no session issued**. If `active` → set an `httpOnly`,
    `secure` (prod), `sameSite=lax`, 7-day `jose` JWT cookie (payload = `{ userId }` only) and
    redirect to `/dashboard`.
-5. `proxy.ts` does an **optimistic** cookie check on `/dashboard/*`; `lib/dal.ts` does the
-   **authoritative** check on every page/action (re-reads the user, enforces `status === 'active'`,
-   loads `role`) so deactivation takes effect immediately.
+5. `proxy.ts` does an **optimistic** cookie check on `/dashboard/*` (matcher covers `/dashboard`
+   itself and everything below — all protected pages live there); `lib/dal.ts` does the
+   **authoritative** check on every page/action (reads the user via the tag-cached `getUserById`,
+   enforces `status === 'active'`, loads `role`). Activate/deactivate and the login callback
+   invalidate `user:<id>`, so deactivation still takes effect immediately.
 6. User-management Server Actions (`activateUser`/`deactivateUser`) require `requireSuperadmin()`
    and forbid self-modification / disabling a superadmin (lockout prevention).
-7. Logout: POST `/api/auth/logout` clears the cookie.
+7. Logout: POST `/api/auth/logout` clears the session cookie **and** any leftover OAuth txn
+   cookies (`oauth_state`/`oauth_nonce`/`oauth_verifier`) from abandoned sign-ins, 303 → `/login`.
 
 > Secrets (`GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`) only via env — never hardcoded, committed,
 > logged, or in URLs. `sameSite=lax` is required so the cookie survives the Google redirect.
+
+## 7b. Caching (Cache Components)
+
+`next.config.ts` sets `cacheComponents: true` (Next 16 PPR). All DB reads go through the
+`'use cache'` functions in `lib/data.ts`; pages never query Drizzle directly. Unchanged data is
+served from cache; every write invalidates its tags (`updateTag` in Server Actions for
+read-your-writes, `revalidateTag` in route handlers).
+
+| Tag | Covers | Invalidated by |
+|---|---|---|
+| `guests` | guest rows + label joins + token lookups (`getGuestsWithLabels`, `getGuestByToken`) | guest CRUD, label rename/delete, `submitRsvp` |
+| `labels` | `getAllLabels` (+ `getGuestsWithLabels`) | `createLabel` / `renameLabel` / `deleteLabel` |
+| `users` | `getUsers` | `activateUser` / `deactivateUser`, login callback profile refresh |
+| `user:<id>` | `getUserById` (DAL auth lookup) | `activateUser` / `deactivateUser`, login callback |
+
+`cacheLife`: guest/label/user lists `'days'` (tags do the real work), `getGuestByToken` `'hours'`,
+`getUserById` `'minutes'` — the short TTL is the safety net for **out-of-band SQL edits** (e.g.
+provisioning or disabling an admin directly in the DB), which bypass tag invalidation; such a
+change can take up to ~a minute to bite. Dynamic routes keep Suspense fallbacks (`loading.tsx` for
+`/dashboard`, `/dashboard/users`, `/login`, and the landing page) as cacheComponents requires.
 
 ---
 
