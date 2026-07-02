@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/dal";
+import { requireUser, canEdit } from "@/lib/dal";
 import { db } from "@/db";
 import { labels as labelsTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -209,7 +209,9 @@ export default async function DashboardPage() {
           {/* Phones get a fixed bottom "Add guest" bar instead of header buttons. */}
           <div className="hidden flex-wrap items-center justify-end gap-2.5 sm:flex">
             <ExportGuestsButton rows={guestRows} baseUrl={baseUrl} />
-            <GuestDialog mode="create" labels={allLabels} />
+            {canEdit(user.role) ? (
+              <GuestDialog mode="create" labels={allLabels} />
+            ) : null}
           </div>
         </div>
       </header>
@@ -232,13 +234,20 @@ export default async function DashboardPage() {
       <div className="relative">
         <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[42px] -right-[42px] z-[6] hidden h-[calc(100%_+_84px)] max-h-[420px] w-auto lg:block" />
         <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] hidden h-[calc(100%_+_84px)] max-h-[420px] w-auto lg:block" />
-        <GuestsTable rows={guestRows} labels={allLabels} baseUrl={baseUrl} />
+        <GuestsTable
+          rows={guestRows}
+          labels={allLabels}
+          baseUrl={baseUrl}
+          canEdit={canEdit(user.role)}
+        />
       </div>
 
       {/* Mobile: fixed bottom action bar (per hi-fi mobile design) */}
-      <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center bg-gradient-to-t from-white via-white/90 to-transparent px-5 pt-5 pb-6 sm:hidden dark:from-background dark:via-background/90">
-        <GuestDialog mode="create" labels={allLabels} />
-      </div>
+      {canEdit(user.role) ? (
+        <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center bg-gradient-to-t from-white via-white/90 to-transparent px-5 pt-5 pb-6 sm:hidden dark:from-background dark:via-background/90">
+          <GuestDialog mode="create" labels={allLabels} />
+        </div>
+      ) : null}
     </div>
   );
 }

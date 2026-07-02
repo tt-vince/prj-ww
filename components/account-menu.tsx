@@ -105,10 +105,12 @@ export function AccountMenu({
               </span>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setLabelsOpen(true)}>
-              <Tag />
-              Manage labels
-            </DropdownMenuItem>
+            {user.role !== "viewer" ? (
+              <DropdownMenuItem onClick={() => setLabelsOpen(true)}>
+                <Tag />
+                Manage labels
+              </DropdownMenuItem>
+            ) : null}
             {user.role === "superadmin" ? (
               <DropdownMenuItem render={<Link href="/dashboard/users" />}>
                 <ShieldCheck />

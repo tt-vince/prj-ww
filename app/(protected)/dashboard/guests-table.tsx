@@ -164,10 +164,12 @@ function GuestCard({
   row,
   labels,
   baseUrl,
+  canEdit,
 }: {
   row: GuestRow;
   labels: LabelRow[];
   baseUrl: string;
+  canEdit: boolean;
 }) {
   const status = STATUS[row.status];
   const av = tint(row.name);
@@ -230,8 +232,12 @@ function GuestCard({
         <div className="flex-1" />
         <div className="flex items-center gap-1">
           <CopyLinkButton token={row.token} baseUrl={baseUrl} />
-          <GuestDialog mode="edit" labels={labels} guest={guestData} />
-          <DeleteGuestButton guestId={row.id} name={row.name} />
+          {canEdit ? (
+            <>
+              <GuestDialog mode="edit" labels={labels} guest={guestData} />
+              <DeleteGuestButton guestId={row.id} name={row.name} />
+            </>
+          ) : null}
         </div>
       </div>
       {row.guestNote || row.adminNote ? (
@@ -291,10 +297,13 @@ export function GuestsTable({
   rows,
   labels,
   baseUrl,
+  canEdit,
 }: {
   rows: GuestRow[];
   labels: LabelRow[];
   baseUrl: string;
+  /** Viewers get a read-only table — no edit/delete controls in the action column. */
+  canEdit: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [labelSel, setLabelSel] = useState<Selection>(null);
@@ -390,7 +399,13 @@ export function GuestsTable({
           {/* Mobile: card list */}
           <div className="flex flex-col gap-3 border-t px-4 py-4 md:hidden">
             {sorted.map((row) => (
-              <GuestCard key={row.id} row={row} labels={labels} baseUrl={baseUrl} />
+              <GuestCard
+                key={row.id}
+                row={row}
+                labels={labels}
+                baseUrl={baseUrl}
+                canEdit={canEdit}
+              />
             ))}
           </div>
 
@@ -516,8 +531,12 @@ export function GuestsTable({
                     <TableCell>
                       <div className="flex items-center justify-end gap-1.5">
                         <CopyLinkButton token={row.token} baseUrl={baseUrl} />
-                        <GuestDialog mode="edit" labels={labels} guest={guestData} />
-                        <DeleteGuestButton guestId={row.id} name={row.name} />
+                        {canEdit ? (
+                          <>
+                            <GuestDialog mode="edit" labels={labels} guest={guestData} />
+                            <DeleteGuestButton guestId={row.id} name={row.name} />
+                          </>
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
