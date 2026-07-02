@@ -19,8 +19,6 @@ type Pt = readonly [number, number];
 const PETALS_MED: readonly Pt[] = [[0, -11], [10, -3], [6, 9], [-6, 9], [-10, -3]];
 const PETALS_BIG: readonly Pt[] = [[0, -11], [10.5, -3.4], [6.5, 8.9], [-6.5, 8.9], [-10.5, -3.4]];
 const PETALS_S2: readonly Pt[] = [[0, -8], [7.6, -2.5], [4.7, 6.5], [-4.7, 6.5], [-7.6, -2.5]];
-const PETALS_S3: readonly Pt[] = [[0, -6], [5.7, -1.8], [3.5, 4.9], [-3.5, 4.9], [-5.7, -1.8]];
-const PETALS_S4: readonly Pt[] = [[0, -5.5], [5.2, -1.7], [3.2, 4.4], [-3.2, 4.4], [-5.2, -1.7]];
 
 function Blossom({
   x = 0,
@@ -40,12 +38,20 @@ function Blossom({
   petal: string;
 }) {
   const transform = `translate(${x} ${y})${s === 1 ? "" : ` scale(${s})`}`;
+  // Deterministic per-blossom phase so the field doesn't rustle in lockstep.
+  const delay = ((Math.abs(x * 13 + y * 7) % 36) / 10).toFixed(1);
+  const duration = (4.2 + (Math.abs(x + y) % 3) * 0.6).toFixed(1);
   return (
-    <g transform={transform}>
-      {pts.map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r={r} fill={petal} />
-      ))}
-      <circle r={cr} fill={GOLD} />
+    <g
+      className="wind-rustle"
+      style={{ animationDelay: `${delay}s`, animationDuration: `${duration}s` }}
+    >
+      <g transform={transform}>
+        {pts.map(([cx, cy], i) => (
+          <circle key={i} cx={cx} cy={cy} r={r} fill={petal} />
+        ))}
+        <circle r={cr} fill={GOLD} />
+      </g>
     </g>
   );
 }
@@ -65,8 +71,24 @@ function Leaf({
   rot: number;
   fill: string;
 }) {
+  // Deterministic per-leaf phase/speed — same idea as Blossom, so leaves flutter
+  // out of sync like a real breeze.
+  const delay = ((Math.abs(cx * 7 + cy * 13) % 42) / 10).toFixed(1);
+  const duration = (3.2 + (Math.abs(cx + cy) % 4) * 0.5).toFixed(1);
   return (
-    <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fill} transform={`rotate(${rot} ${cx} ${cy})`} />
+    <g
+      className="wind-rustle"
+      style={{ animationDelay: `${delay}s`, animationDuration: `${duration}s` }}
+    >
+      <ellipse
+        cx={cx}
+        cy={cy}
+        rx={rx}
+        ry={ry}
+        fill={fill}
+        transform={`rotate(${rot} ${cx} ${cy})`}
+      />
+    </g>
   );
 }
 
@@ -81,7 +103,12 @@ export function PageFloralTopLeft({ className, style }: SvgProps) {
       viewBox="0 0 340 340"
       aria-hidden="true"
       focusable="false"
-      className={className ?? "pointer-events-none absolute -top-[46px] -left-[58px] opacity-50"}
+      className={
+        className ??
+        // Hidden on phones (the mobile design uses a single top-right spray);
+        // tablet shows a 240px version, desktop the full 340px.
+        "wind-sway pointer-events-none absolute -top-[30px] -left-[40px] hidden h-[240px] w-[240px] opacity-50 md:block lg:-top-[46px] lg:-left-[58px] lg:h-[340px] lg:w-[340px]"
+      }
       style={style}
     >
       <g fill="none" stroke="#b6a6d6" strokeWidth={2} strokeLinecap="round">
@@ -116,7 +143,7 @@ export function PageFloralBottomRight({ className, style }: SvgProps) {
       focusable="false"
       className={
         className ??
-        "pointer-events-none absolute -right-[46px] -bottom-[52px] -scale-x-100 opacity-[0.42]"
+        "wind-sway pointer-events-none absolute -right-[46px] -bottom-[52px] hidden -scale-x-100 opacity-[0.42] lg:block"
       }
       style={style}
     >
@@ -154,41 +181,35 @@ export function NameSprig({ className }: SvgProps) {
   );
 }
 
-// Sprig at the top-left of the account chip.
-export function AccountSprigTopLeft({ className }: SvgProps) {
+// Garland arcing around the account chip (desktop only — the updated hi-fi
+// design replaces the two small corner sprigs with this single wreath).
+export function AccountGarland({ className }: SvgProps) {
   return (
     <svg
-      width={46}
-      height={34}
-      viewBox="0 0 46 34"
-      aria-hidden="true"
-      focusable="false"
-      className={className ?? "pointer-events-none absolute -top-[13px] -left-[15px] z-[5]"}
-    >
-      <path d="M6 30 C10 20 18 12 30 8" fill="none" stroke="#8fae6e" strokeWidth={1.4} strokeLinecap="round" />
-      <Leaf cx={12} cy={21} rx={3} ry={6} rot={-38} fill="#8fae6e" />
-      <Leaf cx={20} cy={14} rx={2.6} ry={5.4} rot={-22} fill="#9cb87c" />
-      <Blossom x={32} y={7} pts={PETALS_S3} r={3.4} cr={3} petal="#d9b6c4" />
-    </svg>
-  );
-}
-
-// Sprig at the bottom-right of the account chip (mirrored).
-export function AccountSprigBottomRight({ className }: SvgProps) {
-  return (
-    <svg
-      width={42}
-      height={30}
-      viewBox="0 0 42 30"
+      width={207}
+      height={76}
+      viewBox="0 0 207 76"
       aria-hidden="true"
       focusable="false"
       className={
-        className ?? "pointer-events-none absolute -right-[13px] -bottom-[12px] z-[5] -scale-x-100"
+        className ?? "wind-sway pointer-events-none absolute -top-4 -left-4 z-[5] hidden lg:block"
       }
     >
-      <path d="M6 4 C10 14 18 22 30 26" fill="none" stroke="#c9a1ad" strokeWidth={1.4} strokeLinecap="round" />
-      <Leaf cx={13} cy={12} rx={2.8} ry={5.6} rot={34} fill="#8fae6e" />
-      <Blossom x={30} y={24} pts={PETALS_S4} r={3.2} cr={2.8} petal="#d9b6c4" />
+      <path
+        d="M189 24 C196 42 186 56 163 59.5 L57 60"
+        fill="none"
+        stroke="#9cb87c"
+        strokeWidth={2}
+        strokeLinecap="round"
+      />
+      <Leaf cx={147} cy={67} rx={4} ry={10.5} rot={-52} fill="#8fae6e" />
+      <Leaf cx={121} cy={68} rx={4} ry={10.5} rot={-34} fill="#8fae6e" />
+      <Leaf cx={87} cy={67} rx={3.8} ry={10} rot={-58} fill="#8fae6e" />
+      <Leaf cx={177} cy={56} rx={3.8} ry={10} rot={40} fill="#8fae6e" />
+      <Leaf cx={135} cy={52} rx={3.2} ry={8} rot={50} fill="#a9c489" />
+      <Leaf cx={103} cy={52} rx={3.2} ry={8} rot={42} fill="#a9c489" />
+      <Blossom x={57} y={63} s={0.82} pts={PETALS_BIG} r={6.5} cr={5.5} petal="#c9a1ad" />
+      <Blossom x={191} y={24} s={0.66} pts={PETALS_BIG} r={6.5} cr={5.5} petal="#d9b6c4" />
     </svg>
   );
 }
@@ -207,7 +228,7 @@ export function CardSprayTopRight({ className }: SvgProps) {
         // Cap height to the card (+42px bleed top & bottom); width scales with the
         // aspect ratio so the frame shrinks with short guest lists instead of
         // overhanging. Never taller than the design's intrinsic 420px.
-        "pointer-events-none absolute -top-[42px] -right-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
+        "wind-sway pointer-events-none absolute -top-[42px] -right-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
       }
     >
       <path
@@ -262,7 +283,7 @@ export function CardSprayBottomLeft({ className }: SvgProps) {
       focusable="false"
       className={
         className ??
-        "pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
+        "wind-sway pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
       }
     >
       <path

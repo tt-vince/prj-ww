@@ -6,8 +6,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { AccountMenu } from "@/components/account-menu";
 import {
-  AccountSprigBottomRight,
-  AccountSprigTopLeft,
+  AccountGarland,
   CardSprayBottomLeft,
   CardSprayTopRight,
   NameSprig,
@@ -60,14 +59,16 @@ function StatCard({
 }) {
   const t = TONE[tone];
   return (
-    <Card className="gap-0 rounded-[18px] p-6">
+    <Card className="gap-0 rounded-[18px] p-4 sm:p-6">
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-medium tracking-[0.1em] text-muted-foreground uppercase">
           {label}
         </span>
         <span className={cn("size-2.5 rounded-full", t.dot)} />
       </div>
-      <div className={cn("mt-3.5 font-serif text-[46px] leading-none", t.text)}>{value}</div>
+      <div className={cn("mt-2.5 font-serif text-[34px] leading-none sm:mt-3.5 sm:text-[46px]", t.text)}>
+        {value}
+      </div>
       <div className="mt-2 text-[12.5px] text-muted-foreground">{caption}</div>
       <Progress
         value={pct}
@@ -167,6 +168,7 @@ export default async function DashboardPage() {
     email: r.email,
     phone: r.phone,
     adminNote: r.adminNote,
+    guestNote: r.guestNote,
     respondedAt: r.respondedAt ? r.respondedAt.toISOString() : null,
     labels: r.guestLabels.map((gl) => ({ id: gl.labelId, name: gl.label.name })),
   }));
@@ -174,25 +176,26 @@ export default async function DashboardPage() {
   const baseUrl = process.env.APP_URL ?? "";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-5 pb-16 sm:gap-6 sm:pb-0">
       {/* Header */}
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="font-script text-[38px] leading-none text-(--script)">{COUPLE}</div>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="font-script text-[30px] leading-none text-(--script) sm:text-[38px]">
+              {COUPLE}
+            </div>
             <NameSprig />
           </div>
-          <h1 className="mt-1 font-serif text-[42px] leading-[1.02] text-foreground">
+          <h1 className="mt-1 font-serif text-[28px] leading-[1.02] text-foreground sm:text-[42px]">
             Manage RSVP
           </h1>
-          <div className="mt-2.5 text-xs tracking-[0.14em] text-muted-foreground uppercase">
+          <div className="mt-2.5 text-[10.5px] tracking-[0.14em] text-muted-foreground uppercase sm:text-xs">
             {OCCASION}
           </div>
         </div>
         <div className="flex flex-col items-end gap-3.5">
           <div className="relative">
-            <AccountSprigTopLeft />
-            <AccountSprigBottomRight />
+            <AccountGarland />
             <AccountMenu
               user={{
                 name: user.name,
@@ -203,7 +206,8 @@ export default async function DashboardPage() {
               labels={allLabels}
             />
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-2.5">
+          {/* Phones get a fixed bottom "Add guest" bar instead of header buttons. */}
+          <div className="hidden flex-wrap items-center justify-end gap-2.5 sm:flex">
             <ExportGuestsButton rows={guestRows} baseUrl={baseUrl} />
             {canEdit(user.role) ? (
               <GuestDialog mode="create" labels={allLabels} />
@@ -226,10 +230,10 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Guest list */}
+      {/* Guest list — botanical card frames are a desktop-only flourish */}
       <div className="relative">
-        <CardSprayTopRight />
-        <CardSprayBottomLeft />
+        <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[42px] -right-[42px] z-[6] hidden h-[calc(100%_+_84px)] max-h-[420px] w-auto lg:block" />
+        <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] hidden h-[calc(100%_+_84px)] max-h-[420px] w-auto lg:block" />
         <GuestsTable
           rows={guestRows}
           labels={allLabels}
@@ -237,6 +241,13 @@ export default async function DashboardPage() {
           canEdit={canEdit(user.role)}
         />
       </div>
+
+      {/* Mobile: fixed bottom action bar (per hi-fi mobile design) */}
+      {canEdit(user.role) ? (
+        <div className="fixed inset-x-0 bottom-0 z-20 flex justify-center bg-gradient-to-t from-white via-white/90 to-transparent px-5 pt-5 pb-6 sm:hidden dark:from-background dark:via-background/90">
+          <GuestDialog mode="create" labels={allLabels} />
+        </div>
+      ) : null}
     </div>
   );
 }

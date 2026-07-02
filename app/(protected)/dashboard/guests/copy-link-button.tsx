@@ -25,7 +25,7 @@ export function CopyLinkButton({ token, baseUrl }: { token: string; baseUrl: str
 
   return (
     <Button
-      variant="outline"
+      variant="ghost"
       size="icon-sm"
       onClick={copy}
       aria-label={copied ? 'Invite link copied' : 'Copy invite link'}

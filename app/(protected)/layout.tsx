@@ -19,6 +19,8 @@ export default function ProtectedLayout({ children }: { children: ReactNode }) {
       <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
         <PageFloralTopLeft />
         <PageFloralBottomRight />
+        {/* Phone layout uses a single mirrored spray at the top-right instead. */}
+        <PageFloralBottomRight className="wind-sway pointer-events-none absolute -top-[24px] -right-[40px] h-[170px] w-[170px] -scale-x-100 opacity-[0.42] md:hidden" />
       </div>
       <div className="relative mx-auto w-full max-w-[1300px] px-4 py-6 sm:px-6 lg:px-8 lg:py-9">
         {children}

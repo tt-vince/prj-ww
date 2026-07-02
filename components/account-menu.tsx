@@ -62,7 +62,7 @@ export function AccountMenu({
             <button
               type="button"
               aria-label="Account menu"
-              className="flex items-center gap-2.5 rounded-full border bg-card py-[5px] pr-3.5 pl-[5px] text-left transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+              className="flex items-center gap-2.5 rounded-full border bg-card p-[3px] text-left transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none sm:py-[5px] sm:pr-3.5 sm:pl-[5px]"
             >
               <Avatar className="size-8">
                 {user.picture ? (
@@ -80,7 +80,7 @@ export function AccountMenu({
                   {user.email}
                 </span>
               </span>
-              <ChevronDown className="size-3 text-muted-foreground" />
+              <ChevronDown className="hidden size-3 text-muted-foreground sm:block" />
             </button>
           }
         />
