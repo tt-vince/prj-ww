@@ -24,6 +24,8 @@ import {
   ColumnVineBottomLeft,
   ColumnVineFull,
   ColumnVineTopRight,
+  CornerVine,
+  type Corner,
 } from "@/components/dashboard-florals";
 import { moveGuestStatus } from "./guests/actions";
 import { GuestDialog } from "./guests/guest-dialog";
@@ -106,6 +108,9 @@ const COLUMNS: {
 // Mobile tab order leads with Attending (per the mobile design).
 const MOBILE_ORDER: GuestStatus[] = ["going", "pending", "not_going"];
 
+// Corner cycled per mobile card so each item's vine alternates around the stack.
+const CARD_VINE_CYCLE: Corner[] = ["tl", "tr", "br", "bl"];
+
 // Warm card inks from the design — used inside the tinted columns.
 const INK = "#3d332b";
 const MUT = "#a2937f";
@@ -179,6 +184,7 @@ function GuestCard({
   canEdit,
   dragging,
   draggable,
+  vineCorner,
   onDragStart,
   onDragEnd,
 }: {
@@ -188,6 +194,8 @@ function GuestCard({
   canEdit: boolean;
   dragging?: boolean;
   draggable?: boolean;
+  /** When set (mobile list), draw an alternating corner vine on the card. */
+  vineCorner?: Corner;
   onDragStart?: (e: DragEvent) => void;
   onDragEnd?: () => void;
 }) {
@@ -199,12 +207,14 @@ function GuestCard({
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       className={cn(
-        "rounded-[13px] border bg-card p-3.5 shadow-[0_1px_3px_rgba(61,51,43,0.06)] transition-opacity",
+        "relative overflow-hidden rounded-[13px] border bg-card p-3.5 shadow-[0_1px_3px_rgba(61,51,43,0.06)] transition-opacity",
         draggable && "cursor-grab active:cursor-grabbing",
         dragging && "opacity-40",
       )}
       style={{ borderColor: CARD_BORDER }}
     >
+      {vineCorner ? <CornerVine corner={vineCorner} /> : null}
+      <div className="relative z-[1]">
       <div className="flex items-center gap-3">
         <Avatar className="size-9.5">
           <AvatarFallback
@@ -299,6 +309,7 @@ function GuestCard({
             <DeleteGuestButton guestId={row.id} name={row.name} />
           </>
         ) : null}
+      </div>
       </div>
     </div>
   );
@@ -578,13 +589,14 @@ export function GuestsBoard({
         ) : (
           byStatus[tab]
             .slice(0, limits[tab])
-            .map((row) => (
+            .map((row, i) => (
               <GuestCard
                 key={row.id}
                 row={row}
                 labels={labels}
                 baseUrl={baseUrl}
                 canEdit={canEdit}
+                vineCorner={CARD_VINE_CYCLE[i % CARD_VINE_CYCLE.length]}
               />
             ))
         )}

@@ -225,10 +225,14 @@ export function AccountGarland({ className }: SvgProps) {
  * column's dashed outline (behind the guest cards) so the column itself reads
  * as garlanded — per the kanban design's per-column vine layer.
  */
+export type Corner = "tl" | "tr" | "bl" | "br";
+
 function CornerSprig({
   corner,
+  sizeClass,
 }: {
-  corner: "tl" | "tr" | "bl" | "br";
+  corner: Corner;
+  sizeClass?: string;
 }) {
   const flip = { tl: undefined, tr: "scaleX(-1)", bl: "scaleY(-1)", br: "scale(-1, -1)" }[corner];
   const pos = {
@@ -244,7 +248,7 @@ function CornerSprig({
       focusable="false"
       // Narrower tablet columns would be crowded by the full-size sprig, so it
       // scales up from tablet (md) to desktop (lg).
-      className={cn("pointer-events-none absolute z-0 size-[86px] lg:size-[120px]", pos)}
+      className={cn("pointer-events-none absolute z-0", sizeClass ?? "size-[86px] lg:size-[120px]", pos)}
       style={{ transform: flip, opacity: 0.72 }}
     >
       {/* Stems tracing the two edges away from the corner. */}
@@ -289,6 +293,12 @@ export function ColumnVineFull() {
       <CornerSprig corner="br" />
     </>
   );
+}
+
+// Card-scale single-corner sprig for one guest card (mobile list): the caller
+// alternates the corner per item so the stack reads as garlanded.
+export function CornerVine({ corner }: { corner: Corner }) {
+  return <CornerSprig corner={corner} sizeClass="size-[62px]" />;
 }
 
 // Large botanical frame at the guest-list card's top-right corner.
