@@ -180,6 +180,8 @@ function GuestCard({
     email: row.email,
     phone: row.phone,
     adminNote: row.adminNote,
+    adults: row.adults,
+    kids: row.kids,
     status: row.status,
     labelIds: row.labels.map((l) => l.id),
   };
@@ -440,6 +442,8 @@ export function GuestsTable({
                   email: row.email,
                   phone: row.phone,
                   adminNote: row.adminNote,
+                  adults: row.adults,
+                  kids: row.kids,
                   status: row.status,
                   labelIds: row.labels.map((l) => l.id),
                 };

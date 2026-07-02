@@ -1,9 +1,10 @@
 'use client';
 
 import { useActionState, useEffect, useState, type ReactNode } from 'react';
-import { Pencil, Plus } from 'lucide-react';
+import { Check, Pencil, Plus } from 'lucide-react';
 import type { Label as LabelRow } from '@/db/schema';
 import { createGuest, updateGuest, type ActionState } from './actions';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -17,8 +18,8 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
 import {
   Select,
   SelectContent,
@@ -33,6 +34,8 @@ type GuestData = {
   id: string;
   name: string;
   maxGuests: number;
+  adults: number | null;
+  kids: number | null;
   email: string | null;
   phone: string | null;
   adminNote: string | null;
@@ -83,7 +86,7 @@ export function GuestDialog({
           )
         }
       />
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="max-h-[85dvh] overflow-y-auto sm:max-w-lg">
         <GuestForm
           key={instance}
           mode={mode}
@@ -110,6 +113,26 @@ function GuestForm({
   const action = mode === 'create' ? createGuest : updateGuest;
   const [state, formAction, pending] = useActionState(action, INITIAL);
 
+  // Controlled copies of the fields the live party-size math depends on.
+  // The server re-checks the same rules in guestCreateSchema/guestUpdateSchema.
+  const [status, setStatus] = useState<RsvpStatus>(guest?.status ?? 'pending');
+  const [maxGuests, setMaxGuests] = useState(String(guest?.maxGuests ?? 1));
+  const [adults, setAdults] = useState(guest?.adults != null ? String(guest.adults) : '');
+  const [kids, setKids] = useState(guest?.kids != null ? String(guest.kids) : '');
+  const [labelIds, setLabelIds] = useState<string[]>(guest?.labelIds ?? []);
+
+  const declined = mode === 'edit' && status === 'not_going';
+  const hasCounts = !declined && (adults !== '' || kids !== '');
+  const partySize = (Number(adults) || 0) + (Number(kids) || 0);
+  const seats = Number(maxGuests) || 0;
+  const partyError =
+    state.fieldErrors?.partySize ??
+    (hasCounts && seats > 0 && partySize > seats
+      ? `Party size (${partySize}) can't exceed max guests (${seats}).`
+      : !declined && mode === 'edit' && status === 'going' && partySize < 1
+        ? 'A party marked Going needs at least 1 adult or kid.'
+        : undefined);
+
   useEffect(() => {
     if (state.ok) onDone();
   }, [state, onDone]);
@@ -124,77 +147,151 @@ function GuestForm({
             : 'Update this invitee.'}
         </DialogDescription>
       </DialogHeader>
-      <form action={formAction} className="flex flex-col gap-3">
+      <form action={formAction} className="flex flex-col gap-5">
         {mode === 'edit' && guest ? (
           <input type="hidden" name="guestId" value={guest.id} />
         ) : null}
         {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}
 
-        <Field label="Name" error={state.fieldErrors?.name}>
-          <Input name="name" defaultValue={guest?.name ?? ''} maxLength={120} autoFocus />
-        </Field>
-
-        <div className="grid grid-cols-2 gap-3">
-          <Field label="Max guests" error={state.fieldErrors?.maxGuests}>
+        <Section title="Guest details">
+          <Field label="Name" error={state.fieldErrors?.name}>
+            <Input name="name" defaultValue={guest?.name ?? ''} maxLength={120} required autoFocus />
+          </Field>
+          <Field
+            label="Max guests"
+            hint="Seats reserved for this party — the most people their link can bring."
+            error={state.fieldErrors?.maxGuests}
+          >
             <Input
               name="maxGuests"
               type="number"
               min={1}
               max={20}
-              defaultValue={guest?.maxGuests ?? 1}
+              value={maxGuests}
+              onChange={(e) => setMaxGuests(e.target.value)}
             />
           </Field>
-          <Field label="Status">
-            <Select name="status" defaultValue={guest?.status ?? 'pending'}>
-              <SelectTrigger className="w-full">
-                <SelectValue>
-                  {(value: string) => STATUS_LABEL[value as RsvpStatus] ?? 'Pending'}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {STATUS_OPTIONS.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {STATUS_LABEL[s]}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-        </div>
+        </Section>
 
-        <Field label="Email" error={state.fieldErrors?.email}>
-          <Input name="email" type="email" defaultValue={guest?.email ?? ''} />
-        </Field>
-        <Field label="Phone" error={state.fieldErrors?.phone}>
-          <Input name="phone" defaultValue={guest?.phone ?? ''} />
-        </Field>
+        <Section title={mode === 'create' ? 'Party count' : 'RSVP reply'}>
+          {mode === 'edit' ? (
+            <Field label="Status">
+              <Select
+                name="status"
+                value={status}
+                onValueChange={(v) => setStatus(v as RsvpStatus)}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue>
+                    {(value: string) => STATUS_LABEL[value as RsvpStatus] ?? 'Pending'}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {STATUS_OPTIONS.map((s) => (
+                    <SelectItem key={s} value={s}>
+                      {STATUS_LABEL[s]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          ) : null}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Adults" error={state.fieldErrors?.adults}>
+              <Input
+                name="adults"
+                type="number"
+                min={0}
+                max={20}
+                placeholder="—"
+                value={declined ? '0' : adults}
+                onChange={(e) => setAdults(e.target.value)}
+                disabled={declined}
+              />
+            </Field>
+            <Field label="Kids" error={state.fieldErrors?.kids}>
+              <Input
+                name="kids"
+                type="number"
+                min={0}
+                max={20}
+                placeholder="—"
+                value={declined ? '0' : kids}
+                onChange={(e) => setKids(e.target.value)}
+                disabled={declined}
+              />
+            </Field>
+          </div>
+          {partyError ? (
+            <p className="text-xs text-destructive">{partyError}</p>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              {declined
+                ? 'Declined — the party count is cleared to 0 on save.'
+                : hasCounts
+                  ? `Party size ${partySize} of ${seats} seat${seats === 1 ? '' : 's'} (adults + kids).`
+                  : mode === 'create'
+                    ? 'Optional — pre-fill the expected head-count, or leave blank.'
+                    : 'No reply yet — leave blank until the party responds.'}
+            </p>
+          )}
+        </Section>
+
+        <Section title="Contact">
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Email" error={state.fieldErrors?.email}>
+              <Input name="email" type="email" defaultValue={guest?.email ?? ''} />
+            </Field>
+            <Field label="Phone" error={state.fieldErrors?.phone}>
+              <Input name="phone" defaultValue={guest?.phone ?? ''} />
+            </Field>
+          </div>
+        </Section>
 
         {labels.length > 0 ? (
-          <div className="flex flex-col gap-2">
-            <Label>Labels</Label>
-            <div className="flex flex-wrap gap-x-4 gap-y-2">
-              {labels.map((l) => (
-                <label key={l.id} className="flex items-center gap-2 text-sm font-normal">
-                  <Checkbox
-                    name="labelIds"
-                    value={l.id}
-                    defaultChecked={guest?.labelIds.includes(l.id) ?? false}
+          <Section title="Labels">
+            <div className="flex flex-wrap gap-1.5">
+              {labels.map((l) => {
+                const on = labelIds.includes(l.id);
+                return (
+                  <Badge
+                    key={l.id}
+                    variant={on ? 'default' : 'outline'}
+                    className="h-6 cursor-pointer px-2.5"
+                    render={
+                      <button
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          setLabelIds((prev) =>
+                            on ? prev.filter((id) => id !== l.id) : [...prev, l.id],
+                          )
+                        }
+                      >
+                        {on ? <Check /> : <Plus />}
+                        {l.name}
+                      </button>
+                    }
                   />
-                  {l.name}
-                </label>
-              ))}
+                );
+              })}
             </div>
-          </div>
+            {labelIds.map((id) => (
+              <input key={id} type="hidden" name="labelIds" value={id} />
+            ))}
+          </Section>
         ) : null}
 
-        <Field label="Admin note" error={state.fieldErrors?.adminNote}>
-          <Textarea
-            name="adminNote"
-            defaultValue={guest?.adminNote ?? ''}
-            rows={2}
-            placeholder="Private — only you see this"
-          />
-        </Field>
+        <Section title="Notes">
+          <Field label="Admin note" error={state.fieldErrors?.adminNote}>
+            <Textarea
+              name="adminNote"
+              defaultValue={guest?.adminNote ?? ''}
+              rows={2}
+              placeholder="Private — only you see this"
+            />
+          </Field>
+        </Section>
 
         <DialogFooter>
           <DialogClose render={<Button type="button" variant="outline" />}>Cancel</DialogClose>
@@ -207,12 +304,28 @@ function GuestForm({
   );
 }
 
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="flex flex-col gap-3">
+      <div className="flex items-center gap-3">
+        <span className="text-[10.5px] font-semibold tracking-wider text-muted-foreground uppercase">
+          {title}
+        </span>
+        <Separator className="flex-1" />
+      </div>
+      {children}
+    </div>
+  );
+}
+
 function Field({
   label,
+  hint,
   error,
   children,
 }: {
   label: string;
+  hint?: string;
   error?: string;
   children: ReactNode;
 }) {
@@ -220,7 +333,11 @@ function Field({
     <div className="flex flex-col gap-1.5">
       <Label>{label}</Label>
       {children}
-      {error ? <p className="text-xs text-destructive">{error}</p> : null}
+      {error ? (
+        <p className="text-xs text-destructive">{error}</p>
+      ) : hint ? (
+        <p className="text-xs text-muted-foreground">{hint}</p>
+      ) : null}
     </div>
   );
 }

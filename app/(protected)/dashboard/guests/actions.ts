@@ -7,7 +7,8 @@ import { requireEditor } from '@/lib/dal';
 import { db } from '@/db';
 import { guests, guestLabels, labels } from '@/db/schema';
 import {
-  guestInputSchema,
+  guestCreateSchema,
+  guestUpdateSchema,
   guestIdSchema,
   labelInputSchema,
   labelIdSchema,
@@ -33,16 +34,17 @@ function toFieldErrors(error: z.ZodError): ActionState {
   return { ok: false, fieldErrors };
 }
 
-function parseGuest(formData: FormData) {
-  return guestInputSchema.safeParse({
+function guestFormValues(formData: FormData) {
+  return {
     name: formData.get('name'),
     maxGuests: formData.get('maxGuests'),
+    adults: formData.get('adults'),
+    kids: formData.get('kids'),
     email: formData.get('email'),
     phone: formData.get('phone'),
     adminNote: formData.get('adminNote'),
-    status: formData.get('status') ?? undefined,
     labelIds: formData.getAll('labelIds'),
-  });
+  };
 }
 
 /** Generate an invite token not already used (retry on the rare collision). */
@@ -63,7 +65,7 @@ export async function createGuest(
   formData: FormData,
 ): Promise<ActionState> {
   await requireEditor();
-  const parsed = parseGuest(formData);
+  const parsed = guestCreateSchema.safeParse(guestFormValues(formData));
   if (!parsed.success) return toFieldErrors(parsed.error);
   const input = parsed.data;
 
@@ -77,7 +79,9 @@ export async function createGuest(
       email: input.email,
       phone: input.phone,
       adminNote: input.adminNote,
-      status: input.status,
+      // status stays at its 'pending' default — a new invitee hasn't replied.
+      adults: input.adults ?? null,
+      kids: input.kids ?? null,
     })
     .returning({ id: guests.id });
 
@@ -99,9 +103,14 @@ export async function updateGuest(
   await requireEditor();
   const id = guestIdSchema.safeParse(formData.get('guestId'));
   if (!id.success) return { ok: false, error: 'Invalid guest.' };
-  const parsed = parseGuest(formData);
+  const parsed = guestUpdateSchema.safeParse({
+    ...guestFormValues(formData),
+    status: formData.get('status'),
+  });
   if (!parsed.success) return toFieldErrors(parsed.error);
   const input = parsed.data;
+  // A declined party brings nobody — zero the counts, same as the guest form.
+  const declined = input.status === 'not_going';
 
   await db
     .update(guests)
@@ -112,6 +121,8 @@ export async function updateGuest(
       phone: input.phone,
       adminNote: input.adminNote,
       status: input.status,
+      adults: declined ? 0 : (input.adults ?? null),
+      kids: declined ? 0 : (input.kids ?? null),
       updatedAt: new Date(),
     })
     .where(eq(guests.id, id.data));
