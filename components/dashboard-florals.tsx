@@ -227,78 +227,89 @@ export function AccountGarland({ className }: SvgProps) {
  */
 export type Corner = "tl" | "tr" | "bl" | "br";
 
-function CornerSprig({
-  corner,
-  sizeClass,
-}: {
-  corner: Corner;
-  sizeClass?: string;
-}) {
-  const flip = { tl: undefined, tr: "scaleX(-1)", bl: "scaleY(-1)", br: "scale(-1, -1)" }[corner];
+/**
+ * Continuous outline vine — a rounded-rect stroke tracing the full border of
+ * its parent (the design's Attending "vineFull" base). `preserveAspectRatio`
+ * "none" stretches the 100×100 box to the parent; a non-scaling stroke keeps
+ * the line a constant 2px however the parent is sized.
+ */
+function OutlineVine() {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      aria-hidden="true"
+      focusable="false"
+      className="pointer-events-none absolute inset-0 z-0 h-full w-full overflow-visible"
+    >
+      <rect
+        x={1.4}
+        y={1.4}
+        width={97.2}
+        height={97.2}
+        rx={4}
+        fill="none"
+        stroke="#7d9163"
+        strokeWidth={2}
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
+// Awaiting-reply column: a bottom-left botanical corner frame (design vineBL).
+export function ColumnVineBottomLeft() {
+  return (
+    <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[22px] -left-[20px] z-0 h-[210px] w-auto" />
+  );
+}
+
+// Declined column: a top-right corner frame (design vineTR).
+export function ColumnVineTopRight() {
+  return (
+    <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[22px] -right-[20px] z-0 h-[210px] w-auto" />
+  );
+}
+
+// Attending column (design vineFull): the outline vine traces the whole border,
+// and both corner frames add blossoms all the way around it.
+export function ColumnVineFull() {
+  return (
+    <>
+      <OutlineVine />
+      <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[22px] -right-[20px] z-0 h-[210px] w-auto" />
+      <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[22px] -left-[20px] z-0 h-[210px] w-auto" />
+    </>
+  );
+}
+
+/**
+ * Card-scale corner frame for one guest card (mobile list): the L-shaped
+ * botanical border traces two edges of one rounded corner, so the vine sits on
+ * the card outline. The caller cycles the corner per item. Built by flipping
+ * the top-right / bottom-left spray art to reach all four corners.
+ */
+export function CardCornerFrame({ corner }: { corner: Corner }) {
+  const bottom = corner === "bl" || corner === "br";
+  // Base art is top-right (top corners) or bottom-left (bottom corners); flip
+  // horizontally to reach the mirror-side corner.
+  const flipX = corner === "tl" || corner === "br";
   const pos = {
     tl: "top-0 left-0",
     tr: "top-0 right-0",
     bl: "bottom-0 left-0",
     br: "bottom-0 right-0",
   }[corner];
-  return (
-    <svg
-      viewBox="0 0 124 124"
-      aria-hidden="true"
-      focusable="false"
-      // Narrower tablet columns would be crowded by the full-size sprig, so it
-      // scales up from tablet (md) to desktop (lg).
-      className={cn("pointer-events-none absolute z-0", sizeClass ?? "size-[86px] lg:size-[120px]", pos)}
-      style={{ transform: flip, opacity: 0.72 }}
-    >
-      {/* Stems tracing the two edges away from the corner. */}
-      <g fill="none" stroke="#9cb87c" strokeWidth={1.8} strokeLinecap="round">
-        <path d="M13 7 C11 34 15 64 23 92" />
-        <path d="M7 13 C34 11 64 15 92 23" />
-        <path d="M13 40 C24 38 30 32 33 24" />
-        <path d="M40 13 C38 24 32 30 24 33" />
-      </g>
-      <g>
-        <Leaf cx={11} cy={44} rx={4} ry={10.5} rot={54} fill="#8fae6e" />
-        <Leaf cx={15} cy={72} rx={4} ry={10.5} rot={38} fill="#8fae6e" />
-        <Leaf cx={44} cy={11} rx={4} ry={10.5} rot={-56} fill="#8fae6e" />
-        <Leaf cx={72} cy={15} rx={4} ry={10.5} rot={-40} fill="#8fae6e" />
-        <Leaf cx={33} cy={33} rx={3.4} ry={8} rot={45} fill="#a9c489" />
-      </g>
-      <Blossom x={17} y={17} s={0.84} pts={PETALS_BIG} r={6.2} cr={5.2} petal="#d9b6c4" />
-      <Blossom x={94} y={24} s={0.66} pts={PETALS_MED} r={6} cr={5} petal="#c9a1ad" />
-      <Blossom x={24} y={94} s={0.66} pts={PETALS_MED} r={6} cr={5} petal="#c9a1ad" />
-    </svg>
+  const cls = cn(
+    "pointer-events-none absolute z-0 h-[118px] w-auto opacity-80",
+    pos,
+    flipX && "-scale-x-100",
   );
-}
-
-// Awaiting-reply column: a single bottom-left sprig (per the kanban design).
-export function ColumnVineBottomLeft() {
-  return <CornerSprig corner="bl" />;
-}
-
-// Declined column: a single top-right sprig.
-export function ColumnVineTopRight() {
-  return <CornerSprig corner="tr" />;
-}
-
-// Attending column: the full set — all four corners, so the outline is fully
-// garlanded (the design's "vineFull").
-export function ColumnVineFull() {
-  return (
-    <>
-      <CornerSprig corner="tl" />
-      <CornerSprig corner="tr" />
-      <CornerSprig corner="bl" />
-      <CornerSprig corner="br" />
-    </>
+  return bottom ? (
+    <CardSprayBottomLeft className={cls} />
+  ) : (
+    <CardSprayTopRight className={cls} />
   );
-}
-
-// Card-scale single-corner sprig for one guest card (mobile list): the caller
-// alternates the corner per item so the stack reads as garlanded.
-export function CornerVine({ corner }: { corner: Corner }) {
-  return <CornerSprig corner={corner} sizeClass="size-[62px]" />;
 }
 
 // Large botanical frame at the guest-list card's top-right corner.

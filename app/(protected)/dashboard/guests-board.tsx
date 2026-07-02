@@ -21,10 +21,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
+  CardCornerFrame,
   ColumnVineBottomLeft,
   ColumnVineFull,
   ColumnVineTopRight,
-  CornerVine,
   type Corner,
 } from "@/components/dashboard-florals";
 import { moveGuestStatus } from "./guests/actions";
@@ -213,7 +213,7 @@ function GuestCard({
       )}
       style={{ borderColor: CARD_BORDER }}
     >
-      {vineCorner ? <CornerVine corner={vineCorner} /> : null}
+      {vineCorner ? <CardCornerFrame corner={vineCorner} /> : null}
       <div className="relative z-[1]">
       <div className="flex items-center gap-3">
         <Avatar className="size-9.5">
