@@ -239,12 +239,12 @@ function CornerSprig({
   }[corner];
   return (
     <svg
-      width={124}
-      height={124}
       viewBox="0 0 124 124"
       aria-hidden="true"
       focusable="false"
-      className={cn("pointer-events-none absolute z-0", pos)}
+      // Narrower tablet columns would be crowded by the full-size sprig, so it
+      // scales up from tablet (md) to desktop (lg).
+      className={cn("pointer-events-none absolute z-0 size-[86px] lg:size-[120px]", pos)}
       style={{ transform: flip, opacity: 0.72 }}
     >
       {/* Stems tracing the two edges away from the corner. */}
