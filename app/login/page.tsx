@@ -8,7 +8,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Heart } from 'lucide-react';
+import {
+  CardSprayBottomLeft,
+  CardSprayTopRight,
+  PageFloralBottomRight,
+  PageFloralTopLeft,
+} from '@/components/dashboard-florals';
 
 type LoginSearchParams = { pending?: string; error?: string };
 
@@ -52,59 +57,52 @@ export default async function LoginPage({
   const errorMessage = params.error ? ERROR_MESSAGES[params.error] ?? 'Something went wrong.' : null;
 
   return (
-    <main className="relative flex min-h-dvh items-center justify-center overflow-hidden bg-gradient-to-br from-accent/40 via-background to-secondary/40 p-6">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -top-24 -left-24 size-72 rounded-full bg-primary/15 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-24 -bottom-24 size-72 rounded-full bg-primary/10 blur-3xl"
-      />
+    <main className="relative flex min-h-dvh items-center justify-center p-6">
+      {/* Page-corner floral sprays on the wisteria gradient, clipped to the
+          viewport in their own layer — same shell as the dashboard. */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+        <PageFloralTopLeft />
+        <PageFloralBottomRight />
+      </div>
 
       <div className="relative flex w-full max-w-sm flex-col items-center gap-6">
-        <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex size-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/25">
-            <Heart className="size-6" />
-          </div>
-          <div className="flex flex-col gap-1">
-            <h1 className="font-serif text-2xl font-semibold tracking-tight">Wedding RSVP</h1>
-            <p className="text-sm text-muted-foreground">Admin console</p>
-          </div>
+        {/* Botanical frame around the card, same as the dashboard guest-list card. */}
+        <div className="relative w-full">
+          <CardSprayTopRight />
+          <CardSprayBottomLeft />
+          <Card className="w-full">
+            <CardHeader className="text-center">
+              <CardTitle className="font-serif text-xl">Admin sign in</CardTitle>
+              <CardDescription>Sign in to manage guest responses.</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col gap-4">
+              {params.pending && (
+                <Alert>
+                  <AlertTitle>Account pending approval</AlertTitle>
+                  <AlertDescription>
+                    An administrator must activate your account before you can sign in.
+                  </AlertDescription>
+                </Alert>
+              )}
+              {errorMessage && (
+                <Alert variant="destructive">
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
+              {/* Plain anchor (via render) so the GET is never prefetched. */}
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full"
+                nativeButton={false}
+                render={<a href="/api/auth/google" />}
+              >
+                <GoogleIcon data-icon="inline-start" />
+                Continue with Google
+              </Button>
+            </CardContent>
+          </Card>
         </div>
-
-        <Card className="w-full">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">Admin sign in</CardTitle>
-            <CardDescription>Sign in to manage guest responses.</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            {params.pending && (
-              <Alert>
-                <AlertTitle>Account pending approval</AlertTitle>
-                <AlertDescription>
-                  An administrator must activate your account before you can sign in.
-                </AlertDescription>
-              </Alert>
-            )}
-            {errorMessage && (
-              <Alert variant="destructive">
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
-            )}
-            {/* Plain anchor (via render) so the GET is never prefetched. */}
-            <Button
-              variant="outline"
-              size="lg"
-              className="w-full"
-              nativeButton={false}
-              render={<a href="/api/auth/google" />}
-            >
-              <GoogleIcon data-icon="inline-start" />
-              Continue with Google
-            </Button>
-          </CardContent>
-        </Card>
 
         <p className="max-w-xs text-center text-xs text-muted-foreground">
           Access is restricted to approved administrators.

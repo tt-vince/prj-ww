@@ -85,26 +85,26 @@ export function AccountMenu({
           }
         />
         <DropdownMenuContent align="end" className="w-60">
-          <DropdownMenuLabel className="flex items-center gap-2.5 py-2">
-            <Avatar className="size-9">
-              {user.picture ? (
-                <AvatarImage src={user.picture} alt={user.name ?? user.email} />
-              ) : null}
-              <AvatarFallback className="bg-[#ece6f3] text-sm font-semibold text-[#6f5b95]">
-                {initials(user.name, user.email)}
-              </AvatarFallback>
-            </Avatar>
-            <span className="flex min-w-0 flex-col leading-tight">
-              <span className="truncate text-sm font-semibold text-foreground">
-                {user.name ?? "Admin"}
-              </span>
-              <span className="truncate text-xs font-normal text-muted-foreground">
-                {user.email}
-              </span>
-            </span>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
           <DropdownMenuGroup>
+            <DropdownMenuLabel className="flex items-center gap-2.5 py-2">
+              <Avatar className="size-9">
+                {user.picture ? (
+                  <AvatarImage src={user.picture} alt={user.name ?? user.email} />
+                ) : null}
+                <AvatarFallback className="bg-[#ece6f3] text-sm font-semibold text-[#6f5b95]">
+                  {initials(user.name, user.email)}
+                </AvatarFallback>
+              </Avatar>
+              <span className="flex min-w-0 flex-col leading-tight">
+                <span className="truncate text-sm font-semibold text-foreground">
+                  {user.name ?? "Admin"}
+                </span>
+                <span className="truncate text-xs font-normal text-muted-foreground">
+                  {user.email}
+                </span>
+              </span>
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setLabelsOpen(true)}>
               <Tag />
               Manage labels
