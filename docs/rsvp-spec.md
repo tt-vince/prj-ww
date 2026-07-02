@@ -1,6 +1,6 @@
 # Wedding RSVP Site — Project Spec (Option A)
 
-> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive; **decorative floral layer** — page-corner sprays, a name sprig, account-chip sprigs, and guest-card corner frames from the design, in `components/dashboard-florals.tsx`). The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
+> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive; **decorative floral layer** — page-corner sprays, a name sprig, account-chip sprigs, and guest-card corner frames from the design, in `components/dashboard-florals.tsx`). The guest-facing RSVP form (the page a `?id=<token>` link opens) is **built** at `/` (unstyled for now): reads the invitee by token, shows a personalized greeting, hides the form when no/unknown token, and shows a confirmation when already answered. This is the source of truth for the RSVP feature.
 > **For Claude / agents:** Read this file before designing or writing any RSVP-related code.
 > When code and this spec disagree, treat it as a bug — fix one of them, don't silently diverge.
 > Update this spec in the same change whenever a decision here changes.
@@ -337,11 +337,13 @@ Google Cloud: Web OAuth client, redirect URI `${APP_URL}/api/auth/callback/googl
 3. Wire Drizzle + Neon client (`db/index.ts`); define `db/schema.ts`; generate & run the
    initial migration.
 4. Write `lib/validation.ts` (DTOs), then `submitRsvp` in `app/actions/submit-rsvp.ts`.
-5. Build the RSVP form (`components/rsvp-form.tsx`, shadcn) and the landing `app/page.tsx`;
-   connect form → action.
+5. Build the RSVP form (`components/rsvp-form.tsx`) and the landing `app/page.tsx`;
+   connect form → action. **Done** — `submitRsvp` looks up the invitee by `token`,
+   rejects unknown/already-answered replies, bounds `partySize` to `maxGuests`,
+   and writes `status`/`partySize`/`guestNote`/`respondedAt`. (Design deferred.)
 6. Add Google auth: `users` schema + migration, `lib/{session,oauth,users,dal}.ts`, the
    `app/api/auth/*` route handlers, `proxy.ts`, and the `(protected)/dashboard` pages + user-mgmt
-   actions (§7). The guest RSVP form (§7 `submitRsvp` + `components/rsvp-form.tsx`) is still pending.
+   actions (§7). The guest RSVP form (§7 `submitRsvp` + `components/rsvp-form.tsx`) is **built** (design deferred).
 7. Document: JSDoc on the action + schema, README setup/deploy section (§10).
 8. **Hand off for review — do not commit.** All changes reviewed before any commit.
 
