@@ -35,3 +35,19 @@ export const requireSuperadmin = cache(async (): Promise<User> => {
   if (user.role !== 'superadmin') redirect('/dashboard');
   return user;
 });
+
+/**
+ * Enforce a user who can mutate data (guests, labels): `superadmin` or `admin`.
+ * `viewer` is read-only, so it is redirected back to the dashboard. Use this in
+ * every guest/label Server Action — hiding a button is UX, this is the real gate.
+ */
+export const requireEditor = cache(async (): Promise<User> => {
+  const user = await requireUser();
+  if (user.role === 'viewer') redirect('/dashboard');
+  return user;
+});
+
+/** UI capability helpers — mirror the server gates so components render the right controls. */
+export const canEdit = (role: User['role']): boolean => role !== 'viewer';
+export const canManageUsers = (role: User['role']): boolean => role === 'superadmin';
+export const canManageLabels = (role: User['role']): boolean => role !== 'viewer';

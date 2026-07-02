@@ -10,7 +10,7 @@ import {
   primaryKey,
 } from 'drizzle-orm/pg-core';
 
-export const userRole = pgEnum('user_role', ['superadmin', 'admin']);
+export const userRole = pgEnum('user_role', ['superadmin', 'admin', 'viewer']);
 export const userStatus = pgEnum('user_status', ['pending', 'active', 'disabled']);
 
 /** RSVP reply state. Fixed set (not runtime-editable). `pending` = awaiting reply. */

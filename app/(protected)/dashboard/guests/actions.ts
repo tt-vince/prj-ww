@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
-import { requireUser } from '@/lib/dal';
+import { requireEditor } from '@/lib/dal';
 import { db } from '@/db';
 import { guests, guestLabels, labels } from '@/db/schema';
 import {
@@ -62,7 +62,7 @@ export async function createGuest(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireUser();
+  await requireEditor();
   const parsed = parseGuest(formData);
   if (!parsed.success) return toFieldErrors(parsed.error);
   const input = parsed.data;
@@ -96,7 +96,7 @@ export async function updateGuest(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireUser();
+  await requireEditor();
   const id = guestIdSchema.safeParse(formData.get('guestId'));
   if (!id.success) return { ok: false, error: 'Invalid guest.' };
   const parsed = parseGuest(formData);
@@ -129,7 +129,7 @@ export async function updateGuest(
 }
 
 export async function deleteGuest(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireEditor();
   const guestId = guestIdSchema.parse(formData.get('guestId'));
   await db.delete(guests).where(eq(guests.id, guestId)); // cascade clears guest_labels
   revalidatePath('/dashboard');
@@ -139,7 +139,7 @@ export async function createLabel(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireUser();
+  await requireEditor();
   const parsed = labelInputSchema.safeParse({ name: formData.get('name') });
   if (!parsed.success) return toFieldErrors(parsed.error);
   try {
@@ -155,7 +155,7 @@ export async function renameLabel(
   _prev: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  await requireUser();
+  await requireEditor();
   const id = labelIdSchema.safeParse(formData.get('labelId'));
   if (!id.success) return { ok: false, error: 'Invalid label.' };
   const parsed = labelInputSchema.safeParse({ name: formData.get('name') });
@@ -170,7 +170,7 @@ export async function renameLabel(
 }
 
 export async function deleteLabel(formData: FormData): Promise<void> {
-  await requireUser();
+  await requireEditor();
   const labelId = labelIdSchema.parse(formData.get('labelId'));
   await db.delete(labels).where(eq(labels.id, labelId)); // cascade clears guest_labels
   revalidatePath('/dashboard');

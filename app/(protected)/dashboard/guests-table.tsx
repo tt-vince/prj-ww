@@ -84,10 +84,13 @@ export function GuestsTable({
   rows,
   labels,
   baseUrl,
+  canEdit,
 }: {
   rows: GuestRow[];
   labels: LabelRow[];
   baseUrl: string;
+  /** Viewers get a read-only table — no edit/delete controls in the action column. */
+  canEdit: boolean;
 }) {
   const [query, setQuery] = useState("");
   const [activeLabel, setActiveLabel] = useState("all");
@@ -246,8 +249,12 @@ export function GuestsTable({
                     <TableCell>
                       <div className="flex items-center justify-end gap-1.5">
                         <CopyLinkButton token={row.token} baseUrl={baseUrl} />
-                        <GuestDialog mode="edit" labels={labels} guest={guestData} />
-                        <DeleteGuestButton guestId={row.id} name={row.name} />
+                        {canEdit ? (
+                          <>
+                            <GuestDialog mode="edit" labels={labels} guest={guestData} />
+                            <DeleteGuestButton guestId={row.id} name={row.name} />
+                          </>
+                        ) : null}
                       </div>
                     </TableCell>
                   </TableRow>
