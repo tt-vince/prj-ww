@@ -11,7 +11,6 @@ import { ChevronDown, Search, Sparkle } from "lucide-react";
 import type { Label as LabelRow } from "@/db/schema";
 
 import { cn } from "@/lib/utils";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -120,28 +119,18 @@ const CHIP_BORDER = "#e4d9c0";
 const CHIP_TEXT = "#87796a";
 const RULE = "#f1eadb";
 
-// Soft tints cycled per guest so avatars read as distinct people (design detail).
-const AV = [
-  { bg: "#ece6f3", fg: "#6f5b95" },
-  { bg: "#f6e6ec", fg: "#b07d8c" },
-  { bg: "#e9f0e2", fg: "#5f7a48" },
-  { bg: "#f7efda", fg: "#a9832f" },
-  { bg: "#e6eef0", fg: "#5b8390" },
-];
-function tint(name: string) {
-  let h = 0;
-  for (const c of name) h = (h * 31 + c.charCodeAt(0)) >>> 0;
-  return AV[h % AV.length];
-}
-function initials(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  return (parts.length >= 2 ? parts[0][0] + parts[1][0] : name.slice(0, 2)).toUpperCase();
-}
-
 /** Seats a card occupies: the reply head-count once answered, else the allotment. */
 function partySize(row: GuestRow): number {
   if (row.adults == null && row.kids == null) return row.maxGuests;
   return (row.adults ?? 0) + (row.kids ?? 0);
+}
+
+/** "2 adults · 1 kid" — zero/none parts hidden; empty string when nothing to show. */
+function partyBreakdown(adults: number | null, kids: number | null): string {
+  const parts: string[] = [];
+  if (adults != null && adults > 0) parts.push(`${adults} adult${adults === 1 ? "" : "s"}`);
+  if (kids != null && kids > 0) parts.push(`${kids} kid${kids === 1 ? "" : "s"}`);
+  return parts.join(" · ");
 }
 
 const PAGE = 20;
@@ -199,8 +188,8 @@ function GuestCard({
   onDragStart?: (e: DragEvent) => void;
   onDragEnd?: () => void;
 }) {
-  const av = tint(row.name);
   const answered = row.adults != null || row.kids != null;
+  const breakdown = partyBreakdown(row.adults, row.kids);
   return (
     <div
       draggable={draggable}
@@ -217,15 +206,7 @@ function GuestCard({
     >
       {vineCorner ? <CardCornerFrame corner={vineCorner} /> : null}
       <div className="relative z-[1]">
-      <div className="flex items-center gap-3">
-        <Avatar className="size-9.5">
-          <AvatarFallback
-            style={{ background: av.bg, color: av.fg }}
-            className="font-serif text-sm"
-          >
-            {initials(row.name)}
-          </AvatarFallback>
-        </Avatar>
+      <div className="flex items-start gap-3">
         <div className="min-w-0 flex-1">
           <div className="truncate text-sm font-semibold" style={{ color: INK }}>
             {row.name}
@@ -256,10 +237,18 @@ function GuestCard({
         </div>
       ) : null}
 
-      {row.respondedAt ? (
-        <div className="mt-2 text-[11px]" style={{ color: FAINT }}>
-          <span className="font-semibold tracking-wider uppercase">Replied</span>{" "}
-          <span className="tabular-nums">{row.respondedAt.slice(0, 10)}</span>
+      {breakdown || row.respondedAt ? (
+        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 text-[11px]">
+          {/* Reply head-count, spelled out (zero/none parts stay hidden). */}
+          <span className="font-medium" style={{ color: CHIP_TEXT }}>
+            {breakdown}
+          </span>
+          {row.respondedAt ? (
+            <span style={{ color: FAINT }}>
+              <span className="font-semibold tracking-wider uppercase">Replied</span>{" "}
+              <span className="tabular-nums">{row.respondedAt.slice(0, 10)}</span>
+            </span>
+          ) : null}
         </div>
       ) : null}
 
@@ -367,44 +356,57 @@ function FilterDropdown({
 }
 
 /**
- * Column head-count. `guests` is shown everywhere; the `seats` figure (total
- * attending party size) is only meaningful for the Attending column, so it is
- * opt-in via `showSeats` — Awaiting/Declined show the guest count alone.
+ * Column head-count. `guests` is shown everywhere; the seats figure and the
+ * adults/kids totals (from the replies) are only meaningful for the Attending
+ * column, so they are opt-in via `showSeats` — Awaiting/Declined show the
+ * guest count alone.
  */
 function ColumnStats({
-  count,
-  seats,
+  cards,
   showSeats,
   size,
 }: {
-  count: number;
-  seats: number;
+  cards: GuestRow[];
   showSeats: boolean;
   size?: "sm";
 }) {
   const num = size === "sm" ? "text-[22px]" : "text-[27px]";
+  const seats = cards.reduce((sum, r) => sum + partySize(r), 0);
+  const breakdown = showSeats
+    ? partyBreakdown(
+        cards.reduce((sum, r) => sum + (r.adults ?? 0), 0),
+        cards.reduce((sum, r) => sum + (r.kids ?? 0), 0),
+      )
+    : "";
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex items-baseline gap-1.5">
-        <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
-          {count}
-        </span>
-        <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
-          guests
-        </span>
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-4">
+        <div className="flex items-baseline gap-1.5">
+          <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+            {cards.length}
+          </span>
+          <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+            guests
+          </span>
+        </div>
+        {showSeats ? (
+          <>
+            <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
+            <div className="flex items-baseline gap-1.5">
+              <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+                {seats}
+              </span>
+              <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+                seats
+              </span>
+            </div>
+          </>
+        ) : null}
       </div>
-      {showSeats ? (
-        <>
-          <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
-          <div className="flex items-baseline gap-1.5">
-            <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
-              {seats}
-            </span>
-            <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
-              seats
-            </span>
-          </div>
-        </>
+      {breakdown ? (
+        <div className="text-[11px]" style={{ color: CHIP_TEXT }}>
+          {breakdown}
+        </div>
       ) : null}
     </div>
   );
@@ -578,12 +580,7 @@ export function GuestsBoard({
           (CardCornerFrame per item), never floating on this borderless list. */}
       <div className="relative flex flex-col gap-3 md:hidden">
         <div className="relative z-[1] flex flex-col gap-3">
-        <ColumnStats
-          size="sm"
-          count={byStatus[tab].length}
-          seats={byStatus[tab].reduce((sum, r) => sum + partySize(r), 0)}
-          showSeats={tab === "going"}
-        />
+        <ColumnStats size="sm" cards={byStatus[tab]} showSeats={tab === "going"} />
         {byStatus[tab].length === 0 ? (
           <div className="py-8 text-center text-[12.5px] italic" style={{ color: "#c4b7a0" }}>
             {filterActive ? "No matches" : "No guests here yet"}
@@ -646,11 +643,7 @@ export function GuestsBoard({
                 style={{ background: col.dot }}
               />
               <div className="px-1 pb-4">
-                <ColumnStats
-                  count={cards.length}
-                  seats={cards.reduce((sum, r) => sum + partySize(r), 0)}
-                  showSeats={col.key === "going"}
-                />
+                <ColumnStats cards={cards} showSeats={col.key === "going"} />
               </div>
               <div className="flex flex-col gap-3">
                 {shown.map((row) => (
