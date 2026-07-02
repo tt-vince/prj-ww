@@ -13,6 +13,10 @@ const initial: RsvpState = { ok: false };
 export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: number }) {
   const [state, action, pending] = useActionState(submitRsvp, initial);
   const [status, setStatus] = useState<'going' | 'not_going' | ''>('');
+  const [adults, setAdults] = useState(1);
+  const [kids, setKids] = useState(0);
+  const partySize = adults + kids;
+  const overCapacity = status === 'going' && partySize > maxGuests;
 
   if (state.ok) {
     return (
@@ -59,7 +63,8 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
               type="number"
               min={1}
               max={maxGuests}
-              defaultValue={1}
+              value={adults}
+              onChange={(e) => setAdults(Number(e.target.value) || 0)}
               required
             />
             {state.fieldErrors?.adults && (
@@ -74,15 +79,39 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
               type="number"
               min={0}
               max={maxGuests}
-              defaultValue={0}
+              value={kids}
+              onChange={(e) => setKids(Number(e.target.value) || 0)}
             />
             {state.fieldErrors?.kids && (
               <span role="alert">{state.fieldErrors.kids}</span>
             )}
           </p>
-          <p>Total attending must not exceed {maxGuests}.</p>
+          <p aria-live="polite">
+            Party size: {partySize} of {maxGuests} seat(s) reserved.
+            {overCapacity && (
+              <span role="alert"> — that exceeds your allotment.</span>
+            )}
+          </p>
         </>
       )}
+
+      <fieldset>
+        <legend>Your contact details (optional)</legend>
+        <p>
+          <label htmlFor="email">Email</label>
+          <input id="email" name="email" type="email" maxLength={200} />
+          {state.fieldErrors?.email && (
+            <span role="alert">{state.fieldErrors.email}</span>
+          )}
+        </p>
+        <p>
+          <label htmlFor="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" maxLength={30} />
+          {state.fieldErrors?.phone && (
+            <span role="alert">{state.fieldErrors.phone}</span>
+          )}
+        </p>
+      </fieldset>
 
       <p>
         <label htmlFor="guestNote">Message for the couple (optional)</label>
@@ -91,7 +120,7 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
 
       {state.error && <p role="alert">{state.error}</p>}
 
-      <button type="submit" disabled={pending || status === ''}>
+      <button type="submit" disabled={pending || status === '' || overCapacity}>
         {pending ? 'Sending…' : 'Send RSVP'}
       </button>
     </form>

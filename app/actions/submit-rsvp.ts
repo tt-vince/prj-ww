@@ -16,8 +16,8 @@ export type RsvpState = {
  * Records a guest's RSVP reply.
  *
  * Input: FormData carrying `token`, `status` (`going`|`not_going`), `adults`,
- * `kids`, optional `guestNote`. Re-validated server-side — the client is never
- * trusted. The `token` (capability link) identifies the invitee row.
+ * `kids`, optional `email`/`phone`/`guestNote`. Re-validated server-side — the
+ * client is never trusted. The `token` (capability link) identifies the row.
  *
  * Behaviour:
  * - Unknown token → `{ ok: false, error }`.
@@ -36,6 +36,8 @@ export async function submitRsvp(
     status: formData.get('status'),
     adults: formData.get('adults'),
     kids: formData.get('kids'),
+    email: formData.get('email'),
+    phone: formData.get('phone'),
     guestNote: formData.get('guestNote'),
   });
   if (!parsed.success) {
@@ -83,6 +85,9 @@ export async function submitRsvp(
     guestNote: input.guestNote ?? null,
     respondedAt: new Date(),
     updatedAt: new Date(),
+    // Only overwrite contact when the guest supplied it — keep admin-set values otherwise.
+    ...(input.email ? { email: input.email } : {}),
+    ...(input.phone ? { phone: input.phone } : {}),
   };
 
   await db.update(guests).set(updates).where(eq(guests.id, guest.id));

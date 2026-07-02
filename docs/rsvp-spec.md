@@ -90,8 +90,9 @@ The "backend" is `submitRsvp()`, the admin read/manage queries, and the Google O
 
 Three feature tables (`guests`, `labels`, `guest_labels`) plus the `users` admin table, defined in
 Drizzle. A Postgres enum `rsvp_status` backs `guests.status`. **This build ships the admin
-management side only** — the reply columns (`status`/`adults`/`kids`/`guest_note`/`responded_at`)
-exist but nothing writes them yet (the guest-facing form is deferred, §13).
+management side plus the guest reply form** — the reply columns
+(`status`/`adults`/`kids`/`guest_note`/`responded_at`) are written by the public
+`?id=<token>` form (`submitRsvp`), which also lets the guest supply `email`/`phone`.
 
 ### Table: `guests` (invitees / "people")
 
@@ -339,8 +340,9 @@ Google Cloud: Web OAuth client, redirect URI `${APP_URL}/api/auth/callback/googl
 4. Write `lib/validation.ts` (DTOs), then `submitRsvp` in `app/actions/submit-rsvp.ts`.
 5. Build the RSVP form (`components/rsvp-form.tsx`) and the landing `app/page.tsx`;
    connect form → action. **Done** — `submitRsvp` looks up the invitee by `token`,
-   rejects unknown/already-answered replies, bounds `partySize` to `maxGuests`,
-   and writes `status`/`partySize`/`guestNote`/`respondedAt`. (Design deferred.)
+   rejects unknown/already-answered replies, bounds `adults + kids` to `maxGuests`,
+   and writes `status`/`adults`/`kids`/`guestNote`/`respondedAt`, plus optional
+   guest-supplied `email`/`phone` (only overwritten when provided). (Design deferred.)
 6. Add Google auth: `users` schema + migration, `lib/{session,oauth,users,dal}.ts`, the
    `app/api/auth/*` route handlers, `proxy.ts`, and the `(protected)/dashboard` pages + user-mgmt
    actions (§7). The guest RSVP form (§7 `submitRsvp` + `components/rsvp-form.tsx`) is **built** (design deferred).
@@ -383,7 +385,8 @@ integration, not a Claude MCP. `docx`/`pdf` skills considered and excluded.
 - **Invite-only.** The couple pre-registers invitees; each gets an unguessable `token` used as
   `?id=<token>`. No open/anonymous form.
 - **Guest fields:** name, `max_guests` allotment, optional email/phone, optional `admin_note`, plus
-  editable **labels** (tags, many-to-many). Reply stored as `status` + `adults` + `kids` + `guest_note`
+  editable **labels** (tags, many-to-many). The guest reply form also collects optional
+  `email`/`phone` (overwrites admin contact only when supplied). Reply stored as `status` + `adults` + `kids` + `guest_note`
   (deferred form writes these).
 - **Status:** fixed enum `pending | going | not_going` (default `pending`). Not runtime-editable.
 - **Labels:** admin-editable tag set (add / rename / delete), many per guest.

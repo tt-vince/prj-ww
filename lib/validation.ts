@@ -45,6 +45,8 @@ export const rsvpResponseSchema = z.object({
     (v) => (v === '' || v == null ? 0 : v),
     z.coerce.number().int().min(0).max(20),
   ),
+  email: z.preprocess(blankToUndefined, z.email('Enter a valid email').max(200).optional()),
+  phone: z.preprocess(blankToUndefined, z.string().trim().max(30).optional()),
   guestNote: z.preprocess(blankToUndefined, z.string().trim().max(1000).optional()),
 });
 export type RsvpResponse = z.infer<typeof rsvpResponseSchema>;
