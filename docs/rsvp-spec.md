@@ -157,7 +157,7 @@ Authenticated admin users only — guests never appear here. Rows are provisione
 | `email` | `text` | **not null**, unique | From verified Google email |
 | `name` | `text` | nullable | Google profile name |
 | `picture` | `text` | nullable | Google avatar URL |
-| `role` | `user_role` enum | not null, default `admin` | `superadmin` \| `admin` |
+| `role` | `user_role` enum | not null, default `admin` | `superadmin` \| `admin` \| `viewer` |
 | `status` | `user_status` enum | not null, default `pending` | `pending` \| `active` \| `disabled` |
 | `created_at` | `timestamptz` | not null, default `now()` | |
 | `last_login_at` | `timestamptz` | nullable | Updated each login |
@@ -165,7 +165,7 @@ Authenticated admin users only — guests never appear here. Rows are provisione
 ### Enums (auth)
 
 ```
-user_role   = 'superadmin' | 'admin'
+user_role   = 'superadmin' | 'admin' | 'viewer'
 user_status = 'pending' | 'active' | 'disabled'
 ```
 
@@ -242,7 +242,7 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
 | `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); revalidate `/dashboard`. |
 | `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
-| `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`), the superadmin Users link, and sign out (replaces the sidebar nav). |
+| `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`, hidden for `viewer`), the superadmin Users link, and sign out (replaces the sidebar nav). |
 | `components/dashboard-florals.tsx` | Decorative floral SVG art (server component) from the hi-fi design — exported flourishes (`PageFloralTopLeft/BottomRight`, `NameSprig`, `AccountSprigTopLeft/BottomRight`, `CardSprayTopRight/BottomLeft`) rendered by `(protected)/layout.tsx` (page corners) and `dashboard/page.tsx` (name/account/card). Built from `Blossom` + `Leaf` primitives; `aria-hidden`, `pointer-events-none`, art colors hardcoded to match design. |
 | `lib/guest-token.ts` | Short unguessable invite-token generator (crypto). |
 | `app/(protected)/dashboard/users/page.tsx` | User management (superadmin only). |
@@ -267,6 +267,11 @@ None.
 ---
 
 ## 7. Server Action & admin auth contracts
+
+> **Role gates:** three roles (`superadmin` / `admin` / `viewer`) with a full capability
+> matrix and enforcement layers are specified in **[docs/roles-and-permissions.md](roles-and-permissions.md)**.
+> Guest/label actions gate on `requireEditor()`; user management on `requireSuperadmin()`.
+
 
 ### `submitRsvp(input)` — `app/actions/submit-rsvp.ts`
 

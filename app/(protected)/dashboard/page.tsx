@@ -1,4 +1,4 @@
-import { requireUser } from "@/lib/dal";
+import { requireUser, canEdit } from "@/lib/dal";
 import { db } from "@/db";
 import { labels as labelsTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
@@ -205,7 +205,9 @@ export default async function DashboardPage() {
           </div>
           <div className="flex flex-wrap items-center justify-end gap-2.5">
             <ExportGuestsButton rows={guestRows} baseUrl={baseUrl} />
-            <GuestDialog mode="create" labels={allLabels} />
+            {canEdit(user.role) ? (
+              <GuestDialog mode="create" labels={allLabels} />
+            ) : null}
           </div>
         </div>
       </header>
@@ -228,7 +230,12 @@ export default async function DashboardPage() {
       <div className="relative">
         <CardSprayTopRight />
         <CardSprayBottomLeft />
-        <GuestsTable rows={guestRows} labels={allLabels} baseUrl={baseUrl} />
+        <GuestsTable
+          rows={guestRows}
+          labels={allLabels}
+          baseUrl={baseUrl}
+          canEdit={canEdit(user.role)}
+        />
       </div>
     </div>
   );
