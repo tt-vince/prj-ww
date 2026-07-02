@@ -31,15 +31,19 @@ export type GuestInput = z.infer<typeof guestInputSchema>;
 /**
  * Guest RSVP reply (submitted from the public `?id=<token>` form).
  * The guest only ever sets `going` or `not_going` — never `pending`.
- * `partySize` is bound to the invitee's seat allotment server-side; it is
- * ignored/zeroed when the reply is `not_going`.
+ * `adults`/`kids` are the head-count; their total is bound to the invitee's
+ * seat allotment server-side and both are zeroed when the reply is `not_going`.
  */
 export const rsvpResponseSchema = z.object({
   token: z.string().trim().min(1),
   status: z.enum(['going', 'not_going']),
-  partySize: z.preprocess(
+  adults: z.preprocess(
     (v) => (v === '' || v == null ? undefined : v),
     z.coerce.number().int().min(1).max(20).optional(),
+  ),
+  kids: z.preprocess(
+    (v) => (v === '' || v == null ? 0 : v),
+    z.coerce.number().int().min(0).max(20),
   ),
   guestNote: z.preprocess(blankToUndefined, z.string().trim().max(1000).optional()),
 });

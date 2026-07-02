@@ -15,17 +15,17 @@ export type RsvpState = {
 /**
  * Records a guest's RSVP reply.
  *
- * Input: FormData carrying `token`, `status` (`going`|`not_going`), optional
- * `partySize`, optional `guestNote`. Re-validated server-side — the client is
- * never trusted. The `token` (capability link) identifies the invitee row.
+ * Input: FormData carrying `token`, `status` (`going`|`not_going`), `adults`,
+ * `kids`, optional `guestNote`. Re-validated server-side — the client is never
+ * trusted. The `token` (capability link) identifies the invitee row.
  *
  * Behaviour:
  * - Unknown token → `{ ok: false, error }`.
  * - Already answered (status not `pending`) → `{ ok: false, error }` (no overwrite).
- * - `going`: requires `partySize` in 1..maxGuests.
- * - `not_going`: `partySize` forced to null.
+ * - `going`: requires `adults` ≥ 1 and `adults + kids` ≤ maxGuests.
+ * - `not_going`: `adults`/`kids` forced to null.
  *
- * On success writes status/partySize/guestNote/respondedAt and returns `{ ok: true }`.
+ * On success writes status/adults/kids/guestNote/respondedAt and returns `{ ok: true }`.
  */
 export async function submitRsvp(
   _prev: RsvpState,
@@ -34,7 +34,8 @@ export async function submitRsvp(
   const parsed = rsvpResponseSchema.safeParse({
     token: formData.get('token'),
     status: formData.get('status'),
-    partySize: formData.get('partySize'),
+    adults: formData.get('adults'),
+    kids: formData.get('kids'),
     guestNote: formData.get('guestNote'),
   });
   if (!parsed.success) {
@@ -57,32 +58,34 @@ export async function submitRsvp(
     return { ok: false, error: 'You have already responded.' };
   }
 
-  let partySize: number | null = null;
+  let adults: number | null = null;
+  let kids: number | null = null;
   if (input.status === 'going') {
-    if (input.partySize == null) {
-      return { ok: false, fieldErrors: { partySize: 'How many are attending?' } };
+    if (input.adults == null) {
+      return { ok: false, fieldErrors: { adults: 'How many adults are attending?' } };
     }
-    if (input.partySize > guest.maxGuests) {
+    if (input.adults + input.kids > guest.maxGuests) {
       return {
         ok: false,
         fieldErrors: {
-          partySize: `Only ${guest.maxGuests} seat(s) are reserved for you.`,
+          adults: `Only ${guest.maxGuests} seat(s) are reserved for you.`,
         },
       };
     }
-    partySize = input.partySize;
+    adults = input.adults;
+    kids = input.kids;
   }
 
-  await db
-    .update(guests)
-    .set({
-      status: input.status,
-      partySize,
-      guestNote: input.guestNote ?? null,
-      respondedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(guests.id, guest.id));
+  const updates: Partial<typeof guests.$inferInsert> = {
+    status: input.status,
+    adults,
+    kids,
+    guestNote: input.guestNote ?? null,
+    respondedAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await db.update(guests).set(updates).where(eq(guests.id, guest.id));
 
   return { ok: true };
 }

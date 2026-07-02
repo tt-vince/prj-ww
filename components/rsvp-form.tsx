@@ -50,23 +50,38 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
       </fieldset>
 
       {status === 'going' && (
-        <p>
-          <label htmlFor="partySize">
-            Number attending (max {maxGuests})
-          </label>
-          <input
-            id="partySize"
-            name="partySize"
-            type="number"
-            min={1}
-            max={maxGuests}
-            defaultValue={1}
-            required
-          />
-          {state.fieldErrors?.partySize && (
-            <span role="alert">{state.fieldErrors.partySize}</span>
-          )}
-        </p>
+        <>
+          <p>
+            <label htmlFor="adults">Adults attending</label>
+            <input
+              id="adults"
+              name="adults"
+              type="number"
+              min={1}
+              max={maxGuests}
+              defaultValue={1}
+              required
+            />
+            {state.fieldErrors?.adults && (
+              <span role="alert">{state.fieldErrors.adults}</span>
+            )}
+          </p>
+          <p>
+            <label htmlFor="kids">Kids attending</label>
+            <input
+              id="kids"
+              name="kids"
+              type="number"
+              min={0}
+              max={maxGuests}
+              defaultValue={0}
+            />
+            {state.fieldErrors?.kids && (
+              <span role="alert">{state.fieldErrors.kids}</span>
+            )}
+          </p>
+          <p>Total attending must not exceed {maxGuests}.</p>
+        </>
       )}
 
       <p>
