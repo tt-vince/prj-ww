@@ -28,6 +28,23 @@ export const guestInputSchema = z.object({
 });
 export type GuestInput = z.infer<typeof guestInputSchema>;
 
+/**
+ * Guest RSVP reply (submitted from the public `?id=<token>` form).
+ * The guest only ever sets `going` or `not_going` — never `pending`.
+ * `partySize` is bound to the invitee's seat allotment server-side; it is
+ * ignored/zeroed when the reply is `not_going`.
+ */
+export const rsvpResponseSchema = z.object({
+  token: z.string().trim().min(1),
+  status: z.enum(['going', 'not_going']),
+  partySize: z.preprocess(
+    (v) => (v === '' || v == null ? undefined : v),
+    z.coerce.number().int().min(1).max(20).optional(),
+  ),
+  guestNote: z.preprocess(blankToUndefined, z.string().trim().max(1000).optional()),
+});
+export type RsvpResponse = z.infer<typeof rsvpResponseSchema>;
+
 /** Add/rename a label (tag). */
 export const labelInputSchema = z.object({
   name: z.string().trim().min(1, 'Label name is required').max(40),
