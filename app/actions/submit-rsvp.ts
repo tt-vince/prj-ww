@@ -73,16 +73,15 @@ export async function submitRsvp(
     partySize = input.partySize;
   }
 
-  await db
-    .update(guests)
-    .set({
-      status: input.status,
-      partySize,
-      guestNote: input.guestNote ?? null,
-      respondedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(guests.id, guest.id));
+  const updates: Partial<typeof guests.$inferInsert> = {
+    status: input.status,
+    partySize,
+    guestNote: input.guestNote ?? null,
+    respondedAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  await db.update(guests).set(updates).where(eq(guests.id, guest.id));
 
   return { ok: true };
 }
