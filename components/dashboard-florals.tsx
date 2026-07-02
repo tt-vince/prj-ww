@@ -202,7 +202,13 @@ export function CardSprayTopRight({ className }: SvgProps) {
       viewBox="0 0 360 420"
       aria-hidden="true"
       focusable="false"
-      className={className ?? "pointer-events-none absolute -top-[42px] -right-[42px] z-[6]"}
+      className={
+        className ??
+        // Cap height to the card (+42px bleed top & bottom); width scales with the
+        // aspect ratio so the frame shrinks with short guest lists instead of
+        // overhanging. Never taller than the design's intrinsic 420px.
+        "pointer-events-none absolute -top-[42px] -right-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
+      }
     >
       <path
         d="M112 42 L300 42 A18 18 0 0 1 318 60 L318 372"
@@ -254,7 +260,10 @@ export function CardSprayBottomLeft({ className }: SvgProps) {
       viewBox="0 0 360 420"
       aria-hidden="true"
       focusable="false"
-      className={className ?? "pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6]"}
+      className={
+        className ??
+        "pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
+      }
     >
       <path
         d="M42 60 L42 360 A18 18 0 0 0 60 378 L248 378"
