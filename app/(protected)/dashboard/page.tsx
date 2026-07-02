@@ -167,6 +167,7 @@ export default async function DashboardPage() {
     email: r.email,
     phone: r.phone,
     adminNote: r.adminNote,
+    guestNote: r.guestNote,
     respondedAt: r.respondedAt ? r.respondedAt.toISOString() : null,
     labels: r.guestLabels.map((gl) => ({ id: gl.labelId, name: gl.label.name })),
   }));

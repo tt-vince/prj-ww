@@ -191,3 +191,43 @@
     @apply font-sans;
   }
 }
+
+/* Wind: whole floral sprays sway gently while individual leaves & blossoms
+   rustle around their own centers. Purely decorative — disabled for users who
+   prefer reduced motion. */
+@keyframes wind-sway {
+  0%,
+  100% {
+    transform: rotate(-0.6deg);
+  }
+  50% {
+    transform: rotate(0.9deg);
+  }
+}
+@keyframes wind-rustle {
+  0%,
+  100% {
+    transform: rotate(-2.4deg);
+  }
+  35% {
+    transform: rotate(2.8deg);
+  }
+  70% {
+    transform: rotate(-0.9deg);
+  }
+}
+.wind-sway {
+  animation: wind-sway 7.5s ease-in-out infinite;
+  transform-origin: 30% 30%;
+}
+.wind-rustle {
+  animation: wind-rustle 4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wind-sway,
+  .wind-rustle {
+    animation: none;
+  }
+}

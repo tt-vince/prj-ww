@@ -40,12 +40,20 @@ function Blossom({
   petal: string;
 }) {
   const transform = `translate(${x} ${y})${s === 1 ? "" : ` scale(${s})`}`;
+  // Deterministic per-blossom phase so the field doesn't rustle in lockstep.
+  const delay = ((Math.abs(x * 13 + y * 7) % 36) / 10).toFixed(1);
+  const duration = (4.2 + (Math.abs(x + y) % 3) * 0.6).toFixed(1);
   return (
-    <g transform={transform}>
-      {pts.map(([cx, cy], i) => (
-        <circle key={i} cx={cx} cy={cy} r={r} fill={petal} />
-      ))}
-      <circle r={cr} fill={GOLD} />
+    <g
+      className="wind-rustle"
+      style={{ animationDelay: `${delay}s`, animationDuration: `${duration}s` }}
+    >
+      <g transform={transform}>
+        {pts.map(([cx, cy], i) => (
+          <circle key={i} cx={cx} cy={cy} r={r} fill={petal} />
+        ))}
+        <circle r={cr} fill={GOLD} />
+      </g>
     </g>
   );
 }
@@ -65,8 +73,24 @@ function Leaf({
   rot: number;
   fill: string;
 }) {
+  // Deterministic per-leaf phase/speed — same idea as Blossom, so leaves flutter
+  // out of sync like a real breeze.
+  const delay = ((Math.abs(cx * 7 + cy * 13) % 42) / 10).toFixed(1);
+  const duration = (3.2 + (Math.abs(cx + cy) % 4) * 0.5).toFixed(1);
   return (
-    <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fill} transform={`rotate(${rot} ${cx} ${cy})`} />
+    <g
+      className="wind-rustle"
+      style={{ animationDelay: `${delay}s`, animationDuration: `${duration}s` }}
+    >
+      <ellipse
+        cx={cx}
+        cy={cy}
+        rx={rx}
+        ry={ry}
+        fill={fill}
+        transform={`rotate(${rot} ${cx} ${cy})`}
+      />
+    </g>
   );
 }
 
@@ -81,7 +105,9 @@ export function PageFloralTopLeft({ className, style }: SvgProps) {
       viewBox="0 0 340 340"
       aria-hidden="true"
       focusable="false"
-      className={className ?? "pointer-events-none absolute -top-[46px] -left-[58px] opacity-50"}
+      className={
+        className ?? "wind-sway pointer-events-none absolute -top-[46px] -left-[58px] opacity-50"
+      }
       style={style}
     >
       <g fill="none" stroke="#b6a6d6" strokeWidth={2} strokeLinecap="round">
@@ -116,7 +142,7 @@ export function PageFloralBottomRight({ className, style }: SvgProps) {
       focusable="false"
       className={
         className ??
-        "pointer-events-none absolute -right-[46px] -bottom-[52px] -scale-x-100 opacity-[0.42]"
+        "wind-sway pointer-events-none absolute -right-[46px] -bottom-[52px] -scale-x-100 opacity-[0.42]"
       }
       style={style}
     >
@@ -207,7 +233,7 @@ export function CardSprayTopRight({ className }: SvgProps) {
         // Cap height to the card (+42px bleed top & bottom); width scales with the
         // aspect ratio so the frame shrinks with short guest lists instead of
         // overhanging. Never taller than the design's intrinsic 420px.
-        "pointer-events-none absolute -top-[42px] -right-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
+        "wind-sway pointer-events-none absolute -top-[42px] -right-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
       }
     >
       <path
@@ -262,7 +288,7 @@ export function CardSprayBottomLeft({ className }: SvgProps) {
       focusable="false"
       className={
         className ??
-        "pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
+        "wind-sway pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] h-[calc(100%_+_84px)] max-h-[420px] w-auto"
       }
     >
       <path
