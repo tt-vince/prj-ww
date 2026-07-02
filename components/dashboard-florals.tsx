@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
 
+import { cn } from "@/lib/utils";
+
 /**
  * Decorative floral art for the Wedding RSVP dashboard — the "flowery" layer of
  * the hi-fi `Wedding RSVP Dashboard.dc.html` design (wisteria & fig palette).
@@ -214,6 +216,78 @@ export function AccountGarland({ className }: SvgProps) {
       <Blossom x={57} y={63} s={0.82} pts={PETALS_BIG} r={6.5} cr={5.5} petal="#c9a1ad" />
       <Blossom x={191} y={24} s={0.66} pts={PETALS_BIG} r={6.5} cr={5.5} petal="#d9b6c4" />
     </svg>
+  );
+}
+
+/**
+ * One rounded-corner botanical sprig for a kanban status column. Drawn for the
+ * top-left corner; the other corners reuse it via a flip transform. Sits on the
+ * column's dashed outline (behind the guest cards) so the column itself reads
+ * as garlanded — per the kanban design's per-column vine layer.
+ */
+function CornerSprig({
+  corner,
+}: {
+  corner: "tl" | "tr" | "bl" | "br";
+}) {
+  const flip = { tl: undefined, tr: "scaleX(-1)", bl: "scaleY(-1)", br: "scale(-1, -1)" }[corner];
+  const pos = {
+    tl: "top-0 left-0",
+    tr: "top-0 right-0",
+    bl: "bottom-0 left-0",
+    br: "bottom-0 right-0",
+  }[corner];
+  return (
+    <svg
+      width={124}
+      height={124}
+      viewBox="0 0 124 124"
+      aria-hidden="true"
+      focusable="false"
+      className={cn("pointer-events-none absolute z-0", pos)}
+      style={{ transform: flip, opacity: 0.72 }}
+    >
+      {/* Stems tracing the two edges away from the corner. */}
+      <g fill="none" stroke="#9cb87c" strokeWidth={1.8} strokeLinecap="round">
+        <path d="M13 7 C11 34 15 64 23 92" />
+        <path d="M7 13 C34 11 64 15 92 23" />
+        <path d="M13 40 C24 38 30 32 33 24" />
+        <path d="M40 13 C38 24 32 30 24 33" />
+      </g>
+      <g>
+        <Leaf cx={11} cy={44} rx={4} ry={10.5} rot={54} fill="#8fae6e" />
+        <Leaf cx={15} cy={72} rx={4} ry={10.5} rot={38} fill="#8fae6e" />
+        <Leaf cx={44} cy={11} rx={4} ry={10.5} rot={-56} fill="#8fae6e" />
+        <Leaf cx={72} cy={15} rx={4} ry={10.5} rot={-40} fill="#8fae6e" />
+        <Leaf cx={33} cy={33} rx={3.4} ry={8} rot={45} fill="#a9c489" />
+      </g>
+      <Blossom x={17} y={17} s={0.84} pts={PETALS_BIG} r={6.2} cr={5.2} petal="#d9b6c4" />
+      <Blossom x={94} y={24} s={0.66} pts={PETALS_MED} r={6} cr={5} petal="#c9a1ad" />
+      <Blossom x={24} y={94} s={0.66} pts={PETALS_MED} r={6} cr={5} petal="#c9a1ad" />
+    </svg>
+  );
+}
+
+// Awaiting-reply column: a single bottom-left sprig (per the kanban design).
+export function ColumnVineBottomLeft() {
+  return <CornerSprig corner="bl" />;
+}
+
+// Declined column: a single top-right sprig.
+export function ColumnVineTopRight() {
+  return <CornerSprig corner="tr" />;
+}
+
+// Attending column: the full set — all four corners, so the outline is fully
+// garlanded (the design's "vineFull").
+export function ColumnVineFull() {
+  return (
+    <>
+      <CornerSprig corner="tl" />
+      <CornerSprig corner="tr" />
+      <CornerSprig corner="bl" />
+      <CornerSprig corner="br" />
+    </>
   );
 }
 

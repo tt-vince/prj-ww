@@ -20,10 +20,23 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  ColumnVineBottomLeft,
+  ColumnVineFull,
+  ColumnVineTopRight,
+} from "@/components/dashboard-florals";
 import { moveGuestStatus } from "./guests/actions";
 import { GuestDialog } from "./guests/guest-dialog";
 import { DeleteGuestButton } from "./guests/delete-guest-button";
 import { CopyLinkButton } from "./guests/copy-link-button";
+
+// Per-column vine layer (design): Awaiting gets a bottom-left sprig, Declined a
+// top-right sprig, and Attending the full four-corner garland.
+function ColumnVine({ status }: { status: GuestStatus }) {
+  if (status === "going") return <ColumnVineFull />;
+  if (status === "pending") return <ColumnVineBottomLeft />;
+  return <ColumnVineTopRight />;
+}
 
 export type GuestStatus = "pending" | "going" | "not_going";
 
@@ -217,31 +230,61 @@ function GuestCard({
         </div>
       </div>
 
-      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-        {row.labels.map((l) => (
-          <span
-            key={l.id}
-            className="rounded-md border px-2 py-0.5 text-[10.5px]"
-            style={{ borderColor: CHIP_BORDER, color: CHIP_TEXT }}
-          >
-            {l.name}
-          </span>
-        ))}
-        <div className="flex-1" />
-        <span className="text-[11px]" style={{ color: FAINT }}>
-          {row.respondedAt ? row.respondedAt.slice(0, 10) : "—"}
-        </span>
-      </div>
-
-      {row.guestNote ? (
-        <div className="mt-2 text-[11.5px] italic" style={{ color: CHIP_TEXT }}>
-          “{row.guestNote}”
+      {row.labels.length > 0 ? (
+        <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+          {row.labels.map((l) => (
+            <span
+              key={l.id}
+              className="rounded-md border px-2 py-0.5 text-[10.5px]"
+              style={{ borderColor: CHIP_BORDER, color: CHIP_TEXT }}
+            >
+              {l.name}
+            </span>
+          ))}
         </div>
       ) : null}
-      {row.adminNote ? (
-        <div className="mt-1.5 text-[11px]" style={{ color: FAINT }}>
-          <span className="font-semibold tracking-wider uppercase">Admin</span> ·{" "}
-          {row.adminNote}
+
+      {row.respondedAt ? (
+        <div className="mt-2 text-[11px]" style={{ color: FAINT }}>
+          <span className="font-semibold tracking-wider uppercase">Replied</span>{" "}
+          <span className="tabular-nums">{row.respondedAt.slice(0, 10)}</span>
+        </div>
+      ) : null}
+
+      {row.guestNote || row.adminNote ? (
+        <div
+          className="mt-2.5 flex flex-col gap-2 rounded-[10px] px-3 py-2.5"
+          style={{ background: "#faf6ee", border: `1px solid ${RULE}` }}
+        >
+          <span
+            className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+            style={{ color: MUT }}
+          >
+            Notes
+          </span>
+          {row.guestNote ? (
+            <div className="flex flex-col gap-0.5">
+              <span className="text-[9px] font-semibold tracking-wider text-stat-going uppercase">
+                Guest
+              </span>
+              <span className="text-[11.5px] italic" style={{ color: INK }}>
+                “{row.guestNote}”
+              </span>
+            </div>
+          ) : null}
+          {row.adminNote ? (
+            <div className="flex flex-col gap-0.5">
+              <span
+                className="text-[9px] font-semibold tracking-wider uppercase"
+                style={{ color: MUT }}
+              >
+                Admin
+              </span>
+              <span className="text-[11.5px]" style={{ color: CHIP_TEXT }}>
+                {row.adminNote}
+              </span>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
@@ -310,7 +353,22 @@ function FilterDropdown({
   );
 }
 
-function ColumnStats({ count, seats, size }: { count: number; seats: number; size?: "sm" }) {
+/**
+ * Column head-count. `guests` is shown everywhere; the `seats` figure (total
+ * attending party size) is only meaningful for the Attending column, so it is
+ * opt-in via `showSeats` — Awaiting/Declined show the guest count alone.
+ */
+function ColumnStats({
+  count,
+  seats,
+  showSeats,
+  size,
+}: {
+  count: number;
+  seats: number;
+  showSeats: boolean;
+  size?: "sm";
+}) {
   const num = size === "sm" ? "text-[22px]" : "text-[27px]";
   return (
     <div className="flex items-center gap-4">
@@ -322,15 +380,19 @@ function ColumnStats({ count, seats, size }: { count: number; seats: number; siz
           guests
         </span>
       </div>
-      <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
-      <div className="flex items-baseline gap-1.5">
-        <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
-          {seats}
-        </span>
-        <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
-          seats
-        </span>
-      </div>
+      {showSeats ? (
+        <>
+          <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+              {seats}
+            </span>
+            <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+              seats
+            </span>
+          </div>
+        </>
+      ) : null}
     </div>
   );
 }
@@ -500,11 +562,14 @@ export function GuestsBoard({
       </div>
 
       {/* Mobile: active tab card list */}
-      <div className="flex flex-col gap-3 md:hidden">
+      <div className="relative flex flex-col gap-3 md:hidden">
+        <ColumnVine status={tab} />
+        <div className="relative z-[1] flex flex-col gap-3">
         <ColumnStats
           size="sm"
           count={byStatus[tab].length}
           seats={byStatus[tab].reduce((sum, r) => sum + partySize(r), 0)}
+          showSeats={tab === "going"}
         />
         {byStatus[tab].length === 0 ? (
           <div className="py-8 text-center text-[12.5px] italic" style={{ color: "#c4b7a0" }}>
@@ -532,6 +597,7 @@ export function GuestsBoard({
             Show {Math.min(PAGE, byStatus[tab].length - limits[tab])} more
           </Button>
         ) : null}
+        </div>
       </div>
 
       {/* Desktop / tablet: kanban columns */}
@@ -550,6 +616,8 @@ export function GuestsBoard({
                 borderColor: over ? col.dot : col.border,
               }}
             >
+              <ColumnVine status={col.key} />
+              <div className="relative z-[1] flex flex-1 flex-col">
               <div className="flex items-center gap-2.5 px-1">
                 <span
                   className="size-[9px] flex-none rounded-full"
@@ -567,6 +635,7 @@ export function GuestsBoard({
                 <ColumnStats
                   count={cards.length}
                   seats={cards.reduce((sum, r) => sum + partySize(r), 0)}
+                  showSeats={col.key === "going"}
                 />
               </div>
               <div className="flex flex-col gap-3">
@@ -608,6 +677,7 @@ export function GuestsBoard({
                   Show {Math.min(PAGE, cards.length - limits[col.key])} more
                 </Button>
               ) : null}
+              </div>
             </div>
           );
         })}
