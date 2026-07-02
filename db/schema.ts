@@ -56,7 +56,7 @@ export const labels = pgTable('labels', {
 /**
  * Invitees ("people"). Admin-managed: the couple adds a party/household with a
  * `token` used in the wedding-site link (`?id=<token>`) and a `maxGuests`
- * allotment. The `status`/`partySize`/`guestNote`/`respondedAt` columns hold the
+ * allotment. The `status`/`adults`/`kids`/`guestNote`/`respondedAt` columns hold the
  * guest's response — nullable/default and NOT written yet (guest form deferred).
  */
 export const guests = pgTable('guests', {
@@ -72,7 +72,8 @@ export const guests = pgTable('guests', {
 
   // guest response — filled later by the (deferred) guest form
   status: rsvpStatus('status').notNull().default('pending'),
-  partySize: integer('party_size'), // # attending, ≤ maxGuests
+  adults: integer('adults'), // # adults attending
+  kids: integer('kids'), // # kids attending — total (adults + kids) ≤ maxGuests
   guestNote: text('guest_note'),
   respondedAt: timestamp('responded_at', { withTimezone: true }),
 
