@@ -1,8 +1,6 @@
 import Link from 'next/link';
-import { asc } from 'drizzle-orm';
 import { requireSuperadmin } from '@/lib/dal';
-import { db } from '@/db';
-import { users } from '@/db/schema';
+import { getUsers } from '@/lib/data';
 import { activateUser, deactivateUser } from './actions';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -31,7 +29,7 @@ const TH = 'text-[10.5px] font-semibold tracking-wider text-muted-foreground upp
 
 export default async function UsersPage() {
   const current = await requireSuperadmin();
-  const rows = await db.select().from(users).orderBy(asc(users.createdAt));
+  const rows = await getUsers();
 
   return (
     <div className="flex flex-col gap-4">

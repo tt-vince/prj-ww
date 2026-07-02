@@ -1,5 +1,6 @@
 'use server';
 
+import { updateTag } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { db } from '@/db';
 import { guests } from '@/db/schema';
@@ -91,6 +92,9 @@ export async function submitRsvp(
   };
 
   await db.update(guests).set(updates).where(eq(guests.id, guest.id));
+
+  // Refresh the admin dashboard and this token's own cached lookup.
+  updateTag('guests');
 
   return { ok: true };
 }

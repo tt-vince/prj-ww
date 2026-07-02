@@ -1,6 +1,6 @@
 'use server';
 
-import { revalidatePath } from 'next/cache';
+import { updateTag } from 'next/cache';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { requireEditor } from '@/lib/dal';
@@ -88,7 +88,7 @@ export async function createGuest(
       .values(input.labelIds.map((labelId) => ({ guestId: row.id, labelId })));
   }
 
-  revalidatePath('/dashboard');
+  updateTag('guests');
   return OK;
 }
 
@@ -124,7 +124,7 @@ export async function updateGuest(
       .values(input.labelIds.map((labelId) => ({ guestId: id.data, labelId })));
   }
 
-  revalidatePath('/dashboard');
+  updateTag('guests');
   return OK;
 }
 
@@ -132,7 +132,7 @@ export async function deleteGuest(formData: FormData): Promise<void> {
   await requireEditor();
   const guestId = guestIdSchema.parse(formData.get('guestId'));
   await db.delete(guests).where(eq(guests.id, guestId)); // cascade clears guest_labels
-  revalidatePath('/dashboard');
+  updateTag('guests');
 }
 
 export async function createLabel(
@@ -147,7 +147,7 @@ export async function createLabel(
   } catch {
     return { ok: false, fieldErrors: { name: 'That label already exists.' } };
   }
-  revalidatePath('/dashboard');
+  updateTag('labels');
   return OK;
 }
 
@@ -165,7 +165,9 @@ export async function renameLabel(
   } catch {
     return { ok: false, fieldErrors: { name: 'That label already exists.' } };
   }
-  revalidatePath('/dashboard');
+  // Label names are embedded in the cached guest rows — invalidate both.
+  updateTag('labels');
+  updateTag('guests');
   return OK;
 }
 
@@ -173,5 +175,6 @@ export async function deleteLabel(formData: FormData): Promise<void> {
   await requireEditor();
   const labelId = labelIdSchema.parse(formData.get('labelId'));
   await db.delete(labels).where(eq(labels.id, labelId)); // cascade clears guest_labels
-  revalidatePath('/dashboard');
+  updateTag('labels');
+  updateTag('guests');
 }

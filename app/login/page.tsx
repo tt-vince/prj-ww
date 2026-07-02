@@ -1,4 +1,6 @@
 import type { ComponentProps } from 'react';
+import { redirect } from 'next/navigation';
+import { getCurrentUser } from '@/lib/dal';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +55,12 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<LoginSearchParams>;
 }) {
+  // Authoritative check (not the optimistic proxy one): a signed-in, active
+  // admin has no business here. Disabled/deleted users resolve to null and
+  // still see the login page — no redirect loop with the dashboard gate.
+  const user = await getCurrentUser();
+  if (user) redirect('/dashboard');
+
   const params = await searchParams;
   const errorMessage = params.error ? ERROR_MESSAGES[params.error] ?? 'Something went wrong.' : null;
 

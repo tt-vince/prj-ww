@@ -1,6 +1,5 @@
 import { requireUser, canEdit } from "@/lib/dal";
-import { db } from "@/db";
-import { labels as labelsTable } from "@/db/schema";
+import { getGuestsWithLabels, getAllLabels } from "@/lib/data";
 import { cn } from "@/lib/utils";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -84,13 +83,7 @@ function StatCard({
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const [rows, allLabels] = await Promise.all([
-    db.query.guests.findMany({
-      with: { guestLabels: { with: { label: true } } },
-      orderBy: (g, { desc }) => [desc(g.createdAt)],
-    }),
-    db.select().from(labelsTable).orderBy(labelsTable.name),
-  ]);
+  const [rows, allLabels] = await Promise.all([getGuestsWithLabels(), getAllLabels()]);
 
   const invited = rows.length;
   let going = 0;
