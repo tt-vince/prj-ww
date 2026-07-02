@@ -240,7 +240,7 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging; redirects already-signed-in active admins to `/dashboard`. |
 | `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (page-corner floral sprays sit in their own `absolute inset-0 overflow-hidden` layer so their bleed clips without cutting page chrome; horizontal scroll guarded on `<body>`); top-right `AccountMenu`. |
 | `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
-| `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions. |
+| `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions, client-side pagination (20/page, shadcn `Pagination`). |
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
 | `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); invalidate via `updateTag('guests'/'labels')`. |
 | `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
