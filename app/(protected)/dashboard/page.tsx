@@ -230,10 +230,10 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Guest list — botanical card frames are a desktop-only flourish */}
+      {/* Guest list */}
       <div className="relative">
-        <CardSprayTopRight className="wind-sway pointer-events-none absolute -top-[42px] -right-[42px] z-[6] hidden h-[calc(100%_+_84px)] max-h-[420px] w-auto lg:block" />
-        <CardSprayBottomLeft className="wind-sway pointer-events-none absolute -bottom-[42px] -left-[42px] z-[6] hidden h-[calc(100%_+_84px)] max-h-[420px] w-auto lg:block" />
+        <CardSprayTopRight />
+        <CardSprayBottomLeft />
         <GuestsTable
           rows={guestRows}
           labels={allLabels}
