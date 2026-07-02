@@ -1,6 +1,6 @@
 # Wedding RSVP Site — Project Spec (Option A)
 
-> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive). The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
+> **Status:** Admin auth + dashboard **built**. **Guest management built** — invitees, per-person invite tokens, editable labels, and admin CRUD on a **single-page “Manage RSVP”** dashboard at `/dashboard` (stat cards, search, label-filter pills, CSV export; sidebar-less). Visuals follow the imported **hi-fi** Claude Design `Wedding RSVP Dashboard.dc.html` (“wisteria & fig”; fonts **DM Sans** / **Gilda Display** / **Pinyon Script**; gradient bg; mobile/iPad responsive; **decorative floral layer** — page-corner sprays, a name sprig, account-chip sprigs, and guest-card corner frames from the design, in `components/dashboard-florals.tsx`). The guest-facing RSVP form (the page a `?id=<token>` link opens) is still **pending**. This is the source of truth for the RSVP feature.
 > **For Claude / agents:** Read this file before designing or writing any RSVP-related code.
 > When code and this spec disagree, treat it as a bug — fix one of them, don't silently diverge.
 > Update this spec in the same change whenever a decision here changes.
@@ -235,13 +235,14 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `app/api/auth/callback/google/route.ts` | OAuth callback: verify, authenticate existing user, gate, session. |
 | `app/api/auth/logout/route.ts` | POST → clear session cookie. |
 | `app/login/page.tsx` | "Continue with Google" + pending/error messaging. |
-| `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-7xl` container on the wisteria bg + top-right `AccountMenu`. |
+| `app/(protected)/layout.tsx` | Sidebar-less shell — centered `max-w-[1300px]` container on the wisteria bg (full-bleed `relative overflow-hidden` wrapper holds the page-corner floral sprays); top-right `AccountMenu`. |
 | `app/(protected)/dashboard/page.tsx` | Single-page **“Manage RSVP”** — stat cards (Attending/Declined/Awaiting/Invited) + guest table + inline CRUD, per the imported design. |
 | `app/(protected)/dashboard/guests-table.tsx` | Client table: search, label filter pills (shadcn `ToggleGroup`), status pills, reused row actions. |
 | `app/(protected)/dashboard/export-guests-button.tsx` | Client CSV export of the full guest list. |
 | `app/(protected)/dashboard/guests/actions.ts` | Guest + label Server Actions (create/update/delete); revalidate `/dashboard`. |
 | `app/(protected)/dashboard/guests/{guest-dialog,labels-manager,delete-guest-button,copy-link-button}.tsx` | Client CRUD UI (shadcn dialog/select/checkbox/alert-dialog), reused by the single page. |
 | `components/account-menu.tsx` | Header account chip + dropdown (shadcn `DropdownMenu`) — hosts label management (`LabelsManager`), the superadmin Users link, and sign out (replaces the sidebar nav). |
+| `components/dashboard-florals.tsx` | Decorative floral SVG art (server component) from the hi-fi design — exported flourishes (`PageFloralTopLeft/BottomRight`, `NameSprig`, `AccountSprigTopLeft/BottomRight`, `CardSprayTopRight/BottomLeft`) rendered by `(protected)/layout.tsx` (page corners) and `dashboard/page.tsx` (name/account/card). Built from `Blossom` + `Leaf` primitives; `aria-hidden`, `pointer-events-none`, art colors hardcoded to match design. |
 | `lib/guest-token.ts` | Short unguessable invite-token generator (crypto). |
 | `app/(protected)/dashboard/users/page.tsx` | User management (superadmin only). |
 | `app/(protected)/dashboard/users/actions.ts` | activate/deactivate Server Actions. |
