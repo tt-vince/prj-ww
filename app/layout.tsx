@@ -40,7 +40,7 @@ export default function RootLayout({
       lang="en"
       className={`${dmSans.variable} ${gilda.variable} ${pinyon.variable} h-full antialiased`}
     >
-      <body className="flex min-h-dvh flex-col">
+      <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
