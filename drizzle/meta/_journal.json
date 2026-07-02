@@ -15,6 +15,13 @@
       "when": 1782989281838,
       "tag": "0001_guest_management",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1783075681838,
+      "tag": "0002_party_breakdown",
+      "breakpoints": true
     }
   ]
 }

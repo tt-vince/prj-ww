@@ -96,18 +96,21 @@ export default async function DashboardPage() {
   let notGoing = 0;
   let pending = 0;
   let seatsTotal = 0;
-  let expected = 0;
+  let adultsTotal = 0;
+  let kidsTotal = 0;
   for (const r of rows) {
     seatsTotal += r.maxGuests;
     if (r.status === "going") {
       going += 1;
-      expected += r.partySize ?? 0;
+      adultsTotal += r.adults ?? 0;
+      kidsTotal += r.kids ?? 0;
     } else if (r.status === "not_going") {
       notGoing += 1;
     } else {
       pending += 1;
     }
   }
+  const expected = adultsTotal + kidsTotal;
   const responded = going + notGoing;
   const pct = (n: number) => (invited ? Math.round((n / invited) * 100) : 0);
 
@@ -123,7 +126,7 @@ export default async function DashboardPage() {
       key: "going",
       label: "Attending",
       value: going,
-      caption: `${expected} of ${seatsTotal} seats reserved`,
+      caption: `${expected} of ${seatsTotal} seats · ${adultsTotal} adults · ${kidsTotal} kids`,
       tone: "going",
       pct: pct(going),
     },
@@ -158,7 +161,8 @@ export default async function DashboardPage() {
     token: r.token,
     name: r.name,
     maxGuests: r.maxGuests,
-    partySize: r.partySize,
+    adults: r.adults,
+    kids: r.kids,
     status: r.status,
     email: r.email,
     phone: r.phone,

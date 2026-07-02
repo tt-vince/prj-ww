@@ -25,7 +25,7 @@ couple manages invitees + tags and (once the guest form is built) reviews respon
 - **Guest** accounts / guest login. The per-person `token` is a **capability link**, not a credential — anyone holding the URL can fill that invitee's RSVP. Admins **do** authenticate — via Google sign-in (§7).
 - Editing or deleting an existing RSVP from the guest side.
 - Email confirmations / notifications.
-- Multi-event or plus-one-**by-name** management (a numeric `max_guests` allotment + `party_size` reply covers party size).
+- Multi-event or plus-one-**by-name** management (a numeric `max_guests` allotment + `adults`/`kids` reply covers party size).
 - Internationalization.
 
 ---
@@ -90,7 +90,7 @@ The "backend" is `submitRsvp()`, the admin read/manage queries, and the Google O
 
 Three feature tables (`guests`, `labels`, `guest_labels`) plus the `users` admin table, defined in
 Drizzle. A Postgres enum `rsvp_status` backs `guests.status`. **This build ships the admin
-management side only** — the reply columns (`status`/`party_size`/`guest_note`/`responded_at`)
+management side only** — the reply columns (`status`/`adults`/`kids`/`guest_note`/`responded_at`)
 exist but nothing writes them yet (the guest-facing form is deferred, §13).
 
 ### Table: `guests` (invitees / "people")
@@ -108,7 +108,8 @@ wedding-site link (`?id=<token>`) and a `max_guests` seat allotment.
 | `phone` | `text` | nullable | Admin-only contact |
 | `admin_note` | `text` | nullable | Private, dashboard-only |
 | `status` | `rsvp_status` enum | not null, default `pending` | Guest reply — set later by the form |
-| `party_size` | `integer` | nullable | # attending, ≤ `max_guests` — set later |
+| `adults` | `integer` | nullable | # adults attending — set later |
+| `kids` | `integer` | nullable | # kids attending — set later; total (`adults` + `kids`) ≤ `max_guests` |
 | `guest_note` | `text` | nullable | Guest's message — set later |
 | `responded_at` | `timestamptz` | nullable | Set later |
 | `created_at` | `timestamptz` | not null, default `now()` | |
@@ -121,7 +122,7 @@ wedding-site link (`?id=<token>`) and a `max_guests` seat allotment.
 ```
 
 `pending` = awaiting reply. **Fixed set — not runtime-editable.** Dashboard head-count counts rows
-where `status = 'going'` (`party_size` summed for "expected guests").
+where `status = 'going'` (`adults` + `kids` summed for "expected guests").
 
 ### Table: `labels` (editable tags)
 
@@ -380,7 +381,7 @@ integration, not a Claude MCP. `docx`/`pdf` skills considered and excluded.
 - **Invite-only.** The couple pre-registers invitees; each gets an unguessable `token` used as
   `?id=<token>`. No open/anonymous form.
 - **Guest fields:** name, `max_guests` allotment, optional email/phone, optional `admin_note`, plus
-  editable **labels** (tags, many-to-many). Reply stored as `status` + `party_size` + `guest_note`
+  editable **labels** (tags, many-to-many). Reply stored as `status` + `adults` + `kids` + `guest_note`
   (deferred form writes these).
 - **Status:** fixed enum `pending | going | not_going` (default `pending`). Not runtime-editable.
 - **Labels:** admin-editable tag set (add / rename / delete), many per guest.
