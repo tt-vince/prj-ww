@@ -5,6 +5,7 @@ import { AccountGarland, NameSprig } from "@/components/dashboard-florals";
 import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
+import { Countdown } from "./countdown";
 
 // Placeholder couple + date lifted from the design; swap for the real names/date.
 const COUPLE = "Hyuwu & Empty";
@@ -50,6 +51,7 @@ export default async function DashboardPage() {
           <div className="mt-2.5 text-[10.5px] tracking-[0.14em] text-muted-foreground uppercase sm:text-xs">
             {OCCASION}
           </div>
+          <Countdown />
         </div>
         <div className="flex flex-col items-end gap-3.5">
           <div className="relative">
