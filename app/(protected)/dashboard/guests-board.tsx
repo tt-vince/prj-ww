@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  Fragment,
   useMemo,
   useOptimistic,
   useState,
@@ -188,29 +189,19 @@ function guestDialogData(row: GuestRow) {
 }
 
 /**
- * Boxed card section (warm tint + small-caps title) shared by Contact and
- * Notes so they read as the same template.
+ * Minimal card meta block: a small-caps label above its content, divided by a
+ * hairline rule (no filled background) so the card stays elegant and quiet.
+ * Shared by Contact and Notes.
  */
-function CardSection({
-  title,
-  bg = "#faf6ee",
-  children,
-}: {
-  title: string;
-  bg?: string;
-  children: ReactNode;
-}) {
+function CardMeta({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div
-      className="mt-2.5 flex flex-col gap-2 rounded-[10px] px-3 py-2.5"
-      style={{ background: bg, border: `1px solid ${RULE}` }}
-    >
-      <span
-        className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+    <div className="mt-2.5 border-t pt-2" style={{ borderColor: RULE }}>
+      <div
+        className="mb-1.5 text-[9px] font-semibold tracking-[0.14em] uppercase"
         style={{ color: MUT }}
       >
         {title}
-      </span>
+      </div>
       {children}
     </div>
   );
@@ -308,55 +299,63 @@ function GuestCard({
       ) : null}
 
       {hasContact ? (
-        <CardSection title="Contact">
-          {row.phone ? (
-            <div className="truncate text-[11.5px]" style={{ color: INK }}>
-              {row.phone}
-            </div>
-          ) : null}
-          {row.email ? (
-            <div className="truncate text-[11.5px]" style={{ color: INK }}>
-              {row.email}
-            </div>
-          ) : null}
-          {snsEntries.length ? (
-            <div className="flex items-center gap-2.5">
-              {snsEntries.map(({ platform, handle }) => {
-                const cfg = SNS_CONFIG[platform];
-                return (
-                  <a
-                    key={platform}
-                    href={cfg.url(handle)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`${cfg.label}: ${handle}`}
-                    title={`${cfg.label}: ${handle}`}
-                    className="transition-opacity hover:opacity-60"
-                    style={{ color: MUT }}
-                  >
-                    <SnsIcon platform={platform} className="size-4" />
-                  </a>
-                );
-              })}
-            </div>
-          ) : null}
-        </CardSection>
+        <CardMeta title="Contact">
+          <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 text-[11.5px]">
+            {row.phone ? (
+              <>
+                <dt style={{ color: MUT }}>Phone</dt>
+                <dd className="truncate" style={{ color: INK }}>
+                  {row.phone}
+                </dd>
+              </>
+            ) : null}
+            {row.email ? (
+              <>
+                <dt style={{ color: MUT }}>Email</dt>
+                <dd className="truncate" style={{ color: INK }}>
+                  {row.email}
+                </dd>
+              </>
+            ) : null}
+            {snsEntries.map(({ platform, handle }) => {
+              const cfg = SNS_CONFIG[platform];
+              return (
+                <Fragment key={platform}>
+                  <dt style={{ color: MUT }}>{cfg.label}</dt>
+                  <dd className="truncate">
+                    <a
+                      href={cfg.url(handle)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`${cfg.label}: ${handle}`}
+                      className="inline-flex max-w-full items-center gap-1 truncate hover:underline"
+                      style={{ color: INK }}
+                    >
+                      <SnsIcon platform={platform} className="size-3 shrink-0" />
+                      <span className="truncate">{handle}</span>
+                    </a>
+                  </dd>
+                </Fragment>
+              );
+            })}
+          </dl>
+        </CardMeta>
       ) : null}
 
       {row.guestNote ? (
-        <CardSection title="Guest note" bg="#f2f6ec">
-          <span className="text-[11.5px] italic" style={{ color: INK }}>
+        <CardMeta title="Guest note">
+          <p className="text-[11.5px] leading-relaxed italic" style={{ color: INK }}>
             “{row.guestNote}”
-          </span>
-        </CardSection>
+          </p>
+        </CardMeta>
       ) : null}
 
       {row.adminNote ? (
-        <CardSection title="Admin note" bg="#faf6ee">
-          <span className="text-[11.5px]" style={{ color: CHIP_TEXT }}>
+        <CardMeta title="Admin note">
+          <p className="text-[11.5px] leading-relaxed" style={{ color: CHIP_TEXT }}>
             {row.adminNote}
-          </span>
-        </CardSection>
+          </p>
+        </CardMeta>
       ) : null}
 
       <div
