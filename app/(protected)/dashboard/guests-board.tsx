@@ -6,9 +6,12 @@ import {
   useState,
   useTransition,
   type DragEvent,
+  type ReactNode,
 } from "react";
 import { ChevronDown, Search, Sparkle } from "lucide-react";
 import type { Label as LabelRow } from "@/db/schema";
+import { SNS_PLATFORMS, SNS_CONFIG, type SnsAccounts } from "@/lib/sns";
+import { SnsIcon } from "@/components/sns-icon";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,6 +55,7 @@ export type GuestRow = {
   email: string | null;
   phone: string | null;
   adminNote: string | null;
+  snsAccounts: SnsAccounts;
   guestNote: string | null;
   respondedAt: string | null;
   labels: { id: string; name: string }[];
@@ -175,11 +179,41 @@ function guestDialogData(row: GuestRow) {
     email: row.email,
     phone: row.phone,
     adminNote: row.adminNote,
+    snsAccounts: row.snsAccounts,
     adults: row.adults,
     kids: row.kids,
     status: row.status,
     labelIds: row.labels.map((l) => l.id),
   };
+}
+
+/**
+ * Boxed card section (warm tint + small-caps title) shared by Contact and
+ * Notes so they read as the same template.
+ */
+function CardSection({
+  title,
+  bg = "#faf6ee",
+  children,
+}: {
+  title: string;
+  bg?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="mt-2.5 flex flex-col gap-2 rounded-[10px] px-3 py-2.5"
+      style={{ background: bg, border: `1px solid ${RULE}` }}
+    >
+      <span
+        className="text-[9px] font-semibold tracking-[0.14em] uppercase"
+        style={{ color: MUT }}
+      >
+        {title}
+      </span>
+      {children}
+    </div>
+  );
 }
 
 // Guest card (shared by the desktop columns and the mobile tab list).
@@ -207,6 +241,13 @@ function GuestCard({
 }) {
   const answered = row.status === "going";
   const breakdown = partyBreakdown(row.adults, row.kids);
+  const snsEntries = SNS_PLATFORMS.map((platform) => ({
+    platform,
+    handle: row.snsAccounts?.[platform],
+  })).filter((e): e is { platform: (typeof SNS_PLATFORMS)[number]; handle: string } =>
+    Boolean(e.handle),
+  );
+  const hasContact = Boolean(row.phone || row.email || snsEntries.length);
   return (
     <div
       draggable={draggable}
@@ -228,22 +269,6 @@ function GuestCard({
           <div className="truncate text-sm font-semibold" style={{ color: INK }}>
             {row.name}
           </div>
-          {/* Phone takes priority over email; show both when present. */}
-          {row.phone ? (
-            <div className="truncate text-[11.5px]" style={{ color: MUT }}>
-              {row.phone}
-            </div>
-          ) : null}
-          {row.email ? (
-            <div className="truncate text-[11.5px]" style={{ color: MUT }}>
-              {row.email}
-            </div>
-          ) : null}
-          {!row.phone && !row.email ? (
-            <div className="truncate text-[11.5px]" style={{ color: MUT }}>
-              —
-            </div>
-          ) : null}
         </div>
         <div
           className="flex-none font-serif text-[15px] text-stat-going"
@@ -282,41 +307,56 @@ function GuestCard({
         </div>
       ) : null}
 
-      {row.guestNote || row.adminNote ? (
-        <div
-          className="mt-2.5 flex flex-col gap-2 rounded-[10px] px-3 py-2.5"
-          style={{ background: "#faf6ee", border: `1px solid ${RULE}` }}
-        >
-          <span
-            className="text-[9px] font-semibold tracking-[0.14em] uppercase"
-            style={{ color: MUT }}
-          >
-            Notes
+      {hasContact ? (
+        <CardSection title="Contact">
+          {row.phone ? (
+            <div className="truncate text-[11.5px]" style={{ color: INK }}>
+              {row.phone}
+            </div>
+          ) : null}
+          {row.email ? (
+            <div className="truncate text-[11.5px]" style={{ color: INK }}>
+              {row.email}
+            </div>
+          ) : null}
+          {snsEntries.length ? (
+            <div className="flex items-center gap-2.5">
+              {snsEntries.map(({ platform, handle }) => {
+                const cfg = SNS_CONFIG[platform];
+                return (
+                  <a
+                    key={platform}
+                    href={cfg.url(handle)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`${cfg.label}: ${handle}`}
+                    title={`${cfg.label}: ${handle}`}
+                    className="transition-opacity hover:opacity-60"
+                    style={{ color: MUT }}
+                  >
+                    <SnsIcon platform={platform} className="size-4" />
+                  </a>
+                );
+              })}
+            </div>
+          ) : null}
+        </CardSection>
+      ) : null}
+
+      {row.guestNote ? (
+        <CardSection title="Guest note" bg="#f2f6ec">
+          <span className="text-[11.5px] italic" style={{ color: INK }}>
+            “{row.guestNote}”
           </span>
-          {row.guestNote ? (
-            <div className="flex flex-col gap-0.5">
-              <span className="text-[9px] font-semibold tracking-wider text-stat-going uppercase">
-                Guest
-              </span>
-              <span className="text-[11.5px] italic" style={{ color: INK }}>
-                “{row.guestNote}”
-              </span>
-            </div>
-          ) : null}
-          {row.adminNote ? (
-            <div className="flex flex-col gap-0.5">
-              <span
-                className="text-[9px] font-semibold tracking-wider uppercase"
-                style={{ color: MUT }}
-              >
-                Admin
-              </span>
-              <span className="text-[11.5px]" style={{ color: CHIP_TEXT }}>
-                {row.adminNote}
-              </span>
-            </div>
-          ) : null}
-        </div>
+        </CardSection>
+      ) : null}
+
+      {row.adminNote ? (
+        <CardSection title="Admin note" bg="#faf6ee">
+          <span className="text-[11.5px]" style={{ color: CHIP_TEXT }}>
+            {row.adminNote}
+          </span>
+        </CardSection>
       ) : null}
 
       <div

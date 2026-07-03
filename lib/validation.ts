@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SNS_PLATFORMS } from '@/lib/sns';
 
 /** Input schemas / DTOs for Server Actions — the single source of type truth. */
 
@@ -62,6 +63,10 @@ const guestBaseSchema = z.object({
   email: z.preprocess(blankToUndefined, z.email('Enter a valid email').max(200).optional()),
   phone: z.preprocess(blankToUndefined, z.string().trim().max(30).optional()),
   adminNote: z.preprocess(blankToUndefined, z.string().trim().max(1000).optional()),
+  // Social handles keyed by platform; blanks are dropped before parse.
+  snsAccounts: z
+    .partialRecord(z.enum(SNS_PLATFORMS), z.string().trim().min(1).max(100))
+    .default({}),
   labelIds: z.array(z.string().uuid()).default([]),
 });
 

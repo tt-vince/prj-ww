@@ -108,6 +108,7 @@ wedding-site link (`?id=<token>`) and a `max_guests` seat allotment.
 | `email` | `text` | nullable | Admin-only contact |
 | `phone` | `text` | nullable | Admin-only contact |
 | `admin_note` | `text` | nullable | Private, dashboard-only |
+| `sns_accounts` | `jsonb` | not null, default `'{}'` | Admin-only social handles keyed by platform (`messenger`, `instagram`); the app builds the deep link from a fixed per-platform template (`lib/sns.ts`). Extensible — add a platform there |
 | `status` | `rsvp_status` enum | not null, default `pending` | Guest reply — set by the form; admin-editable in **Edit guest** (not on create) |
 | `adults` | `integer` | nullable | # adults attending — set by the form or the admin dialog |
 | `kids` | `integer` | nullable | # kids attending — set by the form or the admin dialog; total (`adults` + `kids`) ≤ `max_guests` |
@@ -194,6 +195,7 @@ Shared base (`guestBaseSchema`):
 | `email` | optional, valid email, max 200 (blank → omitted) |
 | `phone` | optional, trimmed, max 30 |
 | `adminNote` | optional, trimmed, max 1000 |
+| `snsAccounts` | object of platform→handle (`messenger`/`instagram`), each trimmed 1–100 chars; blank handles dropped, default `{}` |
 | `labelIds` | array of uuid, default `[]` |
 
 - **Create** (`guestCreateSchema`): **no `status` field** — a new invitee always starts `pending`.
@@ -207,7 +209,11 @@ Shared base (`guestBaseSchema`):
   Server Action re-validates and returns them as form field errors.
 - Types: `GuestCreateInput` / `GuestUpdateInput`. `rsvpStatusValues` mirrors the pg enum.
 - The **Add/Edit guest dialog** is a sectioned form (Guest details / Party count·RSVP reply /
-  Contact / Labels / Notes); labels are toggleable badge chips, not checkboxes.
+  Contact / Labels / Notes); labels are toggleable badge chips, not checkboxes. The **Contact**
+  section also holds SNS handles (Messenger/Instagram usernames, prefixed-input, admin enters the
+  handle only). On the board card, **Contact** and **Notes** share one boxed section template;
+  Notes render as two tinted boxes (guest note / admin note), and Contact shows email, phone, and
+  clickable SNS icon-links (open the profile/chat in a new tab).
 
 ### `labelInputSchema` (add/rename tag)
 

@@ -15,6 +15,7 @@ import {
   rsvpStatusValues,
 } from '@/lib/validation';
 import { generateToken } from '@/lib/guest-token';
+import { SNS_PLATFORMS } from '@/lib/sns';
 
 /** Result of a form Server Action, consumed via `useActionState` on the client. */
 export type ActionState = {
@@ -45,6 +46,12 @@ function guestFormValues(formData: FormData) {
     phone: formData.get('phone'),
     adminNote: formData.get('adminNote'),
     labelIds: formData.getAll('labelIds'),
+    // Per-platform inputs named `sns_<platform>`; drop the blank ones.
+    snsAccounts: Object.fromEntries(
+      SNS_PLATFORMS.map((p) => [p, String(formData.get(`sns_${p}`) ?? '').trim()]).filter(
+        ([, v]) => v !== '',
+      ),
+    ),
   };
 }
 
@@ -80,6 +87,7 @@ export async function createGuest(
       email: input.email,
       phone: input.phone,
       adminNote: input.adminNote,
+      snsAccounts: input.snsAccounts,
       // status stays at its 'pending' default — a new invitee hasn't replied.
       adults: input.adults ?? null,
       kids: input.kids ?? null,
@@ -121,6 +129,7 @@ export async function updateGuest(
       email: input.email,
       phone: input.phone,
       adminNote: input.adminNote,
+      snsAccounts: input.snsAccounts,
       status: input.status,
       adults: declined ? 0 : (input.adults ?? null),
       kids: declined ? 0 : (input.kids ?? null),
