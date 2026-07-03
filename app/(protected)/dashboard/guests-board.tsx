@@ -119,10 +119,14 @@ const CHIP_BORDER = "#e4d9c0";
 const CHIP_TEXT = "#87796a";
 const RULE = "#f1eadb";
 
-/** Seats a card occupies: the reply head-count once answered, else the allotment. */
+/**
+ * Seats a card occupies. A "going" reply counts its party (adults + kids);
+ * Awaiting/Declined count the full seat allotment (maxGuests) — a declined
+ * family of 4 means 4 people are out, and an awaited one means 4 pending.
+ * Mirrors `headcount` so a card's number agrees with its column total.
+ */
 function partySize(row: GuestRow): number {
-  if (row.adults == null && row.kids == null) return row.maxGuests;
-  return (row.adults ?? 0) + (row.kids ?? 0);
+  return row.status === "going" ? (row.adults ?? 0) + (row.kids ?? 0) : row.maxGuests;
 }
 
 /**
@@ -201,7 +205,7 @@ function GuestCard({
   onDragStart?: (e: DragEvent) => void;
   onDragEnd?: () => void;
 }) {
-  const answered = row.adults != null || row.kids != null;
+  const answered = row.status === "going";
   const breakdown = partyBreakdown(row.adults, row.kids);
   return (
     <div
