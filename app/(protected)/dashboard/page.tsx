@@ -9,7 +9,7 @@ import { Countdown } from "./countdown";
 
 // Placeholder couple + date lifted from the design; swap for the real names/date.
 const COUPLE = "Hyuwu & Empty";
-const OCCASION = "April 2026 · Guest responses";
+const OCCASION = "April 2027 · Guest responses";
 
 export default async function DashboardPage() {
   const user = await requireUser();
