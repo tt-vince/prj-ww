@@ -125,6 +125,19 @@ function partySize(row: GuestRow): number {
   return (row.adults ?? 0) + (row.kids ?? 0);
 }
 
+/**
+ * People represented by a set of cards (not the row count). An Attending reply
+ * counts its party (adults + kids); Awaiting/Declined count the full seat
+ * allotment (maxGuests) — a declined family of 4 means 4 people are out. Used
+ * for every guest count in the board (column headers and mobile tab pills).
+ */
+function headcount(cards: GuestRow[]): number {
+  return cards.reduce(
+    (sum, r) => sum + (r.status === "going" ? (r.adults ?? 0) + (r.kids ?? 0) : r.maxGuests),
+    0,
+  );
+}
+
 /** "2 adults · 1 kid" — zero/none parts hidden; empty string when nothing to show. */
 function partyBreakdown(adults: number | null, kids: number | null): string {
   const parts: string[] = [];
@@ -211,9 +224,22 @@ function GuestCard({
           <div className="truncate text-sm font-semibold" style={{ color: INK }}>
             {row.name}
           </div>
-          <div className="truncate text-[11.5px]" style={{ color: MUT }}>
-            {row.email ?? "—"}
-          </div>
+          {/* Phone takes priority over email; show both when present. */}
+          {row.phone ? (
+            <div className="truncate text-[11.5px]" style={{ color: MUT }}>
+              {row.phone}
+            </div>
+          ) : null}
+          {row.email ? (
+            <div className="truncate text-[11.5px]" style={{ color: MUT }}>
+              {row.email}
+            </div>
+          ) : null}
+          {!row.phone && !row.email ? (
+            <div className="truncate text-[11.5px]" style={{ color: MUT }}>
+              —
+            </div>
+          ) : null}
         </div>
         <div
           className="flex-none font-serif text-[15px] text-stat-going"
@@ -372,11 +398,12 @@ function ColumnStats({
   const num = size === "sm" ? "text-[22px]" : "text-[27px]";
   const adults = cards.reduce((sum, r) => sum + (r.adults ?? 0), 0);
   const kids = cards.reduce((sum, r) => sum + (r.kids ?? 0), 0);
+  const people = headcount(cards);
   return (
     <div className="flex items-center gap-4">
       <div className="flex items-baseline gap-1.5">
         <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
-          {cards.length}
+          {people}
         </span>
         <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
           guests
@@ -565,7 +592,7 @@ export function GuestsBoard({
                 className="mt-1 block font-serif text-2xl leading-none"
                 style={{ color: on ? INK : "#c4b7a0" }}
               >
-                {byStatus[key].length}
+                {headcount(byStatus[key])}
               </span>
             </button>
           );
