@@ -1,0 +1,1 @@
+ALTER TABLE "guests" ADD COLUMN "sns_accounts" jsonb DEFAULT '{}'::jsonb NOT NULL;

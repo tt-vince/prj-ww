@@ -5,10 +5,12 @@ import {
   uuid,
   text,
   integer,
+  jsonb,
   timestamp,
   uniqueIndex,
   primaryKey,
 } from 'drizzle-orm/pg-core';
+import type { SnsAccounts } from '@/lib/sns';
 
 export const userRole = pgEnum('user_role', ['superadmin', 'admin', 'viewer']);
 export const userStatus = pgEnum('user_status', ['pending', 'active', 'disabled']);
@@ -69,6 +71,7 @@ export const guests = pgTable('guests', {
   email: text('email'),
   phone: text('phone'),
   adminNote: text('admin_note'),
+  snsAccounts: jsonb('sns_accounts').$type<SnsAccounts>().notNull().default({}), // social handles keyed by platform
 
   // guest response — filled later by the (deferred) guest form
   status: rsvpStatus('status').notNull().default('pending'),

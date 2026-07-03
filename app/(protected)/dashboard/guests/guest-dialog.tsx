@@ -3,6 +3,8 @@
 import { useActionState, useEffect, useState, type ReactNode } from 'react';
 import { Check, Pencil, Plus } from 'lucide-react';
 import type { Label as LabelRow } from '@/db/schema';
+import { SNS_PLATFORMS, SNS_CONFIG, type SnsAccounts } from '@/lib/sns';
+import { SnsIcon } from '@/components/sns-icon';
 import { createGuest, updateGuest, type ActionState } from './actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -39,6 +41,7 @@ type GuestData = {
   email: string | null;
   phone: string | null;
   adminNote: string | null;
+  snsAccounts: SnsAccounts;
   status: RsvpStatus;
   labelIds: string[];
 };
@@ -245,6 +248,28 @@ function GuestForm({
             <Field label="Phone" error={state.fieldErrors?.phone}>
               <Input name="phone" defaultValue={guest?.phone ?? ''} />
             </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            {SNS_PLATFORMS.map((p) => {
+              const cfg = SNS_CONFIG[p];
+              return (
+                <Field key={p} label={cfg.label}>
+                  <div className="flex items-center rounded-md border border-input focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+                    <span className="flex shrink-0 items-center gap-1 py-1 pr-1 pl-2.5 text-xs text-muted-foreground">
+                      <SnsIcon platform={p} className="size-3.5" />
+                      {cfg.prefix}
+                    </span>
+                    <Input
+                      name={`sns_${p}`}
+                      defaultValue={guest?.snsAccounts?.[p] ?? ''}
+                      placeholder="username"
+                      maxLength={100}
+                      className="border-0 pl-0 shadow-none focus-visible:ring-0"
+                    />
+                  </div>
+                </Field>
+              );
+            })}
           </div>
         </Section>
 
