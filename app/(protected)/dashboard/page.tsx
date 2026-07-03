@@ -68,7 +68,7 @@ function StatCard({
       <div className={cn("mt-2.5 font-serif text-[34px] leading-none sm:mt-3.5 sm:text-[46px]", t.text)}>
         {value}
       </div>
-      <div className="mt-2 text-[12.5px] text-muted-foreground">{caption}</div>
+      <div className="mt-2 text-[12.5px] text-muted-foreground text-pretty break-words">{caption}</div>
       <Progress
         value={pct}
         className={cn(
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
       key: "going",
       label: "Attending",
       value: going,
-      caption: `${expected} of ${seatsTotal} seats · ${adultsTotal} adults · ${kidsTotal} kids`,
+      caption: `${expected}/${seatsTotal} seats · ${adultsTotal}A · ${kidsTotal}K`,
       tone: "going",
       pct: pct(going),
     },
