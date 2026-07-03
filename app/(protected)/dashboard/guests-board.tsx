@@ -356,57 +356,53 @@ function FilterDropdown({
 }
 
 /**
- * Column head-count. `guests` is shown everywhere; the seats figure and the
- * adults/kids totals (from the replies) are only meaningful for the Attending
- * column, so they are opt-in via `showSeats` — Awaiting/Declined show the
- * guest count alone.
+ * Column head-count. `guests` is shown everywhere; the adults/kids totals
+ * (from the replies) are only meaningful for the Attending column, so they
+ * are opt-in via `showCounts` — Awaiting/Declined show the guest count alone.
  */
 function ColumnStats({
   cards,
-  showSeats,
+  showCounts,
   size,
 }: {
   cards: GuestRow[];
-  showSeats: boolean;
+  showCounts: boolean;
   size?: "sm";
 }) {
   const num = size === "sm" ? "text-[22px]" : "text-[27px]";
-  const seats = cards.reduce((sum, r) => sum + partySize(r), 0);
-  const breakdown = showSeats
-    ? partyBreakdown(
-        cards.reduce((sum, r) => sum + (r.adults ?? 0), 0),
-        cards.reduce((sum, r) => sum + (r.kids ?? 0), 0),
-      )
-    : "";
+  const adults = cards.reduce((sum, r) => sum + (r.adults ?? 0), 0);
+  const kids = cards.reduce((sum, r) => sum + (r.kids ?? 0), 0);
   return (
-    <div className="flex flex-col gap-1">
-      <div className="flex items-center gap-4">
-        <div className="flex items-baseline gap-1.5">
-          <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
-            {cards.length}
-          </span>
-          <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
-            guests
-          </span>
-        </div>
-        {showSeats ? (
-          <>
-            <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
-            <div className="flex items-baseline gap-1.5">
-              <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
-                {seats}
-              </span>
-              <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
-                seats
-              </span>
-            </div>
-          </>
-        ) : null}
+    <div className="flex items-center gap-4">
+      <div className="flex items-baseline gap-1.5">
+        <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+          {cards.length}
+        </span>
+        <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+          guests
+        </span>
       </div>
-      {breakdown ? (
-        <div className="text-[11px]" style={{ color: CHIP_TEXT }}>
-          {breakdown}
-        </div>
+      {showCounts ? (
+        <>
+          <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+              {adults}
+            </span>
+            <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+              adults
+            </span>
+          </div>
+          <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
+          <div className="flex items-baseline gap-1.5">
+            <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+              {kids}
+            </span>
+            <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+              kids
+            </span>
+          </div>
+        </>
       ) : null}
     </div>
   );
@@ -580,7 +576,7 @@ export function GuestsBoard({
           (CardCornerFrame per item), never floating on this borderless list. */}
       <div className="relative flex flex-col gap-3 md:hidden">
         <div className="relative z-[1] flex flex-col gap-3">
-        <ColumnStats size="sm" cards={byStatus[tab]} showSeats={tab === "going"} />
+        <ColumnStats size="sm" cards={byStatus[tab]} showCounts={tab === "going"} />
         {byStatus[tab].length === 0 ? (
           <div className="py-8 text-center text-[12.5px] italic" style={{ color: "#c4b7a0" }}>
             {filterActive ? "No matches" : "No guests here yet"}
@@ -643,7 +639,7 @@ export function GuestsBoard({
                 style={{ background: col.dot }}
               />
               <div className="px-1 pb-4">
-                <ColumnStats cards={cards} showSeats={col.key === "going"} />
+                <ColumnStats cards={cards} showCounts={col.key === "going"} />
               </div>
               <div className="flex flex-col gap-3">
                 {shown.map((row) => (
