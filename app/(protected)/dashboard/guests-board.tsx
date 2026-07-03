@@ -400,8 +400,8 @@ function ColumnStats({
   const kids = cards.reduce((sum, r) => sum + (r.kids ?? 0), 0);
   const people = headcount(cards);
   return (
-    <div className="flex items-center gap-4">
-      <div className="flex items-baseline gap-1.5">
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
+      <div className="flex items-baseline gap-1.5 whitespace-nowrap">
         <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
           {people}
         </span>
@@ -412,7 +412,7 @@ function ColumnStats({
       {showCounts ? (
         <>
           <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
-          <div className="flex items-baseline gap-1.5">
+          <div className="flex items-baseline gap-1.5 whitespace-nowrap">
             <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
               {adults}
             </span>
@@ -421,7 +421,7 @@ function ColumnStats({
             </span>
           </div>
           <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
-          <div className="flex items-baseline gap-1.5">
+          <div className="flex items-baseline gap-1.5 whitespace-nowrap">
             <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
               {kids}
             </span>
