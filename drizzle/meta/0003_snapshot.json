@@ -1,65 +1,46 @@
 {
-  "id": "783c7011-d7c3-454c-9fac-f48a0b37e5d0",
-  "prevId": "a1b2c3d4-0003-4a1b-9c2d-000000000003",
+  "id": "a1b2c3d4-0003-4a1b-9c2d-000000000003",
+  "prevId": "a1b2c3d4-0002-4a1b-9c2d-000000000002",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
-    "public.guest_labels": {
-      "name": "guest_labels",
+    "public.labels": {
+      "name": "labels",
       "schema": "",
       "columns": {
-        "guest_id": {
-          "name": "guest_id",
+        "id": {
+          "name": "id",
           "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "label_id": {
-          "name": "label_id",
-          "type": "uuid",
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
           "primaryKey": false,
-          "notNull": true
+          "notNull": true,
+          "default": "now()"
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "guest_labels_guest_id_guests_id_fk": {
-          "name": "guest_labels_guest_id_guests_id_fk",
-          "tableFrom": "guest_labels",
-          "tableTo": "guests",
-          "columnsFrom": [
-            "guest_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "guest_labels_label_id_labels_id_fk": {
-          "name": "guest_labels_label_id_labels_id_fk",
-          "tableFrom": "guest_labels",
-          "tableTo": "labels",
-          "columnsFrom": [
-            "label_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "guest_labels_guest_id_label_id_pk": {
-          "name": "guest_labels_guest_id_label_id_pk",
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "labels_name_unique": {
+          "name": "labels_name_unique",
+          "nullsNotDistinct": false,
           "columns": [
-            "guest_id",
-            "label_id"
+            "name"
           ]
         }
       },
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -111,13 +92,6 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "sns_accounts": {
-          "name": "sns_accounts",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'{}'::jsonb"
         },
         "status": {
           "name": "status",
@@ -182,43 +156,62 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.labels": {
-      "name": "labels",
+    "public.guest_labels": {
+      "name": "guest_labels",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
+        "guest_id": {
+          "name": "guest_id",
           "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
+        "label_id": {
+          "name": "label_id",
+          "type": "uuid",
           "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
+          "notNull": true
         }
       },
       "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "labels_name_unique": {
-          "name": "labels_name_unique",
-          "nullsNotDistinct": false,
+      "foreignKeys": {
+        "guest_labels_guest_id_guests_id_fk": {
+          "name": "guest_labels_guest_id_guests_id_fk",
+          "tableFrom": "guest_labels",
+          "tableTo": "guests",
+          "columnsFrom": [
+            "guest_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "guest_labels_label_id_labels_id_fk": {
+          "name": "guest_labels_label_id_labels_id_fk",
+          "tableFrom": "guest_labels",
+          "tableTo": "labels",
+          "columnsFrom": [
+            "label_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {
+        "guest_labels_guest_id_label_id_pk": {
+          "name": "guest_labels_guest_id_label_id_pk",
           "columns": [
-            "name"
+            "guest_id",
+            "label_id"
           ]
         }
       },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
