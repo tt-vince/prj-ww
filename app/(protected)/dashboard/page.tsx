@@ -1,7 +1,7 @@
 import { requireUser, canEdit } from "@/lib/dal";
 import { getGuestsWithLabels, getAllLabels } from "@/lib/data";
 import { AccountMenu } from "@/components/account-menu";
-import { AccountGarland, NameSprig } from "@/components/dashboard-florals";
+import { AccountGarland, CoupleFigures, NameSprig } from "@/components/dashboard-florals";
 import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
@@ -40,6 +40,7 @@ export default async function DashboardPage() {
       <header className="flex flex-wrap items-end justify-between gap-5">
         <div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <CoupleFigures />
             <div className="font-script text-[30px] leading-none text-(--script) sm:text-[38px]">
               {COUPLE}
             </div>

@@ -164,6 +164,90 @@ export function PageFloralBottomRight({ className, style }: SvgProps) {
   );
 }
 
+// Bride & groom mini-figures beside the couple's script name. Same wisteria &
+// blush art tokens as the florals; the bride's hair, her dress and the groom's
+// hair carry `wind-rustle` (default 3.3s — same speed as the leaves/blossoms),
+// anchored at their top edge so they sway like fabric in the breeze instead of
+// spinning around their center.
+export function CoupleFigures({ className }: SvgProps) {
+  const sway = (origin: string, delay = 0): CSSProperties => ({
+    transformOrigin: origin,
+    animationDelay: `${delay}s`,
+  });
+  return (
+    <svg
+      width={62}
+      height={60}
+      viewBox="0 0 62 60"
+      aria-hidden="true"
+      focusable="false"
+      className={className ?? "h-[36px] w-auto shrink-0 sm:h-[46px]"}
+    >
+      {/* Groom */}
+      <g>
+        {/* suit sways from the shoulder line, like the bride's dress */}
+        <g className="wind-rustle" style={sway("50% 0%", 0.3)}>
+          <path
+            d="M14 23 C16 20 24 20 26 23 L27.5 56 L12.5 56 Z"
+            fill="#8d7bb0"
+          />
+        </g>
+        {/* arm reaching to the joined hands */}
+        <path
+          d="M25.5 27 C28 29.5 30.5 31.5 31.5 33.5"
+          fill="none"
+          stroke="#8d7bb0"
+          strokeWidth={3}
+          strokeLinecap="round"
+        />
+        <circle cx={20} cy={13} r={5.6} fill="#eed7c8" />
+        <g className="wind-rustle" style={sway("50% 0%")}>
+          <path
+            d="M14.4 12.5 C14.4 8 17 5.6 20 5.6 C23 5.6 25.6 8 25.6 12.5 C23.6 10.2 16.4 10.2 14.4 12.5 Z"
+            fill="#6f5f95"
+          />
+        </g>
+      </g>
+      {/* Bride */}
+      <g>
+        {/* hair falls behind the head; sways from the crown */}
+        <g className="wind-rustle" style={sway("50% 0%")}>
+          <path
+            d="M36.6 12 C36.6 6.4 39.4 3.8 43 3.8 C46.6 3.8 49.4 6.4 49.4 12 L51 26 C47 23.6 39 23.6 35 26 Z"
+            fill="#8a4b3a"
+          />
+        </g>
+        <circle cx={43} cy={12.5} r={5.4} fill="#eed7c8" />
+        {/* fringe stays put so the face reads through the sway */}
+        <path
+          d="M38.1 10.8 C38.7 7.2 40.5 5.9 43 5.9 C45.5 5.9 47.3 7.2 47.9 10.8 C45.4 9 40.6 9 38.1 10.8 Z"
+          fill="#8a4b3a"
+        />
+        <Blossom x={48} y={7} s={0.42} pts={PETALS_S2} r={4.6} cr={4} petal="#d9b6c4" />
+        {/* dress sways from the shoulder line */}
+        <g className="wind-rustle" style={sway("50% 0%", 0.3)}>
+          <path
+            d="M38.5 21 C40 19.4 46 19.4 47.5 21 L49 30 C52.5 43 54 50 55 56 L31 56 C32 50 33.5 43 37 30 Z"
+            fill="#f4e9f0"
+            stroke="#d9b6c4"
+            strokeWidth={1.1}
+          />
+        </g>
+        {/* arm reaching to the joined hands */}
+        <path
+          d="M38.5 26 C36 29 33 31.5 31.5 33.5"
+          fill="none"
+          stroke="#eed7c8"
+          strokeWidth={2.6}
+          strokeLinecap="round"
+        />
+      </g>
+      {/* joined hands */}
+      <circle cx={31.5} cy={33.5} r={1.9} fill="#eed7c8" />
+    </svg>
+  );
+}
+
 // Small sprig tucked beside the couple's script name.
 export function NameSprig({ className }: SvgProps) {
   return (

@@ -13,6 +13,7 @@ import {
 import {
   CardSprayBottomLeft,
   CardSprayTopRight,
+  CoupleFigures,
   PageFloralBottomRight,
   PageFloralTopLeft,
 } from '@/components/dashboard-florals';
@@ -80,7 +81,10 @@ export default async function LoginPage({
           <CardSprayBottomLeft />
           <Card className="w-full">
             <CardHeader className="text-center">
-              <CardTitle className="font-serif text-xl">Admin sign in</CardTitle>
+              <CardTitle className="flex items-center justify-center gap-2 font-serif text-xl">
+                <CoupleFigures className="h-[36px] w-auto shrink-0" />
+                Admin sign in
+              </CardTitle>
               <CardDescription>Sign in to manage guest responses.</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col gap-4">
