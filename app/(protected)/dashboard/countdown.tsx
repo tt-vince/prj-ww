@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 
-// TODO: exact wedding day not decided yet — using April 1, 2026 as placeholder.
+// TODO: exact wedding day not decided yet — using April 1, 2027 as placeholder.
 // Update TARGET_DATE once the real date is confirmed.
-const TARGET_DATE = new Date("2026-04-01T00:00:00");
+const TARGET_DATE = new Date("2027-04-01T00:00:00");
 
 function diff(target: Date) {
   const ms = Math.max(0, target.getTime() - Date.now());
