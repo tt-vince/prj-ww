@@ -217,3 +217,234 @@
     animation: none;
   }
 }
+
+/* ── Envelope reveal (homepage) ───────────────────────────────────────
+   A PINNED stage reveals a wax-sealed envelope: the top flap folds open and a
+   greeting letter slides UP out of it as you scroll. Once the pin releases, the
+   real RSVP letter flows in beneath. `--p` (0→1) is the pin's scroll progress,
+   written each frame by components/envelope-reveal.tsx; all motion is CSS
+   calc()/clamp() so it scrubs with the scrollbar. Reduced-motion at bottom.
+
+   Why pinned + handoff: the letter is drawn BEHIND the envelope faces (z-index
+   1) so it is fully hidden until it clears the top edge — that fixes "letter
+   visible outside the envelope before it opens". A tall interactive form cannot
+   live inside a fixed-size envelope, so the reveal shows a short greeting; the
+   real form is a separate section that scrolls in when the pin lets go. */
+.reveal-track {
+  position: relative;
+  /* Scroll runway: (height − 100vh) is the distance mapped to p 0→1. */
+  height: 240vh;
+}
+.reveal-pin {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+/* Fixed-size envelope scene; perspective lets the flap fold back in 3D. */
+.env-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: 8dvh;
+  width: min(86vw, 460px);
+  height: 42dvh;
+  transform: translateX(-50%);
+  perspective: 1500px;
+  perspective-origin: center 35%;
+}
+
+.env-back {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 14px;
+  background: linear-gradient(158deg, #b3a2d4 0%, #937fbb 55%, #7c69a0 100%);
+  box-shadow:
+    0 40px 80px -34px rgba(74, 47, 58, 0.5),
+    0 12px 26px -16px rgba(74, 47, 58, 0.32);
+}
+
+/* Closed flap (sealed look): a downward triangle covering the top. Tilts back
+   slightly and fades out as the envelope opens (p 0 -> ~0.34). Holds the seal. */
+.env-flap {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  height: 74%;
+  z-index: 6; /* big top flap over the body; fades out on open */
+  background: linear-gradient(180deg, #cec1e8 0%, #b0a0d4 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  border-radius: 14px 14px 0 0;
+  transform-origin: top center;
+  transform: rotateX(clamp(-115deg, calc(var(--p, 0) * -360deg), 0deg));
+  backface-visibility: hidden;
+  box-shadow: inset 0 -10px 16px -9px rgba(74, 47, 58, 0.3);
+  opacity: clamp(0, calc((0.34 - var(--p, 0)) * 7), 1);
+}
+
+/* Open flap: the pale inner-paper triangle standing UP just above the envelope
+   (base on the top edge, no gap), behind the letter. Fades in as it opens. */
+.env-flap-open {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 52%;
+  z-index: 1;
+  background: linear-gradient(0deg, #f3edfa 0%, #e2d6f0 100%);
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+  border-radius: 14px 14px 0 0;
+  box-shadow: inset 0 10px 16px -10px rgba(74, 47, 58, 0.3);
+  opacity: clamp(0, calc((var(--p, 0) - 0.14) * 3), 1);
+}
+
+/* Wax seal on the closed flap tip (fades out with its parent flap). */
+.env-seal {
+  position: absolute;
+  left: 50%;
+  top: 88%;
+  height: 2.35rem;
+  width: 2.35rem;
+  border-radius: 9999px;
+  background: radial-gradient(circle at 35% 28%, #d49aab 0%, #b47f8f 62%, #9c6b7a 100%);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.45),
+    inset 0 -4px 7px rgba(0, 0, 0, 0.3),
+    0 3px 6px rgba(74, 47, 58, 0.3);
+  transform: translate(-50%, -50%);
+}
+
+/* Clip window: the letter is only visible ABOVE the pocket mouth (clip bottom
+   at 42% from the wrap top). Extends far upward for tall content. */
+.letter-clip {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 20%;
+  top: -240%;
+  width: 84%;
+  z-index: 4;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* The paper letter = the page content. Base-anchored to the mouth; slides up so
+   at p=0 it is pushed below the clip (hidden) and at p=1 fully out. */
+.env-letter {
+  width: 100%;
+  pointer-events: auto;
+  border: 1px solid #efe6ee;
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #fdfbfd 100%);
+  box-shadow: 0 -20px 50px -26px rgba(74, 47, 58, 0.4);
+  transform: translateY(clamp(0%, calc((1 - var(--p, 0)) * 116%), 116%));
+}
+.env-content {
+  max-height: 82dvh;
+  overflow-y: auto;
+  /* subtle scrollbar for overflowing content */
+  scrollbar-width: thin;
+  scrollbar-color: #d9cfe0 transparent;
+}
+
+/* Front pocket: a shallow band across the BOTTOM with an upward chevron top
+   (the envelope's front flap). It sits in front of the letter (z 5) and tucks
+   only the letter's base, so the letter's content above it is never covered.
+   Paired with the big top flap, the sealed envelope still reads as one shape. */
+.env-front {
+  position: absolute;
+  inset-inline: 0;
+  top: 62%;
+  bottom: 0;
+  z-index: 5;
+  clip-path: polygon(0 53%, 50% 32%, 100% 53%, 100% 100%, 0 100%);
+  background: linear-gradient(168deg, #9a88c2 0%, #806d9f 100%);
+  border-radius: 0 0 16px 16px;
+  box-shadow: inset 0 7px 11px -7px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+
+/* Discoverability cue below the envelope; fades the instant scrolling starts. */
+.env-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 3.5dvh;
+  transform: translateX(-50%);
+  z-index: 7;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  color: #9684b6;
+  pointer-events: none;
+  opacity: clamp(0, calc((0.04 - var(--p, 0)) * 25), 1);
+}
+.env-cue-text {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.env-cue-arrow {
+  animation: env-cue-bounce 1.7s ease-in-out infinite;
+}
+@keyframes env-cue-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .env-cue-arrow {
+    animation: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No pin, no envelope: collapse the runway and show the letter statically. */
+  .reveal-track {
+    height: auto;
+  }
+  .reveal-pin {
+    position: static;
+    height: auto;
+    padding: 3rem 0;
+  }
+  .env-wrap {
+    position: static;
+    width: auto;
+    height: auto;
+    transform: none;
+    perspective: none;
+  }
+  .env-back,
+  .env-flap,
+  .env-flap-open,
+  .env-seal,
+  .env-front,
+  .env-cue {
+    display: none;
+  }
+  .letter-clip {
+    position: static;
+    transform: none;
+    width: min(90vw, 400px);
+    margin: 0 auto;
+    overflow: visible;
+  }
+  .env-letter {
+    transform: none;
+    border-bottom: 1px solid #efe6ee;
+    border-radius: 16px;
+  }
+  .env-content {
+    max-height: none;
+  }
+}
