@@ -221,9 +221,13 @@
 /* ── Envelope reveal (homepage) ───────────────────────────────────────
    A PINNED stage reveals a wax-sealed envelope: the top flap folds open and a
    greeting letter slides UP out of it as you scroll. Once the pin releases, the
-   real RSVP letter flows in beneath. `--p` (0→1) is the pin's scroll progress,
-   written each frame by components/envelope-reveal.tsx; all motion is CSS
-   calc()/clamp() so it scrubs with the scrollbar. Reduced-motion at bottom.
+   real RSVP letter flows in beneath. components/envelope-reveal.tsx writes
+   four custom properties onto the stage: `--pf` (0→1, flap fold, eased),
+   `--pl` (0→1, letter rise — linear/1:1 for tall letters so the whole letter
+   scrolls out with the page, no inner scrollbar), `--runway` (px scroll
+   distance, sized from the measured letter height) and `--letter-h` (px, clip
+   headroom). All motion is CSS calc()/clamp() so it scrubs with the
+   scrollbar. Reduced-motion at bottom.
 
    Why pinned + handoff: the letter is drawn BEHIND the envelope faces (z-index
    1) so it is fully hidden until it clears the top edge — that fixes "letter
@@ -232,8 +236,9 @@
    its base tucks behind the front flaps; the envelope stays fully visible. */
 .reveal-track {
   position: relative;
-  /* Scroll runway: (height − 100vh) is the distance mapped to p 0→1. */
-  height: 240vh;
+  /* Scroll runway sized by JS from the measured letter height so the whole
+     letter can scroll out 1:1; fallback ≈ the old fixed travel pre-measure. */
+  height: calc(100dvh + var(--runway, 140vh));
 }
 .reveal-pin {
   position: sticky;
@@ -280,20 +285,21 @@
   /* No border-radius: a clipped triangle + radius leaves gaps at the corners. */
   transform-origin: top center;
   /* Real fold: the flap rotates fully open (template ahoidahl/mydZXQJ). */
-  transform: rotateX(calc(var(--p, 0) * -179deg));
+  transform: rotateX(calc(var(--pf, 0) * -179deg));
   filter: drop-shadow(0 5px 4px rgba(74, 47, 58, 0.14));
   /* z-index is swapped in JS: on top when closed, behind the letter once open
      (so the open flap stays visible standing behind the letter). */
 }
 
 /* Clip window: the letter is only visible ABOVE its bottom edge (the mouth, at
-   the envelope centre). Extends far upward so tall content is never clipped. */
+   the envelope centre). Height tracks the measured letter (+ shadow room) so
+   tall content is never clipped at the top. */
 .letter-clip {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   bottom: 50%;
-  top: -240%;
+  height: calc(var(--letter-h, 150dvh) + 48px);
   width: 84%;
   z-index: 10; /* letter sits above the flap, below the front pocket (z 12) */
   overflow: hidden;
@@ -313,14 +319,7 @@
   border-radius: 0;
   background: #ffffff;
   box-shadow: 0 -16px 40px -22px rgba(74, 47, 58, 0.22);
-  transform: translateY(clamp(0%, calc((1 - var(--p, 0)) * 116%), 116%));
-}
-.env-content {
-  max-height: 82dvh;
-  overflow-y: auto;
-  /* subtle scrollbar for overflowing content */
-  scrollbar-width: thin;
-  scrollbar-color: #d9cfe0 transparent;
+  transform: translateY(clamp(0%, calc((1 - var(--pl, 0)) * 116%), 116%));
 }
 
 /* Bottom flap: triangle from the bottom edge up to the centre. In FRONT of the
@@ -366,7 +365,7 @@
   gap: 0.3rem;
   color: #8a76b0;
   pointer-events: none;
-  opacity: clamp(0, calc((0.04 - var(--p, 0)) * 25), 1);
+  opacity: clamp(0, calc((0.04 - var(--pf, 0)) * 25), 1);
 }
 .env-cue-text {
   font-size: 0.72rem;
@@ -399,8 +398,8 @@
   }
 }
 
-/* Mobile: wider letter for form room, shorter envelope, tighter cue; keep the
-   whole envelope in view and let tall content scroll inside the letter. */
+/* Mobile: wider letter for form room, shorter envelope, tighter cue; the
+   envelope stays in view while the letter scrolls fully out with the page. */
 @media (max-width: 640px) {
   .env-wrap {
     width: 92vw;
@@ -408,9 +407,6 @@
   }
   .letter-clip {
     width: 92%;
-  }
-  .env-content {
-    max-height: 72dvh;
   }
   .env-cue {
     bottom: 2.5dvh;
@@ -449,6 +445,7 @@
     position: static;
     transform: none;
     width: min(90vw, 400px);
+    height: auto;
     margin: 0 auto;
     overflow: visible;
   }
@@ -456,8 +453,5 @@
     transform: none;
     border-bottom: 1px solid #ece5ea;
     border-radius: 0;
-  }
-  .env-content {
-    max-height: none;
   }
 }
