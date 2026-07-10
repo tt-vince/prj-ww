@@ -408,6 +408,74 @@
   }
 }
 
+/* Compositor-driven reveal: on browsers with CSS scroll-driven animations the
+   flap fold, letter rise and cue fade are keyframes bound to the page scroll
+   offset — no per-frame JS, so the letter tracks the finger even while the
+   main thread is busy. envelope-reveal.tsx publishes the px ranges
+   (--flap-px, --rise-start, --rise-len), sets the letter's timing function
+   (eased for short letters, linear/1:1 for tall ones) and skips its per-frame
+   --pf/--pl fallback. scroll(root) is explicit because .reveal-pin and
+   .letter-clip are overflow:hidden scroll containers that scroll() would
+   otherwise resolve to. */
+@supports (animation-timeline: scroll()) {
+  .env-flap {
+    animation:
+      env-flap-fold cubic-bezier(0.65, 0, 0.35, 1) both,
+      env-flap-z linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px var(--flap-px, 500px);
+  }
+  .env-letter {
+    animation: env-letter-rise linear both;
+    animation-timeline: scroll(root);
+    animation-range: var(--rise-start, 300px)
+      calc(var(--rise-start, 300px) + var(--rise-len, 100vh));
+  }
+  .env-cue {
+    /* Matches the JS fade: gone once the eased fold passes 0.04 — that is
+       raw scroll fraction ∛0.01 ≈ 0.2154 of the flap segment. */
+    animation: env-cue-fade linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px calc(var(--flap-px, 500px) * 0.2154);
+  }
+}
+@keyframes env-flap-fold {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-179deg);
+  }
+}
+/* Discrete flip mirroring the JS z-swap: eased fold passes FLAP_Z_SWAP (0.08)
+   at raw scroll fraction ∛(0.08 / 4) ≈ 0.2714 of the flap segment. */
+@keyframes env-flap-z {
+  0%,
+  27.13% {
+    z-index: 14;
+  }
+  27.14%,
+  100% {
+    z-index: 8;
+  }
+}
+@keyframes env-letter-rise {
+  from {
+    transform: translateY(calc(var(--letter-travel, 1.16) * 100%));
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+@keyframes env-cue-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 /* Tablet: cap the envelope a touch smaller. */
 @media (max-width: 900px) {
   .env-wrap {
@@ -457,6 +525,12 @@
   .env-front,
   .env-cue {
     display: none;
+  }
+  /* Scroll-driven keyframes would override the static pose below. */
+  .env-flap,
+  .env-letter,
+  .env-cue {
+    animation: none;
   }
   .letter-clip {
     position: static;
