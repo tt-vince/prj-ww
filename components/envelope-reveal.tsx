@@ -21,55 +21,95 @@ function easeInOutCubic(t: number): number {
  * front flaps (`.env-front` + `.env-face-*`, z-index 12, `pointer-events:none`)
  * tuck its base while never covering the content above the centre.
  *
- * Motion is a single eased scroll-progress value `--p` (0→1) written onto the
- * stage each frame; all transforms live in CSS (app/globals.css · "Envelope
+ * Motion is two scroll-progress values written onto the stage each frame:
+ * `--pf` (flap fold, eased, completes in the first ~half viewport of scroll)
+ * and `--pl` (letter rise). For letters taller than the viewport `--pl` is
+ * linear over a runway sized 1:1 to the letter's measured height, so the whole
+ * letter scrolls out like a normal document — no inner scrollbar. The runway
+ * (`--runway`) and clip headroom (`--letter-h`) are measured via
+ * ResizeObserver; all transforms live in CSS (app/globals.css · "Envelope
  * reveal"), so it scrubs with the scrollbar for no React re-renders.
  * `prefers-reduced-motion` drops the envelope and shows the letter statically.
  */
 export function EnvelopeReveal({ children }: { children: ReactNode }) {
-  const trackRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const track = trackRef.current;
     const stage = stageRef.current;
-    if (!track || !stage) return;
+    if (!stage) return;
 
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      stage.style.setProperty('--p', '1');
+      stage.style.setProperty('--pf', '1');
+      stage.style.setProperty('--pl', '1');
       return;
     }
 
     const flap = stage.querySelector<HTMLElement>('.env-flap');
+    const letter = stage.querySelector<HTMLElement>('.env-letter');
+
+    // Phase boundaries in raw scroll px; recomputed by measure() on resize and
+    // whenever the letter's content height changes (e.g. conditional fields).
+    let flapPx = 1;
+    let riseStart = 0;
+    let riseLen = 1;
+    let minRise = 1;
+
     let raf = 0;
     const update = () => {
       raf = 0;
-      // Reach p=1 at ~80% of the pin travel, leaving a settled tail at the end.
-      const travel = Math.max(1, track.offsetHeight - window.innerHeight);
-      const raw = Math.min(1, Math.max(0, window.scrollY / (travel * 0.8)));
-      const p = easeInOutCubic(raw);
-      stage.style.setProperty('--p', p.toFixed(4));
+      const y = window.scrollY;
+      const pf = easeInOutCubic(Math.min(1, Math.max(0, y / flapPx)));
+      const raw = Math.min(1, Math.max(0, (y - riseStart) / riseLen));
+      // Short letters keep the eased, cinematic rise; letters taller than the
+      // floor rise linearly so one px of scroll ≈ one px of letter, which reads
+      // like normal document scrolling through a long form.
+      const pl = riseLen <= minRise ? easeInOutCubic(raw) : raw;
+      stage.style.setProperty('--pf', pf.toFixed(4));
+      stage.style.setProperty('--pl', pl.toFixed(4));
       // Flap on top while sealed; behind the letter once it starts opening so it
       // stays visible (standing open) without covering the letter's content.
-      if (flap) flap.style.zIndex = p < 0.08 ? '14' : '8';
+      if (flap) flap.style.zIndex = pf < 0.08 ? '14' : '8';
     };
-    const onScroll = () => {
+    const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);
     };
 
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    const measure = () => {
+      const vh = window.innerHeight;
+      flapPx = Math.min(560, Math.max(280, vh * 0.55));
+      // The letter starts rising while the flap finishes opening.
+      riseStart = flapPx * 0.6;
+      minRise = vh * 0.6;
+      const letterH = letter?.offsetHeight ?? 0;
+      // translateY spans 116% of the letter's own height, so a linear scroll
+      // segment of 1.16·H px maps scroll to rise exactly 1:1.
+      riseLen = Math.max(1.16 * letterH, minRise);
+      stage.style.setProperty('--letter-h', `${Math.round(letterH)}px`);
+      // Runway = rise distance + a settled beat before the pin releases.
+      stage.style.setProperty(
+        '--runway',
+        `${Math.round(riseStart + riseLen + vh * 0.25)}px`
+      );
+      schedule();
+    };
+
+    const ro = letter ? new ResizeObserver(measure) : null;
+    if (letter) ro?.observe(letter);
+
+    measure();
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', measure);
     return () => {
       if (raf) cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
+      ro?.disconnect();
+      window.removeEventListener('scroll', schedule);
+      window.removeEventListener('resize', measure);
     };
   }, []);
 
   return (
     <div ref={stageRef}>
-      <div ref={trackRef} className="reveal-track">
+      <div className="reveal-track">
         <div className="reveal-pin">
           <div className="env-wrap">
             <div className="env-back" aria-hidden />
