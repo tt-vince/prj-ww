@@ -20,8 +20,16 @@ export default async function Home({
     <main>
       <EnvelopeReveal>
         {!guest ? (
-          // Rule 3: no guest detected → hide the form.
-          <p className="mt-6 text-center text-muted-foreground" />
+          // Rule 3: no guest / unknown token → greeting instead of the form.
+          <div className="text-center">
+            <p className="font-script text-4xl leading-tight text-[color:var(--script)]">
+              You&apos;re Invited
+            </p>
+            <p className="mt-4 text-muted-foreground">
+              This link is missing your personal code, so we can&apos;t tell who
+              you are. Please use the RSVP link from your invitation to respond.
+            </p>
+          </div>
         ) : guest.status !== 'pending' ? (
           // Rule 6: already answered.
           <div className="mt-6 text-center">

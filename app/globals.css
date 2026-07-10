@@ -227,9 +227,9 @@
 
    Why pinned + handoff: the letter is drawn BEHIND the envelope faces (z-index
    1) so it is fully hidden until it clears the top edge — that fixes "letter
-   visible outside the envelope before it opens". A tall interactive form cannot
-   live inside a fixed-size envelope, so the reveal shows a short greeting; the
-   real form is a separate section that scrolls in when the pin lets go. */
+   visible outside the envelope before it opens". The letter (the RSVP
+   form, or a greeting when there is no token) rises out through the centre and
+   its base tucks behind the front flaps; the envelope stays fully visible. */
 .reveal-track {
   position: relative;
   /* Scroll runway: (height − 100vh) is the distance mapped to p 0→1. */
@@ -247,9 +247,9 @@
   position: absolute;
   left: 50%;
   bottom: 12dvh;
-  width: min(90vw, 460px);
-  /* Landscape pocket (real envelope proportions), not a tall rectangle. */
-  aspect-ratio: 1.5;
+  width: min(92vw, 480px);
+  /* Landscape envelope proportions (wider than tall). */
+  aspect-ratio: 1.7;
   transform: translateX(-50%);
   perspective: 1600px;
   perspective-origin: center 40%;
@@ -259,59 +259,40 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  border-radius: 14px;
-  /* Envelope body: the deepest wisteria, defines the silhouette + edge. Also
-     the inner lining revealed when the flap opens. */
-  background: linear-gradient(158deg, #d7c9ea 0%, #c1b0dd 100%);
-  border-radius: 18px;
-  border: 1px solid rgba(122, 106, 160, 0.35);
+  /* Envelope inner/back — flat ivory paper, revealed when the flap opens. */
+  background: #efe7db;
   box-shadow:
-    0 34px 60px -30px rgba(74, 47, 58, 0.32),
-    0 10px 22px -14px rgba(74, 47, 58, 0.2);
+    0 30px 58px -30px rgba(74, 47, 58, 0.3),
+    0 10px 22px -14px rgba(74, 47, 58, 0.16);
 }
 
-/* Flap: a downward white triangle covering the top; rotates fully open (-179deg)
-   about its top edge as the envelope opens. Holds the wax seal at its tip. */
+/* Top flap: a downward ivory triangle covering the top; rotates fully open
+   (-179deg) about its top edge as the envelope opens. */
 .env-flap {
   position: absolute;
   inset-inline: 0;
   top: 0;
-  height: 62%;
-  z-index: 6;
-  /* Top flap catches the light — the lightest wisteria. */
-  background: linear-gradient(180deg, #ece5f5 0%, #d6c8e9 100%);
+  height: 58%;
+  z-index: 14; /* flap folds last — on top when closed */
+  /* Flat ivory paper, a touch lighter than the body. */
+  background: #f6f2ec;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   /* No border-radius: a clipped triangle + radius leaves gaps at the corners. */
   transform-origin: top center;
   /* Real fold: the flap rotates fully open (template ahoidahl/mydZXQJ). */
   transform: rotateX(calc(var(--p, 0) * -179deg));
-  filter: drop-shadow(0 6px 4px rgba(74, 47, 58, 0.14));
+  filter: drop-shadow(0 5px 4px rgba(74, 47, 58, 0.14));
+  /* z-index is swapped in JS: on top when closed, behind the letter once open
+     (so the open flap stays visible standing behind the letter). */
 }
 
-/* Wax seal on the closed flap tip (fades out with its parent flap). */
-.env-seal {
-  position: absolute;
-  left: 50%;
-  top: 88%;
-  height: 2.35rem;
-  width: 2.35rem;
-  border-radius: 9999px;
-  background: radial-gradient(circle at 35% 28%, #d49aab 0%, #b47f8f 62%, #9c6b7a 100%);
-  box-shadow:
-    inset 0 1px 2px rgba(255, 255, 255, 0.45),
-    inset 0 -4px 7px rgba(0, 0, 0, 0.3),
-    0 3px 6px rgba(74, 47, 58, 0.3);
-  transform: translate(-50%, -50%);
-  backface-visibility: hidden; /* hides as the flap folds away */
-}
-
-/* Clip window: the letter is only visible ABOVE the pocket mouth (clip bottom
-   at 42% from the wrap top). Extends far upward for tall content. */
+/* Clip window: the letter is only visible ABOVE its bottom edge (the mouth, at
+   the envelope centre). Extends far upward so tall content is never clipped. */
 .letter-clip {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  bottom: 20%;
+  bottom: 50%;
   top: -240%;
   width: 84%;
   z-index: 10; /* letter sits above the flap, below the front pocket (z 12) */
@@ -327,11 +308,11 @@
 .env-letter {
   width: 100%;
   pointer-events: auto;
-  border: 1px solid #efe6ee;
+  border: 1px solid #ece5ea;
   border-bottom: none;
-  border-radius: 16px 16px 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #fdfbfe 100%);
-  box-shadow: 0 -18px 44px -22px rgba(74, 47, 58, 0.28);
+  border-radius: 0;
+  background: #ffffff;
+  box-shadow: 0 -16px 40px -22px rgba(74, 47, 58, 0.22);
   transform: translateY(clamp(0%, calc((1 - var(--p, 0)) * 116%), 116%));
 }
 .env-content {
@@ -342,41 +323,34 @@
   scrollbar-color: #d9cfe0 transparent;
 }
 
-/* Front pocket: a shallow band across the BOTTOM with an upward chevron top
-   (the envelope's front flap). It sits in front of the letter (z 5) and tucks
-   only the letter's base, so the letter's content above it is never covered.
-   Paired with the big top flap, the sealed envelope still reads as one shape. */
+/* Bottom flap: triangle from the bottom edge up to the centre. In FRONT of the
+   letter (z 12) so it tucks the letter's base; content above centre is clear. */
 .env-front {
   position: absolute;
-  inset-inline: 0;
-  top: 62%;
-  bottom: 0;
+  inset: 0;
   z-index: 12;
-  /* V-notch mouth at top-centre; the letter emerges through it (template). */
-  clip-path: polygon(0 0, 50% 20%, 100% 0, 100% 100%, 0 100%);
-  /* Front pocket: mid wisteria, a touch deeper than the flap for depth. */
-  background: linear-gradient(180deg, #cfc0e4 0%, #b9a6d6 100%);
-  border-radius: 0 0 17px 17px;
-  filter: drop-shadow(0 -6px 4px rgba(74, 47, 58, 0.1));
-  overflow: hidden;
+  clip-path: polygon(0 100%, 100% 100%, 50% 50%);
+  background: #eee6da;
+  filter: drop-shadow(0 -5px 5px rgba(74, 47, 58, 0.14));
   pointer-events: none;
 }
-/* Two side triangles meeting at centre = the front's diagonal fold creases
-   (template's .env_bottom::before/::after). */
-.env-crease {
+/* Left/right side flaps — full-height triangles from the side edges up to the
+   TOP corners, apex at the centre (like a real envelope). In FRONT of the
+   letter (z 12) so the letter emerges through the centre with its sides tucked.
+   Slight L/R tone difference gives the diagonal fold creases. */
+.env-face {
   position: absolute;
-  bottom: 0;
-  width: 50%;
-  height: 100%;
-  background: #c2b0dd;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
 }
-.env-crease-l {
-  left: 0;
-  clip-path: polygon(100% 50%, 0 0, 0 100%);
+.env-face-left {
+  clip-path: polygon(0 0, 0 100%, 50% 50%);
+  background: #ebe3d7;
 }
-.env-crease-r {
-  right: 0;
-  clip-path: polygon(0 50%, 100% 0, 100% 100%);
+.env-face-right {
+  clip-path: polygon(100% 0, 100% 100%, 50% 50%);
+  background: #f2ebe0;
 }
 
 /* Discoverability cue below the envelope; fades the instant scrolling starts. */
@@ -437,7 +411,7 @@
   }
   .env-back,
   .env-flap,
-  .env-seal,
+  .env-face,
   .env-front,
   .env-cue {
     display: none;
@@ -451,8 +425,8 @@
   }
   .env-letter {
     transform: none;
-    border-bottom: 1px solid #efe6ee;
-    border-radius: 16px;
+    border-bottom: 1px solid #ece5ea;
+    border-radius: 0;
   }
   .env-content {
     max-height: none;

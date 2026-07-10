@@ -10,16 +10,16 @@ function easeInOutCubic(t: number): number {
 /**
  * Scroll-driven envelope reveal for the homepage.
  *
- * A wax-sealed envelope stays fixed in the lower-centre of a pinned stage and
+ * An ivory paper envelope stays fixed in the lower-centre of a pinned stage and
  * never disappears. As you scroll, the top flap folds open and the paper letter
- * (`children` — the RSVP form / message) slides UP out of the pocket, settling
- * with its base still tucked in so the whole envelope stays visible and all the
- * letter content shows above the flaps.
+ * (`children` — the RSVP form / greeting) slides UP out of it, settling with its
+ * base tucked behind the front flaps so the whole envelope stays visible.
  *
- * All four envelope flaps meet at the centre, so the closed envelope reads as
- * one cohesive shape. The letter lives in `.letter-clip` (overflow-hidden, its
+ * All four flaps meet at the centre, so the closed envelope reads as one clean,
+ * symmetric shape. The letter lives in `.letter-clip` (overflow-hidden, its
  * bottom edge = the mouth) so it is invisible until it clears the mouth; the
- * front flaps (`.env-face-*`, z-index 5, `pointer-events:none`) hold its base.
+ * front flaps (`.env-front` + `.env-face-*`, z-index 12, `pointer-events:none`)
+ * tuck its base while never covering the content above the centre.
  *
  * Motion is a single eased scroll-progress value `--p` (0→1) written onto the
  * stage each frame; all transforms live in CSS (app/globals.css · "Envelope
@@ -40,13 +40,18 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       return;
     }
 
+    const flap = stage.querySelector<HTMLElement>('.env-flap');
     let raf = 0;
     const update = () => {
       raf = 0;
       // Reach p=1 at ~80% of the pin travel, leaving a settled tail at the end.
       const travel = Math.max(1, track.offsetHeight - window.innerHeight);
       const raw = Math.min(1, Math.max(0, window.scrollY / (travel * 0.8)));
-      stage.style.setProperty('--p', easeInOutCubic(raw).toFixed(4));
+      const p = easeInOutCubic(raw);
+      stage.style.setProperty('--p', p.toFixed(4));
+      // Flap on top while sealed; behind the letter once it starts opening so it
+      // stays visible (standing open) without covering the letter's content.
+      if (flap) flap.style.zIndex = p < 0.08 ? '14' : '8';
     };
     const onScroll = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -69,13 +74,15 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
           <div className="env-wrap">
             <div className="env-back" aria-hidden />
 
-            {/* Flap: a down-triangle that rotates fully open on scroll. */}
-            <div className="env-flap" aria-hidden>
-              <div className="env-seal" />
-            </div>
+            {/* Side flaps (in front) — flap + sides + bottom meet at the centre. */}
+            <div className="env-face env-face-left" aria-hidden />
+            <div className="env-face env-face-right" aria-hidden />
 
-            {/* The letter (= page content) slides up out of the pocket. Extra
-                bottom padding is the part that tucks behind the front pocket. */}
+            {/* Top flap: rotates fully open on scroll (z-index swapped in JS). */}
+            <div className="env-flap" aria-hidden />
+
+            {/* The letter (= page content) rises out through the centre. The
+                extra bottom padding is what tucks behind the front flaps. */}
             <div className="letter-clip">
               <div className="env-letter">
                 <div className="env-content px-6 pt-9 pb-16 sm:px-9 sm:pt-11 sm:pb-20">
@@ -84,12 +91,8 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            {/* Front pocket (V-notch mouth + diagonal fold creases) — tucks
-                the letter's base; always visible. */}
-            <div className="env-front" aria-hidden>
-              <div className="env-crease env-crease-l" />
-              <div className="env-crease env-crease-r" />
-            </div>
+            {/* Bottom flap — in front of the letter's base, tucks it in. */}
+            <div className="env-front" aria-hidden />
           </div>
 
           {/* Discoverability cue — fades out as soon as scrolling starts. */}
