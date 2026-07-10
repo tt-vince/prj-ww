@@ -1,5 +1,6 @@
 import { getGuestByToken } from '@/lib/data';
 import { RsvpForm } from '@/components/rsvp-form';
+import { EnvelopeReveal } from '@/components/envelope-reveal';
 
 /**
  * Landing page = the RSVP questionnaire. The invitee is identified by the
@@ -16,27 +17,41 @@ export default async function Home({
   const guest = token ? await getGuestByToken(token) : undefined;
 
   return (
-    <main style={{ maxWidth: 560, margin: '0 auto', padding: '3rem 1.5rem' }}>
-      <h1>You&apos;re Invited</h1>
-
-      {!guest ? (
-        // Rule 3: no guest detected → hide the form.
-        <p>
-          Please open the personal RSVP link that was shared with you to respond.
-        </p>
-      ) : guest.status !== 'pending' ? (
-        // Rule 6: already answered.
-        <>
-          <p>Hi {guest.name},</p>
-          <p>You have already responded. Thank you!</p>
-        </>
-      ) : (
-        <>
-          {/* Rule 2: personalized greeting. */}
-          <p>Hi {guest.name}, we&apos;d love to know if you can make it.</p>
-          <RsvpForm token={guest.token} maxGuests={guest.maxGuests} />
-        </>
-      )}
+    <main>
+      <EnvelopeReveal>
+        {!guest ? (
+          // Rule 3: no guest / unknown token → greeting instead of the form.
+          <div className="text-center">
+            <p className="font-script text-4xl leading-tight text-[color:var(--script)]">
+              You&apos;re Invited
+            </p>
+            <p className="mt-4 text-muted-foreground">
+              This link is missing your personal code, so we can&apos;t tell who
+              you are. Please use the RSVP link from your invitation to respond.
+            </p>
+          </div>
+        ) : guest.status !== 'pending' ? (
+          // Rule 6: already answered.
+          <div className="mt-6 text-center">
+            <p className="font-heading text-2xl text-foreground">
+              Hi {guest.name},
+            </p>
+            <p className="mt-2 text-muted-foreground">
+              You have already responded. Thank you!
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Rule 2: personalized greeting. */}
+            <p className="mt-4 text-center font-heading text-2xl leading-snug text-foreground">
+              Hi {guest.name}, we&apos;d love to know if you can make it.
+            </p>
+            <div className="mt-8">
+              <RsvpForm token={guest.token} maxGuests={guest.maxGuests} />
+            </div>
+          </>
+        )}
+      </EnvelopeReveal>
     </main>
   );
 }
