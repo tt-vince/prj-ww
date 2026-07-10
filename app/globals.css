@@ -392,6 +392,35 @@
   }
 }
 
+/* Tablet: cap the envelope a touch smaller. */
+@media (max-width: 900px) {
+  .env-wrap {
+    width: min(90vw, 440px);
+  }
+}
+
+/* Mobile: wider letter for form room, shorter envelope, tighter cue; keep the
+   whole envelope in view and let tall content scroll inside the letter. */
+@media (max-width: 640px) {
+  .env-wrap {
+    width: 92vw;
+    bottom: 9dvh;
+  }
+  .letter-clip {
+    width: 92%;
+  }
+  .env-content {
+    max-height: 72dvh;
+  }
+  .env-cue {
+    bottom: 2.5dvh;
+  }
+  .env-cue-text {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* No pin, no envelope: collapse the runway and show the letter statically. */
   .reveal-track {
