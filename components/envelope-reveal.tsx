@@ -28,6 +28,17 @@ const SETTLE_VH = 0.25;
 const LETTER_TRAVEL = 1.16;
 /** Flap progress past which the flap drops behind the letter (z-index swap). */
 const FLAP_Z_SWAP = 0.08;
+/** CSS approximation of easeInOutCubic, for the compositor-driven path. */
+const EASE_IN_OUT_CUBIC_CSS = 'cubic-bezier(0.65, 0, 0.35, 1)';
+
+/**
+ * Browsers with CSS scroll-driven animations run the reveal on the compositor
+ * (keyframes in globals.css bound to the scroll offset) — the letter tracks
+ * the finger even when the main thread is busy. Everything else falls back to
+ * the per-frame JS below.
+ */
+const supportsScrollTimeline = () =>
+  typeof CSS !== 'undefined' && CSS.supports('animation-timeline', 'scroll()');
 
 /**
  * Scroll-driven envelope reveal for the homepage.
@@ -43,14 +54,19 @@ const FLAP_Z_SWAP = 0.08;
  * front flaps (`.env-front` + `.env-face-*`, z-index 12, `pointer-events:none`)
  * tuck its base while never covering the content above the centre.
  *
- * Motion is two scroll-progress values written onto the stage each frame:
- * `--pf` (flap fold, eased, completes in the first ~half viewport of scroll)
- * and `--pl` (letter rise). For letters taller than the viewport `--pl` is
- * linear over a runway sized 1:1 to the letter's measured height, so the whole
- * letter scrolls out like a normal document — no inner scrollbar. The runway
- * (`--runway`) and clip headroom (`--letter-h`) are measured via
- * ResizeObserver; all transforms live in CSS (app/globals.css · "Envelope
- * reveal"), so it scrubs with the scrollbar for no React re-renders.
+ * The reveal spans the first `--runway` px of scroll: the flap folds open,
+ * then the letter rises out of the mouth. For letters taller than the viewport
+ * the rise is linear and 1:1 with scroll (sized from the measured letter
+ * height), so the whole letter scrolls out like a normal document — no inner
+ * scrollbar. JS measures via ResizeObserver and publishes px ranges as custom
+ * properties (`--runway`, `--letter-h`, `--flap-px`, `--rise-start`,
+ * `--rise-len`).
+ *
+ * On browsers with CSS scroll-driven animations the motion itself is
+ * compositor-driven keyframes (app/globals.css · "Envelope reveal") — no
+ * per-frame JS. Otherwise a scroll listener writes eased progress values
+ * `--pf` (flap fold) and `--pl` (letter rise) each frame; either way there are
+ * no React re-renders and the motion scrubs with the scrollbar.
  * `prefers-reduced-motion` drops the envelope and shows the letter statically.
  */
 export function EnvelopeReveal({ children }: { children: ReactNode }) {
@@ -69,6 +85,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     const flap = stage.querySelector<HTMLElement>('.env-flap');
     const letter = stage.querySelector<HTMLElement>('.env-letter');
     stage.style.setProperty('--letter-travel', String(LETTER_TRAVEL));
+    const compositor = supportsScrollTimeline();
 
     // Phase boundaries in raw scroll px; recomputed by measure() on resize and
     // whenever the letter's content height changes (e.g. conditional fields).
@@ -124,12 +141,24 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       riseLen = Math.max(LETTER_TRAVEL * letterH, minRise);
       easeRise = riseLen <= minRise;
       stage.style.setProperty('--letter-h', `${Math.round(letterH)}px`);
+      stage.style.setProperty('--flap-px', `${Math.round(flapPx)}px`);
+      stage.style.setProperty('--rise-start', `${Math.round(riseStart)}px`);
+      stage.style.setProperty('--rise-len', `${Math.round(riseLen)}px`);
       // Runway = rise distance + a settled beat before the pin releases.
       stage.style.setProperty(
         '--runway',
         `${Math.round(riseStart + riseLen + vh * SETTLE_VH)}px`
       );
-      schedule();
+      if (compositor) {
+        // The keyframes track the scroll offset by themselves; only the rise
+        // feel is per-measure state (eased for short letters, 1:1 for tall).
+        if (letter)
+          letter.style.animationTimingFunction = easeRise
+            ? EASE_IN_OUT_CUBIC_CSS
+            : 'linear';
+      } else {
+        schedule();
+      }
     };
     // Coalesce resize bursts to one measure per frame — measure() reads
     // offsetHeight, which forces layout on every call otherwise.
@@ -146,13 +175,14 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     if (letter) ro?.observe(letter);
 
     measure();
-    window.addEventListener('scroll', schedule, { passive: true });
+    if (!compositor)
+      window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', scheduleMeasure);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       if (measureRaf) cancelAnimationFrame(measureRaf);
       ro?.disconnect();
-      window.removeEventListener('scroll', schedule);
+      if (!compositor) window.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', scheduleMeasure);
     };
   }, []);
