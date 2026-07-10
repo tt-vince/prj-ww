@@ -69,10 +69,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
           <div className="env-wrap">
             <div className="env-back" aria-hidden />
 
-            {/* Open flap (pale inner paper) standing up behind the letter. */}
-            <div className="env-flap-open" aria-hidden />
-
-            {/* Closed flap (sealed) tilts back and fades as it opens. */}
+            {/* Flap: a down-triangle that rotates fully open on scroll. */}
             <div className="env-flap" aria-hidden>
               <div className="env-seal" />
             </div>
@@ -87,8 +84,12 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            {/* Front pocket — tucks the letter's base, always visible. */}
-            <div className="env-front" aria-hidden />
+            {/* Front pocket (V-notch mouth + diagonal fold creases) — tucks
+                the letter's base; always visible. */}
+            <div className="env-front" aria-hidden>
+              <div className="env-crease env-crease-l" />
+              <div className="env-crease env-crease-r" />
+            </div>
           </div>
 
           {/* Discoverability cue — fades out as soon as scrolling starts. */}
