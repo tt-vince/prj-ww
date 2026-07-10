@@ -329,6 +329,13 @@
   transform: translateY(
     calc((1 - var(--pl, 0)) * var(--letter-travel, 1.16) * 100%)
   );
+  /* Own compositor layer: the transform changes every scroll frame, and the
+     letter is the largest paint surface on the page — without promotion each
+     frame re-rasterizes it plus its box-shadow. The opaque white background
+     keeps subpixel text antialiasing on the promoted layer, and at rest
+     (--pl: 1) the transform is exactly 0 so text sits pixel-snapped. If text
+     looks soft mid-scroll on some device, deleting this line is the revert. */
+  will-change: transform;
 }
 
 /* Bottom flap: triangle from the bottom edge up to the centre. In FRONT of the
