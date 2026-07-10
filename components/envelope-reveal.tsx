@@ -7,6 +7,28 @@ function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 }
 
+const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
+
+/* Motion tuning. All scroll distances are raw pixels. */
+/** Scroll segment that folds the flap open: 55% of the viewport, 280–560px. */
+const FLAP_VH = 0.55;
+const FLAP_MIN_PX = 280;
+const FLAP_MAX_PX = 560;
+/** The letter starts rising when the flap is this far through its segment. */
+const RISE_START_FRAC = 0.6;
+/** Floor on the rise segment so short letters keep an unhurried, eased rise. */
+const MIN_RISE_VH = 0.6;
+/** Settled beat at the end of the runway before the pin releases. */
+const SETTLE_VH = 0.25;
+/**
+ * translateY span as a fraction of the letter's own height — the extra 16%
+ * tucks the padded base behind the front flaps. Written to CSS as
+ * `--letter-travel` so the transform in globals.css shares this one value.
+ */
+const LETTER_TRAVEL = 1.16;
+/** Flap progress past which the flap drops behind the letter (z-index swap). */
+const FLAP_Z_SWAP = 0.08;
+
 /**
  * Scroll-driven envelope reveal for the homepage.
  *
@@ -46,29 +68,47 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
 
     const flap = stage.querySelector<HTMLElement>('.env-flap');
     const letter = stage.querySelector<HTMLElement>('.env-letter');
+    stage.style.setProperty('--letter-travel', String(LETTER_TRAVEL));
 
     // Phase boundaries in raw scroll px; recomputed by measure() on resize and
     // whenever the letter's content height changes (e.g. conditional fields).
     let flapPx = 1;
     let riseStart = 0;
     let riseLen = 1;
-    let minRise = 1;
+    // Short letters keep the eased, cinematic rise; letters taller than the
+    // floor rise linearly so one px of scroll ≈ one px of letter, which reads
+    // like normal document scrolling through a long form.
+    let easeRise = false;
+
+    // Last written values — skipping no-op writes avoids per-frame style
+    // invalidation on the saturated stretches (pf pinned at 1, pl at 0 or 1).
+    let lastPf = '';
+    let lastPl = '';
+    let lastFlapZ = '';
 
     let raf = 0;
     const update = () => {
       raf = 0;
       const y = window.scrollY;
-      const pf = easeInOutCubic(Math.min(1, Math.max(0, y / flapPx)));
-      const raw = Math.min(1, Math.max(0, (y - riseStart) / riseLen));
-      // Short letters keep the eased, cinematic rise; letters taller than the
-      // floor rise linearly so one px of scroll ≈ one px of letter, which reads
-      // like normal document scrolling through a long form.
-      const pl = riseLen <= minRise ? easeInOutCubic(raw) : raw;
-      stage.style.setProperty('--pf', pf.toFixed(4));
-      stage.style.setProperty('--pl', pl.toFixed(4));
+      const pfN = easeInOutCubic(clamp01(y / flapPx));
+      const rawN = clamp01((y - riseStart) / riseLen);
+      const pf = pfN.toFixed(4);
+      const pl = (easeRise ? easeInOutCubic(rawN) : rawN).toFixed(4);
+      if (pf !== lastPf) {
+        lastPf = pf;
+        stage.style.setProperty('--pf', pf);
+      }
+      if (pl !== lastPl) {
+        lastPl = pl;
+        stage.style.setProperty('--pl', pl);
+      }
       // Flap on top while sealed; behind the letter once it starts opening so it
       // stays visible (standing open) without covering the letter's content.
-      if (flap) flap.style.zIndex = pf < 0.08 ? '14' : '8';
+      const flapZ = pfN < FLAP_Z_SWAP ? '14' : '8';
+      if (flap && flapZ !== lastFlapZ) {
+        lastFlapZ = flapZ;
+        flap.style.zIndex = flapZ;
+      }
     };
     const schedule = () => {
       if (!raf) raf = requestAnimationFrame(update);
@@ -76,21 +116,30 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
 
     const measure = () => {
       const vh = window.innerHeight;
-      flapPx = Math.min(560, Math.max(280, vh * 0.55));
-      // The letter starts rising while the flap finishes opening.
-      riseStart = flapPx * 0.6;
-      minRise = vh * 0.6;
+      flapPx = Math.min(FLAP_MAX_PX, Math.max(FLAP_MIN_PX, vh * FLAP_VH));
+      riseStart = flapPx * RISE_START_FRAC;
+      const minRise = vh * MIN_RISE_VH;
       const letterH = letter?.offsetHeight ?? 0;
-      // translateY spans 116% of the letter's own height, so a linear scroll
-      // segment of 1.16·H px maps scroll to rise exactly 1:1.
-      riseLen = Math.max(1.16 * letterH, minRise);
+      // A linear scroll segment of LETTER_TRAVEL·H px maps scroll to rise 1:1.
+      riseLen = Math.max(LETTER_TRAVEL * letterH, minRise);
+      easeRise = riseLen <= minRise;
       stage.style.setProperty('--letter-h', `${Math.round(letterH)}px`);
       // Runway = rise distance + a settled beat before the pin releases.
       stage.style.setProperty(
         '--runway',
-        `${Math.round(riseStart + riseLen + vh * 0.25)}px`
+        `${Math.round(riseStart + riseLen + vh * SETTLE_VH)}px`
       );
       schedule();
+    };
+    // Coalesce resize bursts to one measure per frame — measure() reads
+    // offsetHeight, which forces layout on every call otherwise.
+    let measureRaf = 0;
+    const scheduleMeasure = () => {
+      if (!measureRaf)
+        measureRaf = requestAnimationFrame(() => {
+          measureRaf = 0;
+          measure();
+        });
     };
 
     const ro = letter ? new ResizeObserver(measure) : null;
@@ -98,12 +147,13 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
 
     measure();
     window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', measure);
+    window.addEventListener('resize', scheduleMeasure);
     return () => {
       if (raf) cancelAnimationFrame(raf);
+      if (measureRaf) cancelAnimationFrame(measureRaf);
       ro?.disconnect();
       window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', measure);
+      window.removeEventListener('resize', scheduleMeasure);
     };
   }, []);
 
