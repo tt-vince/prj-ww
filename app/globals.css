@@ -286,6 +286,9 @@
   transform-origin: top center;
   /* Real fold: the flap rotates fully open (template ahoidahl/mydZXQJ). */
   transform: rotateX(calc(var(--pf, 0) * -179deg));
+  /* Promote to its own layer: rotating under a drop-shadow would otherwise
+     re-rasterize every frame. No text here, so promotion is visually free. */
+  will-change: transform;
   filter: drop-shadow(0 5px 4px rgba(74, 47, 58, 0.14));
   /* z-index is swapped in JS: on top when closed, behind the letter once open
      (so the open flap stays visible standing behind the letter). */
@@ -295,11 +298,13 @@
    the envelope centre). Height tracks the measured letter (+ shadow room) so
    tall content is never clipped at the top. */
 .letter-clip {
+  /* Room above the letter for its upward box-shadow (see .env-letter). */
+  --shadow-headroom: 48px;
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
   bottom: 50%;
-  height: calc(var(--letter-h, 150dvh) + 48px);
+  height: calc(var(--letter-h, 150dvh) + var(--shadow-headroom));
   width: 84%;
   z-index: 10; /* letter sits above the flap, below the front pocket (z 12) */
   overflow: hidden;
@@ -310,16 +315,20 @@
 }
 
 /* The paper letter = the page content. Base-anchored to the mouth; slides up so
-   at p=0 it is pushed below the clip (hidden) and at p=1 fully out. */
+   at pl=0 it is pushed below the clip (hidden) and at pl=1 fully out.
+   --letter-travel (span as a fraction of the letter's height) is written by JS
+   (LETTER_TRAVEL in envelope-reveal.tsx); the fallback matches it. --pl is
+   already clamped 0..1 in JS, so no clamp() is needed here. */
 .env-letter {
   width: 100%;
   pointer-events: auto;
   border: 1px solid #ece5ea;
   border-bottom: none;
-  border-radius: 0;
   background: #ffffff;
   box-shadow: 0 -16px 40px -22px rgba(74, 47, 58, 0.22);
-  transform: translateY(clamp(0%, calc((1 - var(--pl, 0)) * 116%), 116%));
+  transform: translateY(
+    calc((1 - var(--pl, 0)) * var(--letter-travel, 1.16) * 100%)
+  );
 }
 
 /* Bottom flap: triangle from the bottom edge up to the centre. In FRONT of the
@@ -365,7 +374,8 @@
   gap: 0.3rem;
   color: #8a76b0;
   pointer-events: none;
-  opacity: clamp(0, calc((0.04 - var(--pf, 0)) * 25), 1);
+  /* Fully visible at rest, faded out by pf = 1/25 — the first hint of scroll. */
+  opacity: clamp(0, calc(1 - var(--pf, 0) * 25), 1);
 }
 .env-cue-text {
   font-size: 0.72rem;
@@ -452,6 +462,5 @@
   .env-letter {
     transform: none;
     border-bottom: 1px solid #ece5ea;
-    border-radius: 0;
   }
 }
