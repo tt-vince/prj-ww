@@ -427,20 +427,26 @@
       env-flap-fold 1ms cubic-bezier(0.65, 0, 0.35, 1) both,
       env-flap-z 1ms linear both;
     animation-timeline: scroll(root);
-    animation-range: 0px var(--flap-px, 500px);
+    /* --anchor shifts the active window to the envelope section (the vinyl
+       section is scrolled through first); 0 before JS measures. */
+    animation-range: var(--anchor, 0px)
+      calc(var(--anchor, 0px) + var(--flap-px, 500px));
   }
   .env-letter {
     animation: env-letter-rise 1ms linear both;
     animation-timeline: scroll(root);
-    animation-range: var(--rise-start, 300px)
-      calc(var(--rise-start, 300px) + var(--rise-len, 100vh));
+    animation-range: calc(var(--anchor, 0px) + var(--rise-start, 300px))
+      calc(
+        var(--anchor, 0px) + var(--rise-start, 300px) + var(--rise-len, 100vh)
+      );
   }
   .env-cue {
     /* Matches the JS fade: gone once the eased fold passes 0.04 — that is
        raw scroll fraction ∛0.01 ≈ 0.2154 of the flap segment. */
     animation: env-cue-fade 1ms linear both;
     animation-timeline: scroll(root);
-    animation-range: 0px calc(var(--flap-px, 500px) * 0.2154);
+    animation-range: var(--anchor, 0px)
+      calc(var(--anchor, 0px) + var(--flap-px, 500px) * 0.2154);
   }
 }
 @keyframes env-flap-fold {
@@ -547,5 +553,121 @@
   .env-letter {
     transform: none;
     border-bottom: 1px solid #ece5ea;
+  }
+}
+
+/* ── Vinyl music player (homepage intro section) ────────────────────
+   A black vinyl record centred in its own full-height section above the
+   envelope. It spins continuously (faster while playing) and toggles a looping
+   placeholder track on click (components/vinyl-player.tsx). Black grooved wax,
+   an ivory label echoing the envelope, and the same `.env-back` drop shadow. */
+.vinyl-section {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 2rem 1.5rem;
+}
+
+.vinyl {
+  display: block;
+  width: min(64vw, 300px);
+  aspect-ratio: 1;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  /* Black wax with fine concentric grooves, a sharp top-left glint, and a
+     conic sheen band. Because the grooves are rotationally symmetric, the glint
+     + band are what make the spin visible — they rotate with the disc and sweep
+     round as it turns. Warm-black to sit with the wisteria/fig palette. */
+  background:
+    /* Bright specular glint — the highlight that sweeps round on spin. */
+    radial-gradient(
+      circle at 30% 26%,
+      rgba(255, 255, 255, 0.42),
+      rgba(255, 255, 255, 0) 26%
+    ),
+    /* Two soft light bands (a strong one + a faint opposite one). */
+    conic-gradient(
+      from 210deg at 50% 50%,
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, 0.16) 38deg,
+      rgba(255, 255, 255, 0) 92deg,
+      rgba(255, 255, 255, 0) 210deg,
+      rgba(255, 255, 255, 0.08) 246deg,
+      rgba(255, 255, 255, 0) 300deg
+    ),
+    repeating-radial-gradient(
+      circle at center,
+      #151115 0 1px,
+      #241f24 1px 3px
+    ),
+    #191519;
+  /* Same drop shadow as `.env-back`, plus a subtle dark rim. */
+  box-shadow:
+    0 30px 58px -30px rgba(74, 47, 58, 0.3),
+    0 10px 22px -14px rgba(74, 47, 58, 0.16),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+  will-change: transform;
+}
+.vinyl:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+/* Centre label — ivory paper tone, echoing the envelope so the two read as a
+   set (real records often carry a cream label). */
+.vinyl-label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40%;
+  height: 40%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #efe7db;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.25),
+    inset 0 0 0 1px rgba(74, 47, 58, 0.08);
+}
+/* Spindle hole — punched through to the dark wax. */
+.vinyl-hole {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6%;
+  height: 6%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: #191519;
+  box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.6);
+}
+
+@keyframes vinyl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+/* Spins only while the music plays (is-spinning is toggled on play). */
+.vinyl.is-spinning {
+  animation: vinyl-spin 3s linear infinite;
+}
+
+.vinyl-hint {
+  margin: 0;
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+/* Reduced motion: keep the player usable, but never spin. */
+@media (prefers-reduced-motion: reduce) {
+  .vinyl.is-spinning {
+    animation: none;
   }
 }
