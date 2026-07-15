@@ -1,6 +1,7 @@
 import { getGuestByToken } from '@/lib/data';
 import { RsvpForm } from '@/components/rsvp-form';
 import { EnvelopeReveal } from '@/components/envelope-reveal';
+import { VinylPlayer } from '@/components/vinyl-player';
 
 /**
  * Landing page = the RSVP questionnaire. The invitee is identified by the
@@ -18,6 +19,7 @@ export default async function Home({
 
   return (
     <main>
+      <VinylPlayer />
       <EnvelopeReveal>
         {!guest ? (
           // Rule 3: no guest / unknown token → greeting instead of the form.

@@ -92,6 +92,10 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     let flapPx = 1;
     let riseStart = 0;
     let riseLen = 1;
+    // Document-offset of the reveal track's top. The reveal is anchored here so
+    // it only begins once this section scrolls to the top of the viewport (the
+    // vinyl section above it is scrolled through first). Recomputed in measure().
+    let anchorPx = 0;
     // Short letters keep the eased, cinematic rise; letters taller than the
     // floor rise linearly so one px of scroll ≈ one px of letter, which reads
     // like normal document scrolling through a long form.
@@ -106,7 +110,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     let raf = 0;
     const update = () => {
       raf = 0;
-      const y = window.scrollY;
+      const y = window.scrollY - anchorPx;
       const pfN = easeInOutCubic(clamp01(y / flapPx));
       const rawN = clamp01((y - riseStart) / riseLen);
       const pf = pfN.toFixed(4);
@@ -133,6 +137,13 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
 
     const measure = () => {
       const vh = window.innerHeight;
+      // Absolute document offset of the track top = where the reveal begins.
+      // Published as --anchor so the compositor ranges start at the section too.
+      anchorPx = Math.max(
+        0,
+        Math.round(stage.getBoundingClientRect().top + window.scrollY)
+      );
+      stage.style.setProperty('--anchor', `${anchorPx}px`);
       flapPx = Math.min(FLAP_MAX_PX, Math.max(FLAP_MIN_PX, vh * FLAP_VH));
       riseStart = flapPx * RISE_START_FRAC;
       const minRise = vh * MIN_RISE_VH;
