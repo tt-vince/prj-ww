@@ -233,7 +233,10 @@
    1) so it is fully hidden until it clears the top edge — that fixes "letter
    visible outside the envelope before it opens". The letter (the RSVP
    form, or a greeting when there is no token) rises out through the centre and
-   its base tucks behind the front flaps; the envelope stays fully visible. */
+   its base tucks behind the front flaps; the envelope starts centred and
+   glides down (--pd / env-drop keyframes, distance --env-drop) until only its
+   top half — top quarter on ≥1024px — stays visible, leaving the screen
+   above to the letter. */
 .reveal-track {
   position: relative;
   /* Scroll runway sized by JS from the measured letter height so the whole
@@ -244,18 +247,33 @@
   position: sticky;
   top: 0;
   height: 100dvh;
-  overflow: hidden;
+  /* Visible: the descended envelope may hang past the pin's box (below the
+     viewport edge) without being clipped. The letter's own clipping is done
+     by .letter-clip, not here. */
+  overflow: visible;
 }
 
 /* Fixed-size envelope scene; perspective lets the flap fold back in 3D. */
 .env-wrap {
   position: absolute;
   left: 50%;
-  bottom: 12dvh;
-  width: min(92vw, 480px);
+  top: 50%;
+  /* Fluid: span the screen with ≈4vw gutters each side. The 140dvh cap
+     (height ≤ 82dvh via the 1.7 aspect) keeps the envelope inside the
+     viewport on ultrawide screens. */
+  --env-w: min(92vw, 140dvh);
+  width: var(--env-w);
   /* Landscape envelope proportions (wider than tall). */
   aspect-ratio: 1.7;
-  transform: translateX(-50%);
+  /* Descent distance. 50dvh lands the centre — the mouth — on the viewport's
+     bottom edge: top half visible (tablet/mobile). Overridden for PC below. */
+  --env-drop: 50dvh;
+  /* Starts dead-centre; glides down --env-drop on its own scroll segment
+     (--pd 0→1 over --drop-px, slower than the flap fold), freeing the screen
+     above for the letter. The compositor path drives the same move via the
+     env-drop keyframes. */
+  transform: translate(-50%, calc(-50% + var(--pd, 0) * var(--env-drop)));
+  will-change: transform;
   perspective: 1600px;
   perspective-origin: center 40%;
 
@@ -451,9 +469,8 @@
    main thread is busy. envelope-reveal.tsx publishes the px ranges
    (--flap-px, --rise-start, --rise-len), sets the letter's timing function
    (eased for short letters, linear/1:1 for tall ones) and skips its per-frame
-   --pf/--pl fallback. scroll(root) is explicit because .reveal-pin and
-   .letter-clip are overflow:hidden scroll containers that scroll() would
-   otherwise resolve to. */
+   --pf/--pl fallback. scroll(root) is explicit because .letter-clip is an
+   overflow:hidden scroll container that scroll() would otherwise resolve to. */
 @supports (animation-timeline: scroll()) {
   /* The 1ms durations are load-bearing: the minifier expands omitted
      durations to 0s (the Animations-1 initial, not Animations-2's auto), and
@@ -464,10 +481,17 @@
       env-flap-fold 1ms cubic-bezier(0.65, 0, 0.35, 1) both,
       env-flap-z 1ms linear both;
     animation-timeline: scroll(root);
-    /* --anchor shifts the active window to the envelope section (the vinyl
-       section is scrolled through first); 0 before JS measures. */
+    /* --anchor shifts the active window to the envelope section (any intro
+       section above is scrolled through first); 0 before JS measures. */
     animation-range: var(--anchor, 0px)
       calc(var(--anchor, 0px) + var(--flap-px, 500px));
+  }
+  /* Envelope descent — own, longer scroll window (--drop-px), same easing. */
+  .env-wrap {
+    animation: env-drop 1ms cubic-bezier(0.65, 0, 0.35, 1) both;
+    animation-timeline: scroll(root);
+    animation-range: var(--anchor, 0px)
+      calc(var(--anchor, 0px) + var(--drop-px, 900px));
   }
   .env-letter {
     animation: env-letter-rise 1ms linear both;
@@ -492,6 +516,14 @@
   }
   to {
     transform: rotateX(-179deg);
+  }
+}
+@keyframes env-drop {
+  from {
+    transform: translate(-50%, -50%);
+  }
+  to {
+    transform: translate(-50%, calc(-50% + var(--env-drop, 50dvh)));
   }
 }
 /* Discrete flip mirroring the JS z-swap: eased fold passes FLAP_Z_SWAP (0.08)
@@ -523,20 +555,18 @@
   }
 }
 
-/* Tablet: cap the envelope a touch smaller. */
-@media (max-width: 900px) {
+/* PC and up: sink deeper — only the top quarter of the envelope stays
+   visible. Extra distance = a quarter of the envelope's height, i.e.
+   width / 1.7 (aspect) / 4 = width / 6.8. */
+@media (min-width: 1024px) {
   .env-wrap {
-    width: min(90vw, 440px);
+    --env-drop: calc(50dvh + var(--env-w) / 6.8);
   }
 }
 
-/* Mobile: wider letter for form room, shorter envelope, tighter cue; the
-   envelope stays in view while the letter scrolls fully out with the page. */
+/* Mobile: wider letter for form room, tighter cue; the envelope stays in
+   view while the letter scrolls fully out with the page. */
 @media (max-width: 640px) {
-  .env-wrap {
-    width: 92vw;
-    bottom: 9dvh;
-  }
   .letter-clip {
     width: 92%;
   }
@@ -574,6 +604,7 @@
     display: none;
   }
   /* Scroll-driven keyframes would override the static pose below. */
+  .env-wrap,
   .env-flap,
   .env-letter,
   .env-cue {
@@ -582,7 +613,7 @@
   .letter-clip {
     position: static;
     transform: none;
-    width: min(90vw, 400px);
+    width: min(92vw, 720px);
     height: auto;
     margin: 0 auto;
     overflow: visible;

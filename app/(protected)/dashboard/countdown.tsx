@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { WEDDING_DATE_ISO } from "@/lib/wedding";
 
-// TODO: exact wedding day not decided yet — using April 1, 2027 as placeholder.
-// Update TARGET_DATE once the real date is confirmed.
-const TARGET_DATE = new Date("2027-04-01T00:00:00");
+const TARGET_DATE = new Date(WEDDING_DATE_ISO);
 
 function diff(target: Date) {
   const ms = Math.max(0, target.getTime() - Date.now());
