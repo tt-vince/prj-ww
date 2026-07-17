@@ -258,14 +258,34 @@
   transform: translateX(-50%);
   perspective: 1600px;
   perspective-origin: center 40%;
+
+  /* Paper texture, shared by every envelope face (applied in the grouped
+     rule after the face colours below). Three layers over the base tone:
+       1. --paper-grain  — grayscale feTurbulence fibre tooth. Blended
+          soft-light so mid-grey noise is neutral: it embosses the paper
+          without shifting the ivory tone (no UI colour change).
+       2. --paper-mottle — a faint top-left sheen, as paper catches light.
+       3. --paper-laid   — hairline vertical laid lines (multiply), the
+          fibre weave of real writing paper. */
+  --paper-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='150' height='150'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  --paper-mottle: radial-gradient(
+    130% 110% at 28% 18%,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  --paper-laid: repeating-linear-gradient(
+    90deg,
+    rgba(90, 70, 55, 0.028) 0 1px,
+    transparent 1px 5px
+  );
 }
 
 .env-back {
   position: absolute;
   inset: 0;
   z-index: 1;
-  /* Envelope inner/back — flat ivory paper, revealed when the flap opens. */
-  background: #efe7db;
+  /* Envelope inner/back — wine-red paper, revealed when the flap opens. */
+  background: #6f2539;
   box-shadow:
     0 30px 58px -30px rgba(74, 47, 58, 0.3),
     0 10px 22px -14px rgba(74, 47, 58, 0.16);
@@ -279,8 +299,8 @@
   top: 0;
   height: 58%;
   z-index: 14; /* flap folds last — on top when closed */
-  /* Flat ivory paper, a touch lighter than the body. */
-  background: #f6f2ec;
+  /* Wine-red paper, a touch lighter than the body (lightest face). */
+  background: #7e2d43;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   /* No border-radius: a clipped triangle + radius leaves gaps at the corners. */
   transform-origin: top center;
@@ -345,7 +365,7 @@
   inset: 0;
   z-index: 12;
   clip-path: polygon(0 100%, 100% 100%, 50% 50%);
-  background: #eee6da;
+  background: #6a2236;
   filter: drop-shadow(0 -5px 5px rgba(74, 47, 58, 0.14));
   pointer-events: none;
 }
@@ -361,11 +381,28 @@
 }
 .env-face-left {
   clip-path: polygon(0 0, 0 100%, 50% 50%);
-  background: #ebe3d7;
+  background: #641f32;
 }
 .env-face-right {
   clip-path: polygon(100% 0, 100% 100%, 50% 50%);
-  background: #f2ebe0;
+  background: #78293e;
+}
+
+/* Layer the paper texture over every face. The individual rules above set
+   each face's base COLOUR (via the `background` shorthand, which also clears
+   background-image to none); this later, equal-specificity rule sets only
+   background-image, so the base colour is kept and the texture paints on top.
+   Layer order top→bottom matches the blend-mode list; the base colour is the
+   bottom layer every layer blends down onto. */
+.env-back,
+.env-flap,
+.env-front,
+.env-face-left,
+.env-face-right {
+  background-image: var(--paper-grain), var(--paper-mottle), var(--paper-laid);
+  background-repeat: repeat, no-repeat, repeat;
+  background-size: 150px 150px, 100% 100%, 5px 5px;
+  background-blend-mode: soft-light, soft-light, multiply;
 }
 
 /* Discoverability cue below the envelope; fades the instant scrolling starts. */
