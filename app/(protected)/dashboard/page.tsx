@@ -6,9 +6,8 @@ import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
 import { Countdown } from "./countdown";
+import { COUPLE } from "@/lib/wedding";
 
-// Placeholder couple + date lifted from the design; swap for the real names/date.
-const COUPLE = "Hyuwu & Empty";
 const OCCASION = "April 2027 · Guest responses";
 
 export default async function DashboardPage() {

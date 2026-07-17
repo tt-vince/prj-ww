@@ -10,14 +10,19 @@ function easeInOutCubic(t: number): number {
 const clamp01 = (n: number) => Math.min(1, Math.max(0, n));
 
 /* Motion tuning. All scroll distances are raw pixels. */
-/** Scroll segment that folds the flap open: 55% of the viewport, 280–560px. */
-const FLAP_VH = 0.55;
-const FLAP_MIN_PX = 280;
-const FLAP_MAX_PX = 560;
+/** Scroll segment that folds the flap open: one full viewport, 480–1000px. */
+const FLAP_VH = 1.0;
+const FLAP_MIN_PX = 480;
+const FLAP_MAX_PX = 1000;
+/** Envelope descent segment — deliberately longer than the flap fold so the
+    envelope sinks gently, still settling while the letter starts to rise. */
+const DROP_VH = 3.5;
+const DROP_MIN_PX = 1680;
+const DROP_MAX_PX = 3500;
 /** The letter starts rising when the flap is this far through its segment. */
 const RISE_START_FRAC = 0.6;
 /** Floor on the rise segment so short letters keep an unhurried, eased rise. */
-const MIN_RISE_VH = 0.6;
+const MIN_RISE_VH = 1.1;
 /** Settled beat at the end of the runway before the pin releases. */
 const SETTLE_VH = 0.25;
 /**
@@ -43,10 +48,13 @@ const supportsScrollTimeline = () =>
 /**
  * Scroll-driven envelope reveal for the homepage.
  *
- * An ivory paper envelope stays fixed in the lower-centre of a pinned stage and
- * never disappears. As you scroll, the top flap folds open and the paper letter
- * (`children` — the RSVP form / greeting) slides UP out of it, settling with its
- * base tucked behind the front flaps so the whole envelope stays visible.
+ * A wine-red envelope starts centred in a pinned stage. As you scroll it glides
+ * down — until only its top half (tablet/mobile) or top quarter (≥1024px) is
+ * visible — while the top flap folds open and the paper letter (`children` —
+ * the RSVP form / greeting) slides UP out of it, so the letter gets the whole
+ * screen above the mouth. The descent is pure CSS: the JS fallback writes --pd
+ * and the compositor path runs the env-drop keyframes; the distance itself is
+ * --env-drop (globals.css), where the PC media query deepens the sink.
  *
  * All four flaps meet at the centre, so the closed envelope reads as one clean,
  * symmetric shape. The letter lives in `.letter-clip` (overflow-hidden, its
@@ -90,11 +98,12 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     // Phase boundaries in raw scroll px; recomputed by measure() on resize and
     // whenever the letter's content height changes (e.g. conditional fields).
     let flapPx = 1;
+    let dropPx = 1;
     let riseStart = 0;
     let riseLen = 1;
     // Document-offset of the reveal track's top. The reveal is anchored here so
-    // it only begins once this section scrolls to the top of the viewport (the
-    // vinyl section above it is scrolled through first). Recomputed in measure().
+    // it only begins once this section scrolls to the top of the viewport (any
+    // intro section above it is scrolled through first). Recomputed in measure().
     let anchorPx = 0;
     // Short letters keep the eased, cinematic rise; letters taller than the
     // floor rise linearly so one px of scroll ≈ one px of letter, which reads
@@ -104,6 +113,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     // Last written values — skipping no-op writes avoids per-frame style
     // invalidation on the saturated stretches (pf pinned at 1, pl at 0 or 1).
     let lastPf = '';
+    let lastPd = '';
     let lastPl = '';
     let lastFlapZ = '';
 
@@ -112,12 +122,18 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       raf = 0;
       const y = window.scrollY - anchorPx;
       const pfN = easeInOutCubic(clamp01(y / flapPx));
+      const pdN = easeInOutCubic(clamp01(y / dropPx));
       const rawN = clamp01((y - riseStart) / riseLen);
       const pf = pfN.toFixed(4);
+      const pd = pdN.toFixed(4);
       const pl = (easeRise ? easeInOutCubic(rawN) : rawN).toFixed(4);
       if (pf !== lastPf) {
         lastPf = pf;
         stage.style.setProperty('--pf', pf);
+      }
+      if (pd !== lastPd) {
+        lastPd = pd;
+        stage.style.setProperty('--pd', pd);
       }
       if (pl !== lastPl) {
         lastPl = pl;
@@ -145,6 +161,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       );
       stage.style.setProperty('--anchor', `${anchorPx}px`);
       flapPx = Math.min(FLAP_MAX_PX, Math.max(FLAP_MIN_PX, vh * FLAP_VH));
+      dropPx = Math.min(DROP_MAX_PX, Math.max(DROP_MIN_PX, vh * DROP_VH));
       riseStart = flapPx * RISE_START_FRAC;
       const minRise = vh * MIN_RISE_VH;
       const letterH = letter?.offsetHeight ?? 0;
@@ -153,12 +170,14 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       easeRise = riseLen <= minRise;
       stage.style.setProperty('--letter-h', `${Math.round(letterH)}px`);
       stage.style.setProperty('--flap-px', `${Math.round(flapPx)}px`);
+      stage.style.setProperty('--drop-px', `${Math.round(dropPx)}px`);
       stage.style.setProperty('--rise-start', `${Math.round(riseStart)}px`);
       stage.style.setProperty('--rise-len', `${Math.round(riseLen)}px`);
-      // Runway = rise distance + a settled beat before the pin releases.
+      // Runway = the longest segment (letter rise vs envelope descent) + a
+      // settled beat before the pin releases.
       stage.style.setProperty(
         '--runway',
-        `${Math.round(riseStart + riseLen + vh * SETTLE_VH)}px`
+        `${Math.round(Math.max(riseStart + riseLen, dropPx) + vh * SETTLE_VH)}px`
       );
       if (compositor) {
         // The keyframes track the scroll offset by themselves; only the rise
@@ -216,7 +235,12 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
                 extra bottom padding is what tucks behind the front flaps. */}
             <div className="letter-clip">
               <div className="env-letter">
-                <div className="env-content px-6 pt-9 pb-16 sm:px-9 sm:pt-11 sm:pb-20">
+                {/* Content column proportional to the paper: 80% of the letter
+                    width on sm+ (full width on phones), centred. The large sm+
+                    bottom padding is the tuck allowance — the front flaps'
+                    wedges rise toward the mouth, and on a big envelope they
+                    would cover the last section without this clearance. */}
+                <div className="env-content mx-auto px-6 pt-9 pb-16 sm:max-w-[80%] sm:px-9 sm:pt-11 sm:pb-[max(6rem,24dvh)]">
                   {children}
                 </div>
               </div>
