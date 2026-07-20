@@ -48,13 +48,15 @@ const supportsScrollTimeline = () =>
 /**
  * Scroll-driven envelope reveal for the homepage.
  *
- * A wine-red envelope starts centred in a pinned stage. As you scroll it glides
- * down — until only its top half (tablet/mobile) or top quarter (≥1024px) is
- * visible — while the top flap folds open and the paper letter (`children` —
- * the RSVP form / greeting) slides UP out of it, so the letter gets the whole
- * screen above the mouth. The descent is pure CSS: the JS fallback writes --pd
- * and the compositor path runs the env-drop keyframes; the distance itself is
- * --env-drop (globals.css), where the PC media query deepens the sink.
+ * A wine-red envelope starts centred in a pinned stage. As you scroll it
+ * widens to full-bleed (--spread — the paper ends up edge to edge) and glides
+ * straight down until it has cleared the bottom of the screen entirely (no
+ * fade — it just exits below the fold), while the top flap folds open and the
+ * paper letter (`children` — the RSVP form / greeting) slides UP out of it,
+ * so the letter gets the whole screen. The descent is pure CSS: the JS
+ * fallback writes --pd and the compositor path runs the env-drop / env-spread
+ * keyframes; the distance itself is --env-drop (globals.css), sized to carry
+ * the whole envelope past the bottom edge.
  *
  * All four flaps meet at the centre, so the closed envelope reads as one clean,
  * symmetric shape. The letter lives in `.letter-clip` (overflow-hidden, its
@@ -87,6 +89,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       stage.style.setProperty('--pf', '1');
       stage.style.setProperty('--pl', '1');
+      stage.style.setProperty('--spread', '1');
       return;
     }
 
@@ -105,6 +108,9 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     // it only begins once this section scrolls to the top of the viewport (any
     // intro section above it is scrolled through first). Recomputed in measure().
     let anchorPx = 0;
+    // Viewport width at last measure — resize events that keep this width
+    // (mobile URL bar show/hide) are ignored, see onResize below.
+    let measuredW = 0;
     // Short letters keep the eased, cinematic rise; letters taller than the
     // floor rise linearly so one px of scroll ≈ one px of letter, which reads
     // like normal document scrolling through a long form.
@@ -130,6 +136,8 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       if (pf !== lastPf) {
         lastPf = pf;
         stage.style.setProperty('--pf', pf);
+        // Same eased value drives the full-bleed widening (globals.css).
+        stage.style.setProperty('--spread', pf);
       }
       if (pd !== lastPd) {
         lastPd = pd;
@@ -153,6 +161,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
 
     const measure = () => {
       const vh = window.innerHeight;
+      measuredW = window.innerWidth;
       // Absolute document offset of the track top = where the reveal begins.
       // Published as --anchor so the compositor ranges start at the section too.
       anchorPx = Math.max(
@@ -201,19 +210,29 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
         });
     };
 
-    const ro = letter ? new ResizeObserver(measure) : null;
+    // Mobile URL-bar show/hide fires resize with only the height changed;
+    // re-measuring then rewrites --runway mid-scroll and the page lurches up
+    // and down. Only a width change warrants a re-measure (the letter's own
+    // height changes are covered by the ResizeObserver).
+    const onResize = () => {
+      if (window.innerWidth !== measuredW) scheduleMeasure();
+    };
+
+    // rAF-coalesced: the widening reflows the letter for a stretch of frames,
+    // and a raw measure() per ResizeObserver tick would force layout each time.
+    const ro = letter ? new ResizeObserver(scheduleMeasure) : null;
     if (letter) ro?.observe(letter);
 
     measure();
     if (!compositor)
       window.addEventListener('scroll', schedule, { passive: true });
-    window.addEventListener('resize', scheduleMeasure);
+    window.addEventListener('resize', onResize);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       if (measureRaf) cancelAnimationFrame(measureRaf);
       ro?.disconnect();
       if (!compositor) window.removeEventListener('scroll', schedule);
-      window.removeEventListener('resize', scheduleMeasure);
+      window.removeEventListener('resize', onResize);
     };
   }, []);
 
@@ -236,11 +255,13 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
             <div className="letter-clip">
               <div className="env-letter">
                 {/* Content column proportional to the paper: 80% of the letter
-                    width on sm+ (full width on phones), centred. The large sm+
-                    bottom padding is the tuck allowance — the front flaps'
-                    wedges rise toward the mouth, and on a big envelope they
-                    would cover the last section without this clearance. */}
-                <div className="env-content mx-auto px-6 pt-9 pb-16 sm:max-w-[80%] sm:px-9 sm:pt-11 sm:pb-[max(6rem,24dvh)]">
+                    width on sm+ (full width on phones), capped at 56rem so
+                    lines stay readable once the paper widens to full-bleed.
+                    The large sm+ bottom padding is the tuck allowance — the
+                    front flaps' wedges rise toward the mouth, and on a big
+                    envelope they would cover the last section without this
+                    clearance. */}
+                <div className="env-content mx-auto px-6 pt-9 pb-16 sm:max-w-[min(80%,56rem)] sm:px-9 sm:pt-11 sm:pb-[max(6rem,24svh)]">
                   {children}
                 </div>
               </div>
