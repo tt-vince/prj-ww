@@ -5,7 +5,7 @@ import { AccountGarland, CoupleFigures, NameSprig } from "@/components/dashboard
 import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
-import { Countdown } from "./countdown";
+import { Countdown } from "@/components/countdown";
 import { COUPLE } from "@/lib/wedding";
 
 const OCCASION = "April 2027 · Guest responses";

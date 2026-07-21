@@ -11,7 +11,8 @@
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-serif: var(--font-gilda), ui-serif, Georgia, "Times New Roman", serif;
   --font-heading: var(--font-serif);
-  --font-script: var(--font-pinyon), ui-serif, cursive;
+  --font-script: var(--font-parisienne), ui-serif, cursive;
+  --font-countdown: var(--font-playwrite), cursive;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -62,7 +63,7 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (DM Sans / Gilda Display / Pinyon Script). */
+/* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (DM Sans / Gilda Display / Parisienne). */
 :root {
   --background: #ffffff;
   --foreground: #4a2f3a;
@@ -97,8 +98,8 @@
   --sidebar-border: #ece3ea;
   --sidebar-ring: #8a76b0;
 
-  /* Couple-name script accent. */
-  --script: #b07d8c;
+  /* Couple-name script accent (sage). */
+  --script: #556D47;
 
   /* Stat numbers, progress bars, status dots, and status pills (hi-fi). */
   --stat-going: #5f7a48;
@@ -163,7 +164,7 @@
   --stat-pending-bar: #dcb25f;
   --stat-invited: #b6a6d6;
   --stat-invited-bar: #8a76b0;
-  --script: #d3a7b5;
+  --script: #91A17C;
   --dot-going: #8fae6f;
   --dot-declined: #d3927a;
   --dot-pending: #e0bd73;
@@ -283,12 +284,16 @@
   /* Landscape envelope proportions (wider than tall). */
   aspect-ratio: 1.7;
   /* Descent distance. 50svh lands the centre — the mouth — on the viewport's
-     bottom edge; the extra distance carries the whole envelope past it so it
+     bottom edge; --env-overshoot carries the whole envelope past it so it
      exits the screen completely. Half the widened envelope's height (width /
      1.7 aspect / 2 = width / 3.4, and width = 100vw at full spread) clears the
      bottom edge, plus a small buffer. At the terminal scroll position the
-     envelope sits fully below the fold, so it never scrolls back into view. */
-  --env-drop: calc(52svh + 100vw / 3.4);
+     envelope sits fully below the fold, so it never scrolls back into view.
+     The letter's bottom edge (= the mouth) ends up --env-overshoot below the
+     viewport too, so .env-content pads its bottom by exactly this much —
+     that stripe is sacrificial and must hold no real content. */
+  --env-overshoot: calc(2svh + 100vw / 3.4);
+  --env-drop: calc(50svh + var(--env-overshoot));
   /* Starts dead-centre; glides down --env-drop on its own scroll segment
      (--pd 0→1 over --drop-px, slower than the flap fold), freeing the screen
      above for the letter. The compositor path drives the same move via the
@@ -323,8 +328,8 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  /* Envelope inner/back — wine-red paper, revealed when the flap opens. */
-  background: #6f2539;
+  /* Envelope inner/back — olive paper, revealed when the flap opens. */
+  background: #585b22;
   box-shadow:
     0 30px 58px -30px rgba(74, 47, 58, 0.3),
     0 10px 22px -14px rgba(74, 47, 58, 0.16);
@@ -339,7 +344,7 @@
   height: 58%;
   z-index: 14; /* flap folds last — on top when closed */
   /* Wine-red paper, a touch lighter than the body (lightest face). */
-  background: #7e2d43;
+  background: #6a6e2a;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
   /* No border-radius: a clipped triangle + radius leaves gaps at the corners. */
   transform-origin: top center;
@@ -398,6 +403,14 @@
   will-change: transform;
 }
 
+/* Tuck allowance: at terminal scroll the letter's bottom --env-overshoot px
+   sit below the viewport (see --env-drop above). This padding is that
+   sacrificial stripe, so the page's real content ends exactly at the
+   viewport's bottom edge. Inherits --env-overshoot from .env-wrap. */
+.env-content {
+  padding-bottom: var(--env-overshoot, 0px);
+}
+
 /* Bottom flap: triangle from the bottom edge up to the centre. In FRONT of the
    letter (z 12) so it tucks the letter's base; content above centre is clear. */
 .env-front {
@@ -405,7 +418,7 @@
   inset: 0;
   z-index: 12;
   clip-path: polygon(0 100%, 100% 100%, 50% 50%);
-  background: #6a2236;
+  background: #525420;
   filter: drop-shadow(0 -5px 5px rgba(74, 47, 58, 0.14));
   pointer-events: none;
 }
@@ -421,11 +434,11 @@
 }
 .env-face-left {
   clip-path: polygon(0 0, 0 100%, 50% 50%);
-  background: #641f32;
+  background: #484a1e;
 }
 .env-face-right {
   clip-path: polygon(100% 0, 100% 100%, 50% 50%);
-  background: #78293e;
+  background: #626526;
 }
 
 /* Layer the paper texture over every face. The individual rules above set
@@ -651,6 +664,10 @@
   .env-letter {
     transform: none;
     border-bottom: 1px solid #ece5ea;
+  }
+  /* No envelope, no descent — the tuck allowance would just be dead space. */
+  .env-content {
+    padding-bottom: 0;
   }
 }
 
