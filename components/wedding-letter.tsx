@@ -332,6 +332,53 @@ export function WeddingLetter({ children }: { children: ReactNode }) {
 
       <Separator />
 
+      {/* Location */}
+      <section className="space-y-4">
+        <SectionHeading eyebrow="Where we’ll be" title="Location" />
+        <div className="relative overflow-hidden rounded-md border border-[#ece3ea] bg-[#a9bccb] shadow-[0_10px_24px_-16px_rgba(74,47,58,0.35)]">
+          {/* Beach backdrop for the whole section. Drop the palm-beach photo at
+              public/beach-location.jpg; the tropical gradient shows until then. */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage:
+                "linear-gradient(180deg, rgba(35,58,74,0.55) 0%, rgba(35,58,74,0.32) 45%, rgba(35,58,74,0.72) 100%), linear-gradient(180deg, #7fb6c9 0%, #cfe6dd 55%, #f3e6cf 100%), url('/beach-location.jpg')",
+            }}
+          />
+          <div className="relative p-4 sm:p-5">
+            <p className="text-center font-heading text-lg text-white drop-shadow-[0_1px_6px_rgba(35,58,74,0.6)]">
+              Anvy Beach Resort
+            </p>
+            <p className="mt-1 text-center text-sm text-white/90 drop-shadow-[0_1px_6px_rgba(35,58,74,0.6)]">
+              Where we’ll say “I do,” toes in the sand.
+            </p>
+            <div className="mt-4 overflow-hidden rounded-sm border border-white/50 shadow-[0_10px_24px_-16px_rgba(35,58,74,0.6)]">
+              <iframe
+                title="Map — Anvy Beach Resort"
+                src="https://www.google.com/maps?q=Anvy+Beach+Resort&output=embed"
+                className="block h-64 w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+            <div className="mt-3 text-center">
+              <a
+                href="https://www.google.com/maps/place/Anvy+Beach+Resort+(Resort+Hotel)/data=!4m2!3m1!1s0x0:0x97f91a6833d5039d?sa=X&ved=1t:2428&ictx=111"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 rounded-full bg-white/90 px-4 py-1.5 text-sm font-medium text-[color:var(--foreground)] shadow-sm transition hover:bg-white"
+              >
+                Open in Google Maps
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <Separator />
+
       {/* FAQ */}
       <section className="space-y-5">
         <SectionHeading eyebrow="Good to know" title="Questions" />
