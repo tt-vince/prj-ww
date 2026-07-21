@@ -1,5 +1,10 @@
 import type { Metadata } from "next";
-import { DM_Sans, Gilda_Display, Pinyon_Script } from "next/font/google";
+import {
+  DM_Sans,
+  Gilda_Display,
+  Parisienne,
+  Playwrite_US_Modern,
+} from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -17,11 +22,17 @@ const gilda = Gilda_Display({
   display: "swap",
 });
 
-// Calligraphic accent for the couple's names (design `Pinyon Script`).
-const pinyon = Pinyon_Script({
-  variable: "--font-pinyon",
+// Calligraphic accent for the couple's names (design `Parisienne`).
+const parisienne = Parisienne({
+  variable: "--font-parisienne",
   weight: "400",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Upright script for the countdown numbers (design `Playwrite US Modern`).
+const playwrite = Playwrite_US_Modern({
+  variable: "--font-playwrite",
   display: "swap",
 });
 
@@ -38,7 +49,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${gilda.variable} ${pinyon.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${gilda.variable} ${parisienne.variable} ${playwrite.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <TooltipProvider>{children}</TooltipProvider>

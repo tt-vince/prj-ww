@@ -48,7 +48,7 @@ const supportsScrollTimeline = () =>
 /**
  * Scroll-driven envelope reveal for the homepage.
  *
- * A wine-red envelope starts centred in a pinned stage. As you scroll it
+ * An olive envelope starts centred in a pinned stage. As you scroll it
  * widens to full-bleed (--spread — the paper ends up edge to edge) and glides
  * straight down until it has cleared the bottom of the screen entirely (no
  * fade — it just exits below the fold), while the top flap folds open and the
@@ -254,16 +254,12 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
                 extra bottom padding is what tucks behind the front flaps. */}
             <div className="letter-clip">
               <div className="env-letter">
-                {/* Content column proportional to the paper: 80% of the letter
-                    width on sm+ (full width on phones), capped at 56rem so
-                    lines stay readable once the paper widens to full-bleed.
-                    The large sm+ bottom padding is the tuck allowance — the
-                    front flaps' wedges rise toward the mouth, and on a big
-                    envelope they would cover the last section without this
-                    clearance. */}
-                <div className="env-content mx-auto px-6 pt-9 pb-16 sm:max-w-[min(80%,56rem)] sm:px-9 sm:pt-11 sm:pb-[max(6rem,24svh)]">
-                  {children}
-                </div>
+                {/* Full paper width — so a full-bleed hero can reach the paper
+                    edges. .env-content carries the bottom tuck allowance in
+                    CSS (padding-bottom: --env-overshoot, globals.css): the
+                    letter's last --env-overshoot px end up below the viewport
+                    at terminal scroll, so that stripe must stay empty. */}
+                <div className="env-content">{children}</div>
               </div>
             </div>
 

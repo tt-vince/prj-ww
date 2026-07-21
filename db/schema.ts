@@ -78,6 +78,8 @@ export const guests = pgTable('guests', {
   adults: integer('adults'), // # adults attending
   kids: integer('kids'), // # kids attending — total (adults + kids) ≤ maxGuests
   guestNote: text('guest_note'),
+  dietary: text('dietary').array().notNull().default(sql`'{}'::text[]`), // selected diet preset keys (lib/dietary.ts)
+  dietaryOther: text('dietary_other'), // free text when "Other" is picked
   respondedAt: timestamp('responded_at', { withTimezone: true }),
 
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),

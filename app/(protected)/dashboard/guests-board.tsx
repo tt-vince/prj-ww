@@ -12,6 +12,7 @@ import {
 import { ChevronDown, Search, Sparkle } from "lucide-react";
 import type { Label as LabelRow } from "@/db/schema";
 import { SNS_PLATFORMS, SNS_CONFIG, type SnsAccounts } from "@/lib/sns";
+import { dietaryList } from "@/lib/dietary";
 import { SnsIcon } from "@/components/sns-icon";
 
 import { cn } from "@/lib/utils";
@@ -58,6 +59,8 @@ export type GuestRow = {
   adminNote: string | null;
   snsAccounts: SnsAccounts;
   guestNote: string | null;
+  dietary: string[];
+  dietaryOther: string | null;
   respondedAt: string | null;
   labels: { id: string; name: string }[];
 };
@@ -339,6 +342,14 @@ function GuestCard({
               );
             })}
           </dl>
+        </CardMeta>
+      ) : null}
+
+      {row.dietary.length || row.dietaryOther ? (
+        <CardMeta title="Dietary">
+          <p className="text-[11.5px] leading-relaxed" style={{ color: INK }}>
+            {dietaryList(row.dietary, row.dietaryOther).join(", ")}
+          </p>
         </CardMeta>
       ) : null}
 
