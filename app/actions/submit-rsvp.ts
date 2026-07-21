@@ -24,9 +24,10 @@ export type RsvpState = {
  * - Unknown token → `{ ok: false, error }`.
  * - Already answered (status not `pending`) → `{ ok: false, error }` (no overwrite).
  * - `going`: requires `adults` ≥ 1 and `adults + kids` ≤ maxGuests.
- * - `not_going`: `adults`/`kids` forced to null.
+ * - `not_going`: `adults`/`kids` forced to null and dietary cleared.
  *
- * On success writes status/adults/kids/guestNote/respondedAt and returns `{ ok: true }`.
+ * On success writes status/adults/kids/guestNote/dietary/dietaryOther/respondedAt
+ * and returns `{ ok: true }`.
  */
 export async function submitRsvp(
   _prev: RsvpState,
@@ -40,6 +41,8 @@ export async function submitRsvp(
     email: formData.get('email'),
     phone: formData.get('phone'),
     guestNote: formData.get('guestNote'),
+    dietary: formData.getAll('dietary'),
+    dietaryOther: formData.get('dietaryOther'),
   });
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -79,11 +82,18 @@ export async function submitRsvp(
     kids = input.kids;
   }
 
+  // Dietary only applies to a `going` reply; a decline clears it.
+  const dietary = input.status === 'going' ? input.dietary : [];
+  const dietaryOther =
+    input.status === 'going' ? (input.dietaryOther ?? null) : null;
+
   const updates: Partial<typeof guests.$inferInsert> = {
     status: input.status,
     adults,
     kids,
     guestNote: input.guestNote ?? null,
+    dietary,
+    dietaryOther,
     respondedAt: new Date(),
     updatedAt: new Date(),
     // Only overwrite contact when the guest supplied it — keep admin-set values otherwise.

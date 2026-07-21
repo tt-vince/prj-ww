@@ -28,6 +28,8 @@ export default async function DashboardPage() {
     adminNote: r.adminNote,
     snsAccounts: r.snsAccounts,
     guestNote: r.guestNote,
+    dietary: r.dietary,
+    dietaryOther: r.dietaryOther,
     respondedAt: r.respondedAt ? r.respondedAt.toISOString() : null,
     labels: r.guestLabels.map((gl) => ({ id: gl.labelId, name: gl.label.name })),
   }));

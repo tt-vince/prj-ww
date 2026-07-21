@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { SNS_PLATFORMS } from '@/lib/sns';
+import { DIETARY_KEYS } from '@/lib/dietary';
 
 /** Input schemas / DTOs for Server Actions — the single source of type truth. */
 
@@ -100,6 +101,13 @@ export const rsvpResponseSchema = z.object({
   email: z.preprocess(blankToUndefined, z.email('Enter a valid email').max(200).optional()),
   phone: z.preprocess(blankToUndefined, z.string().trim().max(30).optional()),
   guestNote: z.preprocess(blankToUndefined, z.string().trim().max(1000).optional()),
+  // Dietary presets (checkboxes) + free-text "Other". FormData sends `dietary`
+  // zero-or-more times; normalize to an array and drop unknown keys.
+  dietary: z.preprocess(
+    (v) => (Array.isArray(v) ? v : v == null ? [] : [v]),
+    z.array(z.enum(DIETARY_KEYS)).default([]),
+  ),
+  dietaryOther: z.preprocess(blankToUndefined, z.string().trim().max(200).optional()),
 });
 export type RsvpResponse = z.infer<typeof rsvpResponseSchema>;
 

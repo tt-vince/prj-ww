@@ -1,7 +1,9 @@
 'use client';
 
 import { useActionState, useState } from 'react';
+import { Minus, Plus } from 'lucide-react';
 import { submitRsvp, type RsvpState } from '@/app/actions/submit-rsvp';
+import { DIETARY_OPTIONS } from '@/lib/dietary';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,6 +23,7 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
   const [status, setStatus] = useState<'going' | 'not_going' | ''>('');
   const [adults, setAdults] = useState(1);
   const [kids, setKids] = useState(0);
+  const [dietaryOther, setDietaryOther] = useState(false);
   const partySize = adults + kids;
   const overCapacity = status === 'going' && partySize > maxGuests;
 
@@ -78,43 +81,26 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
           <Separator />
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label htmlFor="adults">Adults</Label>
-                <Input
-                  id="adults"
-                  name="adults"
-                  type="number"
-                  min={1}
-                  max={maxGuests}
-                  value={adults}
-                  onChange={(e) => setAdults(Number(e.target.value) || 0)}
-                  required
-                  aria-invalid={!!state.fieldErrors?.adults}
-                />
-                {state.fieldErrors?.adults && (
-                  <span role="alert" className="text-xs text-destructive">
-                    {state.fieldErrors.adults}
-                  </span>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label htmlFor="kids">Kids</Label>
-                <Input
-                  id="kids"
-                  name="kids"
-                  type="number"
-                  min={0}
-                  max={maxGuests}
-                  value={kids}
-                  onChange={(e) => setKids(Number(e.target.value) || 0)}
-                  aria-invalid={!!state.fieldErrors?.kids}
-                />
-                {state.fieldErrors?.kids && (
-                  <span role="alert" className="text-xs text-destructive">
-                    {state.fieldErrors.kids}
-                  </span>
-                )}
-              </div>
+              <Stepper
+                label="Adults"
+                name="adults"
+                value={adults}
+                setValue={setAdults}
+                min={1}
+                max={maxGuests}
+                canIncrement={partySize < maxGuests}
+                error={state.fieldErrors?.adults}
+              />
+              <Stepper
+                label="Kids"
+                name="kids"
+                value={kids}
+                setValue={setKids}
+                min={0}
+                max={maxGuests}
+                canIncrement={partySize < maxGuests}
+                error={state.fieldErrors?.kids}
+              />
             </div>
             <p
               aria-live="polite"
@@ -127,6 +113,49 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
               Party size: {partySize} of {maxGuests} seat(s) reserved.
               {overCapacity && ' — that exceeds your allotment.'}
             </p>
+
+            <fieldset className="space-y-3 border-t pt-4">
+              <legend className="mb-1 text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                Dietary restrictions (optional)
+              </legend>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
+                {DIETARY_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.key}
+                    className="flex cursor-pointer items-center gap-2.5 text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      name="dietary"
+                      value={opt.key}
+                      className="size-4 accent-[color:var(--primary)]"
+                    />
+                    <span>{opt.label}</span>
+                  </label>
+                ))}
+                <label className="flex cursor-pointer items-center gap-2.5 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={dietaryOther}
+                    onChange={(e) => setDietaryOther(e.target.checked)}
+                    className="size-4 accent-[color:var(--primary)]"
+                  />
+                  <span>Other</span>
+                </label>
+              </div>
+              {dietaryOther && (
+                <div className="space-y-1.5">
+                  <Label htmlFor="dietaryOther">Please specify</Label>
+                  <Textarea
+                    id="dietaryOther"
+                    name="dietaryOther"
+                    rows={2}
+                    maxLength={200}
+                    placeholder="Tell us about any other dietary needs"
+                  />
+                </div>
+              )}
+            </fieldset>
           </div>
         </>
       )}
@@ -189,5 +218,74 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
         {pending ? 'Sending…' : 'Send RSVP'}
       </Button>
     </form>
+  );
+}
+
+/**
+ * −/+ stepper for a whole-number count. Posts its value through a hidden input
+ * (`name`) so the server action reads it exactly like the old number field.
+ * `canIncrement` caps the party at `maxGuests` from the caller (total across
+ * both steppers); per-field `min`/`max` are the local bounds.
+ */
+function Stepper({
+  label,
+  name,
+  value,
+  setValue,
+  min,
+  max,
+  canIncrement,
+  error,
+}: {
+  label: string;
+  name: string;
+  value: number;
+  setValue: (n: number) => void;
+  min: number;
+  max: number;
+  canIncrement: boolean;
+  error?: string;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <Label htmlFor={`${name}-value`}>{label}</Label>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-9 shrink-0 rounded-full"
+          onClick={() => setValue(Math.max(min, value - 1))}
+          disabled={value <= min}
+          aria-label={`Decrease ${label}`}
+        >
+          <Minus className="size-4" />
+        </Button>
+        <output
+          id={`${name}-value`}
+          aria-live="polite"
+          className="min-w-8 flex-1 text-center text-lg font-medium tabular-nums"
+        >
+          {value}
+        </output>
+        <Button
+          type="button"
+          variant="outline"
+          size="icon"
+          className="size-9 shrink-0 rounded-full"
+          onClick={() => setValue(Math.min(max, value + 1))}
+          disabled={value >= max || !canIncrement}
+          aria-label={`Increase ${label}`}
+        >
+          <Plus className="size-4" />
+        </Button>
+      </div>
+      <input type="hidden" name={name} value={value} />
+      {error && (
+        <span role="alert" className="text-xs text-destructive">
+          {error}
+        </span>
+      )}
+    </div>
   );
 }
