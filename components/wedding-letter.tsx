@@ -2,6 +2,7 @@ import { Hero } from '@/components/letter/hero';
 import { OurStory } from '@/components/letter/our-story';
 import { DayItself } from '@/components/letter/day-itself';
 import { AttireGuide } from '@/components/letter/attire-guide';
+import { Location } from '@/components/letter/location';
 
 /**
  * The long-form wedding letter — the page content that rises out of the
@@ -19,6 +20,7 @@ export function WeddingLetter() {
       <OurStory />
       <DayItself />
       <AttireGuide />
+      <Location />
     </div>
   );
 }
