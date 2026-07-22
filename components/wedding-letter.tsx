@@ -8,16 +8,13 @@ import { Rsvp } from '@/components/letter/rsvp';
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 /**
- * The long-form wedding letter — the page content that rises out of the
- * envelope. Each section lives in components/letter/; this file only
- * composes them. Hero, OurStory and DayItself are full-bleed and overlap
- * each other (see the -mt/z-index notes in those files).
- *
- * The closing Rsvp section MUST stay inside the letter: the reveal's
- * compositor animations use `scroll(root)` timelines calibrated to the
- * reveal-track being the whole scrollable document, so any content rendered
- * *after* the reveal lengthens the scroll and the reveal never completes (the
- * envelope stalls part-descended). `searchParams` is forwarded (not awaited).
+ * The long-form wedding letter — the page content revealed by the envelope
+ * intro (components/envelope-reveal.tsx). Each section lives in
+ * components/letter/; this file only composes them. Hero, OurStory and
+ * DayItself are full-bleed and overlap each other (see the -mt/z-index notes
+ * in those files). It is ordinary document flow and scrolls natively — the
+ * reveal is a one-shot CSS intro with no scroll coupling, so sections can be
+ * added/reordered freely. `searchParams` is forwarded (not awaited).
  */
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
