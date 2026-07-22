@@ -218,9 +218,20 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       if (window.innerWidth !== measuredW) scheduleMeasure();
     };
 
-    // rAF-coalesced: the widening reflows the letter for a stretch of frames,
-    // and a raw measure() per ResizeObserver tick would force layout each time.
-    const ro = letter ? new ResizeObserver(scheduleMeasure) : null;
+    // The paper widens over the flap segment (--spread), and that width change
+    // reflows the letter — so the letter's height changes every frame WHILE the
+    // reveal is playing. Remeasuring then rewrites --rise-len / --runway under
+    // the user's finger, and the page throttles up and down (and lurches on a
+    // long-press that triggers a stray reflow). So ignore ResizeObserver ticks
+    // that land mid-spread; only remeasure at rest or once fully open, where a
+    // height change is a real content change (e.g. conditional RSVP fields).
+    // rAF-coalesced: a raw measure() per tick would force layout each time.
+    const onLetterResize = () => {
+      const rel = window.scrollY - anchorPx;
+      if (rel > 0 && rel < flapPx) return;
+      scheduleMeasure();
+    };
+    const ro = letter ? new ResizeObserver(onLetterResize) : null;
     if (letter) ro?.observe(letter);
 
     measure();
