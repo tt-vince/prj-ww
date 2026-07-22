@@ -251,6 +251,24 @@
   inherits: true;
   initial-value: 0;
 }
+/* C1: the reveal owns its own fixed-size scroll container instead of the
+   document. iOS Safari only collapses its URL bar when the PAGE scrolls; this
+   element is position:fixed, so nothing tall lives in the body flow, the body
+   never scrolls, and the bar never collapses. Its clientHeight is therefore
+   constant, so the compositor scroll timeline never re-samples from a viewport
+   change (that was the residual "envelope flashes / scrolls up a bit" bob on
+   mobile). The reveal's scroll-driven animations bind to this element by name
+   via the --reveal timeline. */
+.reveal-scroller {
+  position: fixed;
+  inset: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  /* Named scroll timeline the compositor keyframes bind to (ignored where
+     scroll-driven animations are unsupported; the JS path uses scrollTop). */
+  scroll-timeline: --reveal y;
+}
 .reveal-track {
   position: relative;
   /* Scroll runway sized by JS from the measured letter height so the whole
@@ -517,8 +535,10 @@
    main thread is busy. envelope-reveal.tsx publishes the px ranges
    (--flap-px, --rise-start, --rise-len), sets the letter's timing function
    (eased for short letters, linear/1:1 for tall ones) and skips its per-frame
-   --pf/--pl fallback. scroll(root) is explicit because .letter-clip is an
-   overflow:hidden scroll container that scroll() would otherwise resolve to. */
+   --pf/--pl fallback. The animations bind to the named --reveal timeline
+   declared on .reveal-scroller (the fixed scroll container) — not scroll(root)
+   / scroll(nearest), which would resolve to the document or to .letter-clip
+   (an overflow:hidden scroll container). */
 @supports (animation-timeline: scroll()) {
   /* The 1ms durations are load-bearing: the minifier expands omitted
      durations to 0s (the Animations-1 initial, not Animations-2's auto), and
@@ -528,7 +548,7 @@
     animation:
       env-flap-fold 1ms cubic-bezier(0.65, 0, 0.35, 1) both,
       env-flap-z 1ms linear both;
-    animation-timeline: scroll(root), scroll(root);
+    animation-timeline: --reveal, --reveal;
     /* --anchor shifts the active window to the envelope section (any intro
        section above is scrolled through first); 0 before JS measures. Fold
        and z-swap both run over the flap segment. */
@@ -542,14 +562,14 @@
     animation:
       env-drop 1ms cubic-bezier(0.65, 0, 0.35, 1) both,
       env-spread 1ms cubic-bezier(0.65, 0, 0.35, 1) both;
-    animation-timeline: scroll(root), scroll(root);
+    animation-timeline: --reveal, --reveal;
     animation-range:
       var(--anchor, 0px) calc(var(--anchor, 0px) + var(--drop-px, 900px)),
       var(--anchor, 0px) calc(var(--anchor, 0px) + var(--flap-px, 500px));
   }
   .env-letter {
     animation: env-letter-rise 1ms linear both;
-    animation-timeline: scroll(root);
+    animation-timeline: --reveal;
     animation-range: calc(var(--anchor, 0px) + var(--rise-start, 300px))
       calc(
         var(--anchor, 0px) + var(--rise-start, 300px) + var(--rise-len, 100vh)
@@ -559,7 +579,7 @@
     /* Matches the JS fade: gone once the eased fold passes 0.04 — that is
        raw scroll fraction ∛0.01 ≈ 0.2154 of the flap segment. */
     animation: env-cue-fade 1ms linear both;
-    animation-timeline: scroll(root);
+    animation-timeline: --reveal;
     animation-range: var(--anchor, 0px)
       calc(var(--anchor, 0px) + var(--flap-px, 500px) * 0.2154);
   }

@@ -93,8 +93,16 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
       return;
     }
 
+    // The stage IS the scroll container (`.reveal-scroller`, position:fixed): the
+    // reveal scrolls inside this fixed-size element, not the document. Because
+    // nothing tall lives in the body flow, iOS Safari never collapses its URL
+    // bar, so `stage.clientHeight` stays constant and the compositor scroll
+    // timeline never re-samples from a viewport change (that was the residual
+    // "envelope flashes / scrolls up a bit" bob). All scroll reads use the
+    // scroller, not window.
     const flap = stage.querySelector<HTMLElement>('.env-flap');
     const letter = stage.querySelector<HTMLElement>('.env-letter');
+    const track = stage.querySelector<HTMLElement>('.reveal-track');
     stage.style.setProperty('--letter-travel', String(LETTER_TRAVEL));
     const compositor = supportsScrollTimeline();
 
@@ -126,7 +134,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     let raf = 0;
     const update = () => {
       raf = 0;
-      const y = window.scrollY - anchorPx;
+      const y = stage.scrollTop - anchorPx;
       const pfN = easeInOutCubic(clamp01(y / flapPx));
       const pdN = easeInOutCubic(clamp01(y / dropPx));
       const rawN = clamp01((y - riseStart) / riseLen);
@@ -160,14 +168,12 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     };
 
     const measure = () => {
-      const vh = window.innerHeight;
-      measuredW = window.innerWidth;
-      // Absolute document offset of the track top = where the reveal begins.
-      // Published as --anchor so the compositor ranges start at the section too.
-      anchorPx = Math.max(
-        0,
-        Math.round(stage.getBoundingClientRect().top + window.scrollY)
-      );
+      const vh = stage.clientHeight;
+      measuredW = stage.clientWidth;
+      // Offset of the track top within the scroller = where the reveal begins
+      // (0 in practice; the track is the scroller's first child). Published as
+      // --anchor so the compositor ranges start at the track.
+      anchorPx = track ? track.offsetTop : 0;
       stage.style.setProperty('--anchor', `${anchorPx}px`);
       flapPx = Math.min(FLAP_MAX_PX, Math.max(FLAP_MIN_PX, vh * FLAP_VH));
       dropPx = Math.min(DROP_MAX_PX, Math.max(DROP_MIN_PX, vh * DROP_VH));
@@ -210,12 +216,12 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
         });
     };
 
-    // Mobile URL-bar show/hide fires resize with only the height changed;
-    // re-measuring then rewrites --runway mid-scroll and the page lurches up
-    // and down. Only a width change warrants a re-measure (the letter's own
-    // height changes are covered by the ResizeObserver).
+    // Only a width change (orientation) warrants a re-measure. The scroller's
+    // height is now constant (the URL bar can't collapse it), so height-only
+    // resizes never fire here; the letter's own height changes are covered by
+    // the ResizeObserver.
     const onResize = () => {
-      if (window.innerWidth !== measuredW) scheduleMeasure();
+      if (stage.clientWidth !== measuredW) scheduleMeasure();
     };
 
     // The paper widens over the flap segment (--spread), and that width change
@@ -227,7 +233,7 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     // height change is a real content change (e.g. conditional RSVP fields).
     // rAF-coalesced: a raw measure() per tick would force layout each time.
     const onLetterResize = () => {
-      const rel = window.scrollY - anchorPx;
+      const rel = stage.scrollTop - anchorPx;
       // Once the reveal has started (rel > 0) the letter must NOT rewrite
       // --rise-len/--runway. The letter reflows constantly during scroll (the
       // spread animates its width; fonts/images settle) and each rewrite
@@ -247,23 +253,23 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     // still at the top so it never rewrites the scroll length mid-reveal.
     if (typeof document !== 'undefined' && document.fonts?.ready) {
       document.fonts.ready.then(() => {
-        if (window.scrollY - anchorPx <= 0) scheduleMeasure();
+        if (stage.scrollTop - anchorPx <= 0) scheduleMeasure();
       });
     }
     if (!compositor)
-      window.addEventListener('scroll', schedule, { passive: true });
+      stage.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', onResize);
     return () => {
       if (raf) cancelAnimationFrame(raf);
       if (measureRaf) cancelAnimationFrame(measureRaf);
       ro?.disconnect();
-      if (!compositor) window.removeEventListener('scroll', schedule);
+      if (!compositor) stage.removeEventListener('scroll', schedule);
       window.removeEventListener('resize', onResize);
     };
   }, []);
 
   return (
-    <div ref={stageRef}>
+    <div ref={stageRef} className="reveal-scroller">
       <div className="reveal-track">
         <div className="reveal-pin">
           <div className="env-wrap">
