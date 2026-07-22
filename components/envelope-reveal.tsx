@@ -228,13 +228,28 @@ export function EnvelopeReveal({ children }: { children: ReactNode }) {
     // rAF-coalesced: a raw measure() per tick would force layout each time.
     const onLetterResize = () => {
       const rel = window.scrollY - anchorPx;
-      if (rel > 0 && rel < flapPx) return;
+      // Once the reveal has started (rel > 0) the letter must NOT rewrite
+      // --rise-len/--runway. The letter reflows constantly during scroll (the
+      // spread animates its width; fonts/images settle) and each rewrite
+      // changes the document height mid-scroll, which shifts the compositor
+      // scroll(root) ranges and makes the reveal jump ("throttle"/scroll
+      // reversal). Only remeasure while still above the reveal, where a rewrite
+      // is invisible. Genuine content-size changes at rest still remeasure.
+      if (rel > 0) return;
       scheduleMeasure();
     };
     const ro = letter ? new ResizeObserver(onLetterResize) : null;
     if (letter) ro?.observe(letter);
 
     measure();
+    // Web fonts swap in after first paint and reflow the letter (the main
+    // reflow on mobile). Capture that once fonts are ready, but only while
+    // still at the top so it never rewrites the scroll length mid-reveal.
+    if (typeof document !== 'undefined' && document.fonts?.ready) {
+      document.fonts.ready.then(() => {
+        if (window.scrollY - anchorPx <= 0) scheduleMeasure();
+      });
+    }
     if (!compositor)
       window.addEventListener('scroll', schedule, { passive: true });
     window.addEventListener('resize', onResize);
