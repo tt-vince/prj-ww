@@ -224,94 +224,49 @@
 }
 
 /* ── Envelope reveal (homepage) ───────────────────────────────────────
-   A PINNED stage reveals a wax-sealed envelope: the top flap folds open and a
-   greeting letter slides UP out of it as you scroll. Once the pin releases, the
-   real RSVP letter flows in beneath. components/envelope-reveal.tsx writes
-   four custom properties onto the stage: `--pf` (0→1, flap fold, eased),
-   `--pl` (0→1, letter rise — linear/1:1 for tall letters so the whole letter
-   scrolls out with the page, no inner scrollbar), `--runway` (px scroll
-   distance, sized from the measured letter height) and `--letter-h` (px, clip
-   headroom). All motion is CSS calc()/clamp() so it scrubs with the
-   scrollbar. Reduced-motion at bottom.
-
-   Why pinned + handoff: the letter is drawn BEHIND the envelope faces (z-index
-   1) so it is fully hidden until it clears the top edge — that fixes "letter
-   visible outside the envelope before it opens". The letter (the RSVP
-   form, or a greeting when there is no token) rises out through the centre and
-   its base tucks behind the front flaps; the envelope starts centred, widens
-   to full-bleed (--spread) as the flap opens, and glides straight down (--pd /
-   env-drop keyframes, distance --env-drop) until it has cleared the bottom of
-   the screen entirely — no fade, it simply exits below the fold, leaving the
-   paper the whole screen, edge to edge. */
-
-/* Registered so the compositor path can animate it in keyframes (env-spread);
-   inherits so .letter-clip picks up the value animated on .env-wrap. */
-@property --spread {
-  syntax: '<number>';
-  inherits: true;
-  initial-value: 0;
-}
-.reveal-track {
+   A ONE-SHOT intro, with NO scroll coupling. On load a wax-sealed envelope
+   sits centred; its top flap folds open, then the whole envelope zooms and
+   dissolves away while the letter fades up into place. The letter
+   (components/letter/*) is ordinary document flow — it scrolls natively, so
+   there is no pinning, no scroll-driven (scroll()) animation, no measured
+   runway and no dependence on the mobile URL-bar / viewport height (the source
+   of every earlier scroll-jitter bug: throttle, envelope bob, right-shift).
+   The intro is a position:fixed, pointer-events:none overlay that plays once
+   and fades to nothing, so the letter beneath is interactive and scrollable
+   throughout. prefers-reduced-motion skips the intro. */
+.reveal-c2 {
   position: relative;
-  /* Scroll runway sized by JS from the measured letter height so the whole
-     letter can scroll out 1:1; fallback ≈ the old fixed travel pre-measure.
-     svh (not dvh): the mobile URL bar showing/hiding must not resize the
-     track mid-scroll — that reads as the page lurching up and down. */
-  height: calc(100svh + var(--runway, 140vh));
-  /* Browser scroll anchoring fights the pinned scene when heights change
-     (letter re-measure) — another source of up/down scroll jumps. */
-  overflow-anchor: none;
-}
-.reveal-pin {
-  position: sticky;
-  top: 0;
-  height: 100svh;
-  /* Visible: the descended envelope may hang past the pin's box (below the
-     viewport edge) without being clipped. The letter's own clipping is done
-     by .letter-clip, not here. */
-  overflow: visible;
 }
 
-/* Fixed-size envelope scene; perspective lets the flap fold back in 3D. */
+/* The real content — plain document flow, native scroll. One-shot entrance
+   (fade + a small rise) timed to the envelope opening so it reads as emerging
+   from it. */
+.reveal-letter {
+  animation: c2-letter-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) 1.35s both;
+}
+
+/* One-shot intro overlay, decorative only (aria-hidden + pointer-events:none so
+   the letter beneath is always interactive). Transparent: the closed envelope
+   sits on the page background, exactly where the letter will appear. */
+.reveal-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Fixed-size envelope scene; perspective lets the flap fold back in 3D. Zooms
+   in and fades once the flap is open, as if the view moves into the envelope. */
 .env-wrap {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  /* Fluid: span the screen with ≈4vw gutters each side at rest. The 140svh
-     cap (height ≤ 82svh via the 1.7 aspect) keeps the envelope inside the
-     viewport on ultrawide screens. */
-  --env-w: min(92vw, 140svh);
-  /* Widens to full-bleed as the flap opens: --spread (0→1 over the flap
-     segment) grows the envelope — and the paper inside it — until the paper
-     is edge to edge. */
-  width: calc(var(--env-w) + (100vw - var(--env-w)) * var(--spread, 0));
-  /* Landscape envelope proportions (wider than tall). */
+  position: relative;
+  width: min(86vw, 30rem);
   aspect-ratio: 1.7;
-  /* Descent distance. 50svh lands the centre — the mouth — on the viewport's
-     bottom edge; --env-overshoot carries the whole envelope past it so it
-     exits the screen completely. Half the widened envelope's height (width /
-     1.7 aspect / 2 = width / 3.4, and width = 100vw at full spread) clears the
-     bottom edge, plus a small buffer. At the terminal scroll position the
-     envelope sits fully below the fold, so it never scrolls back into view.
-     The letter's bottom edge (= the mouth) ends up --env-overshoot below the
-     viewport too, so .env-content pads its bottom by exactly this much —
-     that stripe is sacrificial and must hold no real content. */
-  /* lvh (largest viewport, URL bar HIDDEN) — the reveal is scrolled with the
-     bar hidden, so lvh is the real viewport height for the whole descent.
-     svh here undershot by the bar's height and left the envelope peeking back
-     in at the bottom on mobile/tablet. The 4lvh buffer covers partial bar
-     states and rounding. Pin height is 100dvh so the envelope stays centred
-     in the real viewport in every bar state. */
-  --env-overshoot: calc(4lvh + 100vw / 3.4);
-  --env-drop: calc(50lvh + var(--env-overshoot));
-  /* Starts dead-centre; glides down --env-drop on its own scroll segment
-     (--pd 0→1 over --drop-px, slower than the flap fold), freeing the screen
-     above for the letter. The compositor path drives the same move via the
-     env-drop keyframes. */
-  transform: translate(-50%, calc(-50% + var(--pd, 0) * var(--env-drop)));
-  will-change: transform;
   perspective: 1600px;
   perspective-origin: center 40%;
+  animation: c2-zoom 0.85s cubic-bezier(0.5, 0, 0.75, 0) 1.5s forwards;
 
   /* Paper texture, shared by every envelope face (applied in the grouped
      rule after the face colours below). Three layers over the base tone:
@@ -345,80 +300,21 @@
     0 10px 22px -14px rgba(74, 47, 58, 0.16);
 }
 
-/* Top flap: a downward ivory triangle covering the top; rotates fully open
-   (-179deg) about its top edge as the envelope opens. */
+/* Top flap: a downward triangle covering the top; folds fully open (-179deg)
+   about its top edge, once, on load. */
 .env-flap {
   position: absolute;
   inset-inline: 0;
   top: 0;
   height: 58%;
-  z-index: 14; /* flap folds last — on top when closed */
-  /* Wine-red paper, a touch lighter than the body (lightest face). */
+  z-index: 14;
   background: #6a6e2a;
   clip-path: polygon(0 0, 100% 0, 50% 100%);
-  /* No border-radius: a clipped triangle + radius leaves gaps at the corners. */
   transform-origin: top center;
-  /* Real fold: the flap rotates fully open (template ahoidahl/mydZXQJ). */
-  transform: rotateX(calc(var(--pf, 0) * -179deg));
-  /* Promote to its own layer: rotating under a drop-shadow would otherwise
-     re-rasterize every frame. No text here, so promotion is visually free. */
+  transform: rotateX(0deg);
+  animation: c2-flap 0.9s cubic-bezier(0.65, 0, 0.35, 1) 0.5s forwards;
   will-change: transform;
   filter: drop-shadow(0 5px 4px rgba(74, 47, 58, 0.14));
-  /* z-index is swapped in JS: on top when closed, behind the letter once open
-     (so the open flap stays visible standing behind the letter). */
-}
-
-/* Clip window: the letter is only visible ABOVE its bottom edge (the mouth, at
-   the envelope centre). Height tracks the measured letter (+ shadow room) so
-   tall content is never clipped at the top. */
-.letter-clip {
-  /* Room above the letter for its upward box-shadow (see .env-letter). */
-  --shadow-headroom: 48px;
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  bottom: 50%;
-  height: calc(var(--letter-h, 150svh) + var(--shadow-headroom));
-  /* Paper widens with the envelope (--spread) until it is edge to edge. */
-  width: calc(84% + 16% * var(--spread, 0));
-  z-index: 10; /* letter sits above the flap, below the front pocket (z 12) */
-  overflow: hidden;
-  pointer-events: none;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-/* The paper letter = the page content. Base-anchored to the mouth; slides up so
-   at pl=0 it is pushed below the clip (hidden) and at pl=1 fully out.
-   --letter-travel (span as a fraction of the letter's height) is written by JS
-   (LETTER_TRAVEL in envelope-reveal.tsx); the fallback matches it. --pl is
-   already clamped 0..1 in JS, so no clamp() is needed here. */
-.env-letter {
-  width: 100%;
-  pointer-events: auto;
-  border: 1px solid #ece5ea;
-  border-bottom: none;
-  background: #ffffff;
-  box-shadow: 0 -16px 40px -22px rgba(74, 47, 58, 0.22);
-  transform: translateY(
-    calc((1 - var(--pl, 0)) * var(--letter-travel, 1.16) * 100%)
-  );
-  /* Own compositor layer: the transform changes every scroll frame, and the
-     letter is the largest paint surface on the page — without promotion each
-     frame re-rasterizes it plus its box-shadow. The opaque white background
-     keeps subpixel text antialiasing on the promoted layer, and at rest
-     (--pl: 1) the transform is exactly 0 so text sits pixel-snapped. If text
-     looks soft mid-scroll on some device, deleting this line is the revert. */
-  will-change: transform;
-}
-
-/* Tuck allowance: at terminal scroll the letter's bottom --env-overshoot px
-   sit below the viewport (see --env-drop above). This padding is that
-   sacrificial stripe, so the page's real content ends exactly at the
-   viewport's bottom edge. Inherits --env-overshoot from .env-wrap. */
-.env-content {
-  padding-bottom: var(--env-overshoot, 0px);
 }
 
 /* Bottom flap: triangle from the bottom edge up to the centre. In FRONT of the
@@ -466,218 +362,37 @@
   background-repeat: repeat, no-repeat, repeat;
   background-size: 150px 150px, 100% 100%, 5px 5px;
   background-blend-mode: soft-light, soft-light, multiply;
-  /* Dissolve over the descent's second half (JS path: --pd 0.5→1 → opacity
-     1→0). The letter is not a face, so it is unaffected. After the pin
-     releases it sits fully below the fold (see --env-drop). */
 }
 
-/* Discoverability cue below the envelope; fades the instant scrolling starts. */
-.env-cue {
-  position: absolute;
-  left: 50%;
-  bottom: 3.5svh;
-  transform: translateX(-50%);
-  z-index: 7;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.3rem;
-  color: #8a76b0;
-  pointer-events: none;
-  /* Fully visible at rest, faded out by pf = 1/25 — the first hint of scroll. */
-  opacity: clamp(0, calc(1 - var(--pf, 0) * 25), 1);
-}
-.env-cue-text {
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-.env-cue-arrow {
-  animation: env-cue-bounce 1.7s ease-in-out infinite;
-}
-@keyframes env-cue-bounce {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(4px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .env-cue-arrow {
-    animation: none;
-  }
-}
-
-/* Compositor-driven reveal: on browsers with CSS scroll-driven animations the
-   flap fold, letter rise and cue fade are keyframes bound to the page scroll
-   offset — no per-frame JS, so the letter tracks the finger even while the
-   main thread is busy. envelope-reveal.tsx publishes the px ranges
-   (--flap-px, --rise-start, --rise-len), sets the letter's timing function
-   (eased for short letters, linear/1:1 for tall ones) and skips its per-frame
-   --pf/--pl fallback. scroll(root) is explicit because .letter-clip is an
-   overflow:hidden scroll container that scroll() would otherwise resolve to. */
-@supports (animation-timeline: scroll()) {
-  /* The 1ms durations are load-bearing: the minifier expands omitted
-     durations to 0s (the Animations-1 initial, not Animations-2's auto), and
-     a 0s duration makes a scroll-driven animation jump straight to its end
-     state. Any nonzero time maps proportionally onto the full range. */
-  .env-flap {
-    animation:
-      env-flap-fold 1ms cubic-bezier(0.65, 0, 0.35, 1) both,
-      env-flap-z 1ms linear both;
-    animation-timeline: scroll(root), scroll(root);
-    /* --anchor shifts the active window to the envelope section (any intro
-       section above is scrolled through first); 0 before JS measures. Fold
-       and z-swap both run over the flap segment. */
-    animation-range:
-      var(--anchor, 0px) calc(var(--anchor, 0px) + var(--flap-px, 500px)),
-      var(--anchor, 0px) calc(var(--anchor, 0px) + var(--flap-px, 500px));
-  }
-  /* Envelope descent — own, longer scroll window (--drop-px), same easing —
-     plus the full-bleed widening (--spread) over the flap segment. */
-  .env-wrap {
-    animation:
-      env-drop 1ms cubic-bezier(0.65, 0, 0.35, 1) both,
-      env-spread 1ms cubic-bezier(0.65, 0, 0.35, 1) both;
-    animation-timeline: scroll(root), scroll(root);
-    animation-range:
-      var(--anchor, 0px) calc(var(--anchor, 0px) + var(--drop-px, 900px)),
-      var(--anchor, 0px) calc(var(--anchor, 0px) + var(--flap-px, 500px));
-  }
-  .env-letter {
-    animation: env-letter-rise 1ms linear both;
-    animation-timeline: scroll(root);
-    animation-range: calc(var(--anchor, 0px) + var(--rise-start, 300px))
-      calc(
-        var(--anchor, 0px) + var(--rise-start, 300px) + var(--rise-len, 100vh)
-      );
-  }
-  .env-cue {
-    /* Matches the JS fade: gone once the eased fold passes 0.04 — that is
-       raw scroll fraction ∛0.01 ≈ 0.2154 of the flap segment. */
-    animation: env-cue-fade 1ms linear both;
-    animation-timeline: scroll(root);
-    animation-range: var(--anchor, 0px)
-      calc(var(--anchor, 0px) + var(--flap-px, 500px) * 0.2154);
-  }
-}
-@keyframes env-flap-fold {
-  from {
-    transform: rotateX(0deg);
-  }
+@keyframes c2-flap {
   to {
     transform: rotateX(-179deg);
   }
 }
-@keyframes env-drop {
-  from {
-    transform: translate(-50%, -50%);
-  }
+@keyframes c2-zoom {
   to {
-    transform: translate(-50%, calc(-50% + var(--env-drop, 50lvh)));
-  }
-}
-@keyframes env-spread {
-  from {
-    --spread: 0;
-  }
-  to {
-    --spread: 1;
-  }
-}
-
-/* Discrete flip mirroring the JS z-swap: eased fold passes FLAP_Z_SWAP (0.08)
-   at raw scroll fraction ∛(0.08 / 4) ≈ 0.2714 of the flap segment. */
-@keyframes env-flap-z {
-  0%,
-  27.13% {
-    z-index: 14;
-  }
-  27.14%,
-  100% {
-    z-index: 8;
-  }
-}
-@keyframes env-letter-rise {
-  from {
-    transform: translateY(calc(var(--letter-travel, 1.16) * 100%));
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-@keyframes env-cue-fade {
-  from {
-    opacity: 1;
-  }
-  to {
+    transform: scale(1.35);
     opacity: 0;
   }
 }
-
-/* Mobile: wider paper for form room, tighter cue. */
-@media (max-width: 640px) {
-  .letter-clip {
-    width: calc(92% + 8% * var(--spread, 0));
+@keyframes c2-letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
   }
-  .env-cue {
-    bottom: 2.5svh;
-  }
-  .env-cue-text {
-    font-size: 0.66rem;
-    letter-spacing: 0.12em;
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* No pin, no envelope: collapse the runway and show the letter statically. */
-  .reveal-track {
-    height: auto;
-  }
-  .reveal-pin {
-    position: static;
-    height: auto;
-    padding: 3rem 0;
-  }
-  .env-wrap {
-    position: static;
-    width: auto;
-    height: auto;
-    transform: none;
-    perspective: none;
-  }
-  .env-back,
-  .env-flap,
-  .env-face,
-  .env-front,
-  .env-cue {
+  /* Skip the intro; show the letter immediately. */
+  .reveal-intro {
     display: none;
   }
-  /* Scroll-driven keyframes would override the static pose below. */
-  .env-wrap,
-  .env-flap,
-  .env-letter,
-  .env-cue {
+  .reveal-letter {
     animation: none;
-  }
-  .letter-clip {
-    position: static;
-    transform: none;
-    width: min(92vw, 720px);
-    height: auto;
-    margin: 0 auto;
-    overflow: visible;
-  }
-  .env-letter {
-    transform: none;
-    border-bottom: 1px solid #ece5ea;
-  }
-  /* No envelope, no descent — the tuck allowance would just be dead space. */
-  .env-content {
-    padding-bottom: 0;
   }
 }
 
