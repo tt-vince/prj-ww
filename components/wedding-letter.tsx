@@ -5,6 +5,8 @@ import { AttireGuide } from '@/components/letter/attire-guide';
 import { Location } from '@/components/letter/location';
 import { Hotels } from '@/components/letter/hotels';
 import { Rsvp } from '@/components/letter/rsvp';
+import { Gifts } from '@/components/letter/gifts';
+import { Faq } from '@/components/letter/faq';
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -27,6 +29,8 @@ export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) 
       <Location />
       <Hotels />
       <Rsvp searchParams={searchParams} />
+      <Gifts />
+      <Faq />
     </div>
   );
 }
