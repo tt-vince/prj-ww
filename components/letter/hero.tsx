@@ -25,7 +25,7 @@ export function Hero() {
         backgroundPosition: '50% top',
       }}
     >
-      <header className="relative flex min-h-svh flex-col items-center justify-center px-6 py-16 text-center">
+      <header className="relative flex min-h-svh flex-col items-center justify-center px-5 py-16 text-center sm:px-9">
         <div className="flex flex-col items-center">
           {/* Names sit inside a square floral lace frame (public/lace.png):
               a frosted-glass window shows through the lace's open center,

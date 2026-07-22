@@ -8,8 +8,8 @@ import Image from 'next/image';
  */
 export function AttireGuide() {
   return (
-    <section className="bg-white px-6 pb-24 sm:px-9">
-      <div className="mx-auto max-w-[min(80%,56rem)] text-center">
+    <section className="bg-white px-5 pt-24 pb-24 sm:px-9">
+      <div className="mx-auto max-w-[56rem] text-center">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           What to wear
         </h2>

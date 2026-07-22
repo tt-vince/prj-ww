@@ -8,7 +8,7 @@
 export function Location() {
   return (
     <section
-      className="relative bg-[#eaf3f6] px-6 py-24 sm:px-9"
+      className="relative bg-[#eaf3f6] px-5 py-24 sm:px-9"
       style={{
         backgroundImage:
           'linear-gradient(to bottom, #ffffff 0%, rgba(255,255,255,0) 45%, rgba(255,255,255,0) 62%, #ffffff 100%), linear-gradient(rgba(255,255,255,0.45), rgba(255,255,255,0.45)), url(/beach-location.jpg)',
@@ -16,7 +16,7 @@ export function Location() {
         backgroundPosition: '50% bottom',
       }}
     >
-      <div className="mx-auto max-w-[min(80%,56rem)] text-center">
+      <div className="mx-auto max-w-[56rem] text-center">
         <h2 className="font-script text-4xl leading-tight text-[#1f4453] drop-shadow-[0_1px_10px_rgba(255,255,255,0.8)] sm:text-5xl">
           Where we’ll be
         </h2>

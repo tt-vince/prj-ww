@@ -13,8 +13,8 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
 export function OurStory() {
   return (
     <section className="relative z-10 -mt-48">
-      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-[#2C3F25] px-6 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
-        <div className="mx-auto max-w-[min(80%,56rem)] space-y-4">
+      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-[#2C3F25] px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
+        <div className="mx-auto max-w-[56rem]">
           <div className="text-center">
             <h2 className="font-script text-4xl leading-tight text-[#91A17C] sm:text-5xl">
               Our Story
@@ -92,7 +92,7 @@ export function OurStory() {
                         <p className="font-script text-xl leading-none text-[#91A17C]">
                           {s.date}
                         </p>
-                        <h3 className="mt-1.5 font-heading text-lg tracking-wide text-[#f5efdd]">
+                        <h3 className="mt-2 font-heading text-lg tracking-wide text-[#f5efdd]">
                           {s.title}
                         </h3>
                         <p className="mt-2 text-sm leading-relaxed text-[#e6e8d0]">

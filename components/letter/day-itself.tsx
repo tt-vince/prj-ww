@@ -6,15 +6,15 @@
  */
 export function DayItself() {
   return (
-    <section className="relative z-0 -mt-48 bg-white px-6 pt-56 pb-24 sm:px-9">
-      <div className="mx-auto max-w-[min(80%,56rem)] text-center">
+    <section className="relative z-0 -mt-48 bg-white px-5 pt-56 pb-24 sm:px-9">
+      <div className="mx-auto max-w-[56rem] text-center">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           The day itself
         </h2>
         <p className="mt-2 font-countdown text-sm tracking-wide text-[#2C3F25]">
           What we have planned
         </p>
-        <ol className="mx-auto mt-12 max-w-md text-left">
+        <ol className="mx-auto mt-10 max-w-md text-left">
           {[
             { time: '2:00 pm', what: 'Guests arrive', detail: 'Welcome drinks on the terrace.' },
             { time: '2:30 pm', what: 'Ceremony', detail: 'In the garden, weather permitting.' },
@@ -52,7 +52,7 @@ export function DayItself() {
                 <p className="font-heading text-lg leading-snug text-[#556D47]">
                   {e.what}
                 </p>
-                <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {e.detail}
                 </p>
               </div>

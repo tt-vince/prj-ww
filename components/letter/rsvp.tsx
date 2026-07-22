@@ -25,8 +25,8 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  */
 export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <section className="relative bg-[#2C3F25] px-6 py-24 sm:px-9">
-      <div className="mx-auto max-w-[min(90%,32rem)]">
+    <section className="relative bg-[#2C3F25] px-5 py-24 sm:px-9">
+      <div className="mx-auto max-w-[32rem]">
         <div className="text-center">
           <h2 className="font-script text-4xl leading-tight text-[#91A17C] sm:text-5xl">
             Will you join us?
