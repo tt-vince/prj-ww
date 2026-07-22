@@ -265,7 +265,7 @@
 .reveal-pin {
   position: sticky;
   top: 0;
-  height: 100dvh;
+  height: 100svh;
   /* Visible: the descended envelope may hang past the pin's box (below the
      viewport edge) without being clipped. The letter's own clipping is done
      by .letter-clip, not here. */
