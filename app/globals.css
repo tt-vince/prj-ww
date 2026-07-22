@@ -190,6 +190,10 @@
   }
   html {
     @apply font-sans;
+    /* Kill rubber-band overscroll chaining on mobile: the pinned reveal
+       jitters when the root scroller bounces past its ends (and when the
+       URL bar toggles on a long-press / edge touch). */
+    overscroll-behavior-y: none;
   }
 }
 
@@ -261,7 +265,7 @@
 .reveal-pin {
   position: sticky;
   top: 0;
-  height: 100svh;
+  height: 100dvh;
   /* Visible: the descended envelope may hang past the pin's box (below the
      viewport edge) without being clipped. The letter's own clipping is done
      by .letter-clip, not here. */
@@ -292,8 +296,14 @@
      The letter's bottom edge (= the mouth) ends up --env-overshoot below the
      viewport too, so .env-content pads its bottom by exactly this much —
      that stripe is sacrificial and must hold no real content. */
-  --env-overshoot: calc(2svh + 100vw / 3.4);
-  --env-drop: calc(50svh + var(--env-overshoot));
+  /* lvh (largest viewport, URL bar HIDDEN) — the reveal is scrolled with the
+     bar hidden, so lvh is the real viewport height for the whole descent.
+     svh here undershot by the bar's height and left the envelope peeking back
+     in at the bottom on mobile/tablet. The 4lvh buffer covers partial bar
+     states and rounding. Pin height is 100dvh so the envelope stays centred
+     in the real viewport in every bar state. */
+  --env-overshoot: calc(4lvh + 100vw / 3.4);
+  --env-drop: calc(50lvh + var(--env-overshoot));
   /* Starts dead-centre; glides down --env-drop on its own scroll segment
      (--pd 0→1 over --drop-px, slower than the flap fold), freeing the screen
      above for the letter. The compositor path drives the same move via the
@@ -567,7 +577,7 @@
     transform: translate(-50%, -50%);
   }
   to {
-    transform: translate(-50%, calc(-50% + var(--env-drop, 50svh)));
+    transform: translate(-50%, calc(-50% + var(--env-drop, 50lvh)));
   }
 }
 @keyframes env-spread {
