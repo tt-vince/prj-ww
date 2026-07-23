@@ -8,8 +8,9 @@ import { cn } from '@/lib/utils';
  * Layout: a single centre rail runs down the middle. Each event alternates
  * sides — a line-icon illustration on one half, the description on the other,
  * with a short horizontal connector from the centre rail to the title. On
- * mobile the rail shifts left and every item stacks on the right
- * (illustration above description). Dummy data for now.
+ * mobile the rail shifts left, a short connector runs from it to each title,
+ * and the illustration sits in the item body AFTER the description. Dummy
+ * data for now.
  */
 
 type EventIconName =
@@ -36,7 +37,7 @@ const EVENTS: {
 
 export function DayItself() {
   return (
-    <section className="relative z-0 -mt-48 bg-white px-5 pt-56 pb-24 sm:px-9">
+    <section className="relative z-0 -mt-48 bg-white pr-5 pt-56 pb-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           The day itself
@@ -58,12 +59,21 @@ export function DayItself() {
             return (
               <li
                 key={e.time}
-                className="relative flex items-start gap-5 pb-12 last:pb-0 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-x-10"
+                className="relative flex flex-col items-start gap-3 pb-12 pl-16 last:pb-0 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-x-10 md:pl-0"
               >
-                {/* Illustration — left rail on mobile, a side cell on md+. */}
+                {/* Connector from the LEFT rail to the title (mobile only) —
+                    stops short of the title (small gap) and is vertically
+                    centred on the title's first line. */}
+                <span
+                  aria-hidden
+                  className="absolute left-6 top-[0.95rem] h-0.5 w-8 bg-[#91A17C]/60 md:hidden"
+                />
+
+                {/* Illustration — a side cell on md+; on mobile it sits in the
+                    item body, after the description (order-2). */}
                 <div
                   className={cn(
-                    'flex shrink-0 justify-center md:order-2 md:shrink',
+                    'order-2 flex shrink-0 justify-center md:order-2 md:shrink',
                     illoRight ? 'md:order-3' : 'md:order-1'
                   )}
                 >
@@ -78,13 +88,13 @@ export function DayItself() {
                 {/* Description + connector to the centre rail. */}
                 <div
                   className={cn(
-                    'relative pt-1 md:pt-0',
+                    'order-1 relative pt-1 text-left md:pt-0',
                     illoRight
                       ? 'md:order-1 md:pr-2 md:text-right'
                       : 'md:order-3 md:pl-2 md:text-left'
                   )}
                 >
-                  {/* Horizontal connector from centre rail to the title. */}
+                  {/* Horizontal connector from centre rail to the title (md+). */}
                   <span
                     aria-hidden
                     className={cn(
