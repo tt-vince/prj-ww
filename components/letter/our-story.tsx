@@ -141,7 +141,17 @@ export function OurStory() {
                       <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-[#91A17C]">
                         {m.date}
                       </p>
-                      <h3 className="mt-1 font-heading text-2xl leading-tight text-[#f5efdd] sm:text-[2rem]">
+                      <h3 className="relative mt-1 font-heading text-2xl leading-tight text-[#f5efdd] sm:text-[2rem]">
+                        {/* Connector from the centre spine to the title (sm+).
+                            Width = text padding (pl/pr-10 = 40px) + half the
+                            column gap (gap-x-16 = 64px). */}
+                        <span
+                          aria-hidden
+                          className={cn(
+                            'absolute top-[0.55em] hidden h-[3px] w-[4.5rem] rounded-full bg-white/60 sm:block',
+                            imageLeft ? 'sm:-left-[4.5rem]' : 'sm:-right-[4.5rem]'
+                          )}
+                        />
                         {m.title}
                       </h3>
                       <p className="mt-2 text-sm leading-relaxed text-[#e6e8d0]">
