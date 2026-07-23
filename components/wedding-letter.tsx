@@ -11,13 +11,13 @@ import { Faq } from '@/components/letter/faq';
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 /**
- * The long-form wedding letter — the page content revealed by the envelope
- * intro (components/envelope-reveal.tsx). Each section lives in
+ * The long-form wedding site content. Each section lives in
  * components/letter/; this file only composes them. Hero, OurStory and
  * DayItself are full-bleed and overlap each other (see the -mt/z-index notes
- * in those files). It is ordinary document flow and scrolls natively — the
- * reveal is a one-shot CSS intro with no scroll coupling, so sections can be
- * added/reordered freely. `searchParams` is forwarded (not awaited).
+ * in those files). It is ordinary document flow and scrolls natively, so
+ * sections can be added/reordered freely. `searchParams` is forwarded (not
+ * awaited). The former envelope intro (components/envelope-reveal.tsx) no
+ * longer wraps this content but is kept for reuse.
  */
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
