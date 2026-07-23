@@ -102,7 +102,7 @@ export function OurStory() {
                 drawn by each item's own connector segment instead. */}
             <span
               aria-hidden
-              className="absolute top-0 bottom-4 left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-[#91A17C]/45 sm:block"
+              className="absolute top-0 bottom-4 left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white/60 sm:block"
             />
 
             <ol className="space-y-6 sm:space-y-0">
@@ -113,19 +113,11 @@ export function OurStory() {
                     key={m.date}
                     className="relative flex flex-col items-center sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-16 sm:py-8"
                   >
-                    {/* Mobile-only thread segment above the bead. */}
+                    {/* Mobile-only thread segment joining items into one thread. */}
                     <span
                       aria-hidden
-                      className="h-14 w-[2px] rounded-full bg-[#91A17C]/45 sm:hidden"
+                      className="my-3 h-16 w-[2px] rounded-full bg-white/60 sm:hidden"
                     />
-
-                    {/* Heart bead: inline on mobile, pinned to the spine on sm+. */}
-                    <span
-                      aria-hidden
-                      className="z-10 my-3 flex size-8 items-center justify-center rounded-full bg-[radial-gradient(circle_at_38%_32%,#a8b992,#556D47)] text-[13px] text-[#f5efdd] shadow-[0_3px_7px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.4)] sm:absolute sm:left-1/2 sm:top-1/2 sm:my-0 sm:-translate-x-1/2 sm:-translate-y-1/2"
-                    >
-                      ♥
-                    </span>
 
                     {/* Polaroid. */}
                     <div
