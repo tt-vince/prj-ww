@@ -7,13 +7,13 @@
 export function Location() {
   return (
     <section className="px-5 py-24 sm:px-9">
-      <div className="mx-auto grid max-w-[72rem] items-center gap-10 md:grid-cols-[minmax(0,24rem)_1fr] md:gap-14">
+      <div className="mx-auto grid max-w-[72rem] items-stretch gap-10 md:grid-cols-[minmax(0,24rem)_1fr] md:gap-14">
         {/* Pill-shaped photo alongside the content */}
-        <div className="order-2 mx-auto w-full max-w-[24rem] overflow-hidden rounded-full shadow-[0_28px_60px_-28px_rgba(20,42,54,0.55)] md:order-1 md:mx-0">
+        <div className="order-2 mx-auto w-full max-w-[455px] overflow-hidden rounded-full shadow-[0_28px_60px_-28px_rgba(20,42,54,0.55)] md:order-1 md:mx-0 md:h-full md:max-w-[24rem]">
           <img
             src="/beach-location.jpg"
             alt="Palm-lined beach at Anvy Beach Resort"
-            className="h-[32rem] w-full object-cover md:h-[42rem]"
+            className="h-[32rem] w-full object-cover md:h-full"
             loading="lazy"
           />
         </div>
@@ -33,11 +33,11 @@ export function Location() {
             Where we’ll say “I do,” toes in the sand.
           </p>
 
-          <div className="mt-8 overflow-hidden rounded-md border border-white/70 shadow-[0_24px_50px_-24px_rgba(20,42,54,0.5)]">
+          <div className="mx-auto mt-8 w-full max-w-[455px] overflow-hidden rounded-full border border-white/70 shadow-[0_24px_50px_-24px_rgba(20,42,54,0.5)] md:mx-0 md:max-w-none md:rounded-md">
             <iframe
               title="Map — Anvy Beach Resort"
               src="https://www.google.com/maps?q=Anvy+Beach+Resort&ll=5.8086321,125.1743154&z=17&output=embed"
-              className="block h-[24rem] w-full border-0"
+              className="block h-[32rem] w-full border-0 md:h-[24rem]"
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               allowFullScreen
