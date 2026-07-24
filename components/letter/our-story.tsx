@@ -1,5 +1,15 @@
+'use client';
+
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { COUPLE_NAMES } from '@/lib/wedding';
+
+// Both slots (photo + text) share this variant so a row reveals as one unit.
+const rowItem = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0 },
+};
+const rowTransition = { duration: 1.1, ease: 'easeOut' } as const;
 
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
@@ -109,9 +119,12 @@ export function OurStory() {
               {MEMORIES.map((m, i) => {
                 const imageLeft = i % 2 === 0;
                 return (
-                  <li
+                  <motion.li
                     key={m.date}
                     className="relative flex flex-col items-center sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-16 sm:py-8"
+                    initial="hidden"
+                    whileInView="show"
+                    viewport={{ once: true, amount: 0.3 }}
                   >
                     {/* Mobile-only thread segment joining items into one thread. */}
                     <span
@@ -120,17 +133,21 @@ export function OurStory() {
                     />
 
                     {/* Polaroid. */}
-                    <div
+                    <motion.div
+                      variants={rowItem}
+                      transition={rowTransition}
                       className={cn(
                         'flex justify-center',
                         imageLeft ? 'sm:order-1 sm:pr-10' : 'sm:order-2 sm:pl-10'
                       )}
                     >
                       <Polaroid memory={m} />
-                    </div>
+                    </motion.div>
 
                     {/* Text, hugging the spine. */}
-                    <div
+                    <motion.div
+                      variants={rowItem}
+                      transition={rowTransition}
                       className={cn(
                         'mt-2 max-w-sm px-2 text-center sm:mt-0 sm:max-w-none',
                         imageLeft
@@ -157,8 +174,8 @@ export function OurStory() {
                       <p className="mt-2 text-sm leading-relaxed text-[#e6e8d0]">
                         {m.body}
                       </p>
-                    </div>
-                  </li>
+                    </motion.div>
+                  </motion.li>
                 );
               })}
             </ol>

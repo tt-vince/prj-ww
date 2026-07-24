@@ -1,3 +1,6 @@
+'use client';
+
+import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 /**
@@ -57,9 +60,13 @@ export function DayItself() {
             // Even rows: illustration left, description right. Odd: swapped.
             const illoRight = i % 2 === 1;
             return (
-              <li
+              <motion.li
                 key={e.time}
                 className="relative flex flex-col items-start gap-3 pb-12 pl-16 last:pb-0 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-x-10 md:pl-0"
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.4 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
               >
                 {/* Connector from the LEFT rail to the title (mobile only) —
                     stops short of the title (small gap) and is vertically
@@ -109,7 +116,7 @@ export function DayItself() {
                     {e.detail}
                   </p>
                 </div>
-              </li>
+              </motion.li>
             );
           })}
         </ol>
