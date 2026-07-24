@@ -5,7 +5,7 @@ import {
   Parisienne,
   Playwrite_US_Modern,
 } from "next/font/google";
-import { TooltipProvider } from "@/components/ui/tooltip";
+import { Providers } from "@/components/providers";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -52,7 +52,7 @@ export default function RootLayout({
       className={`${dmSans.variable} ${gilda.variable} ${parisienne.variable} ${playwrite.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
-        <TooltipProvider>{children}</TooltipProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
