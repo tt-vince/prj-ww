@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import {
+  Beth_Ellen,
   DM_Sans,
   Gilda_Display,
   Parisienne,
@@ -36,6 +37,14 @@ const playwrite = Playwrite_US_Modern({
   display: "swap",
 });
 
+// Casual handwriting, for pen-on-paper notes in the guest letter (`--font-hand`).
+const bethEllen = Beth_Ellen({
+  variable: "--font-beth-ellen",
+  weight: "400",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Wedding RSVP · Admin",
   description: "Admin console for managing wedding RSVPs.",
@@ -49,7 +58,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${gilda.variable} ${parisienne.variable} ${playwrite.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${gilda.variable} ${parisienne.variable} ${playwrite.variable} ${bethEllen.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <Providers>{children}</Providers>

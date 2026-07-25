@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
@@ -12,30 +13,39 @@ import { cn } from '@/lib/utils';
  * sides — a line-icon illustration on one half, the description on the other,
  * with a short horizontal connector from the centre rail to the title. On
  * mobile the rail shifts left, a short connector runs from it to each title,
- * and the illustration sits in the item body AFTER the description. Dummy
- * data for now.
+ * and the illustration sits in the item body AFTER the description. The rail
+ * runs from the first event down to the getaway car at the end. Dummy data
+ * for now.
  */
 
-type EventIconName =
-  | 'drink'
-  | 'rings'
-  | 'camera'
-  | 'dinner'
-  | 'dance'
-  | 'sparkler';
+/**
+ * Hand-drawn illustrations from `public/icons/hand_drawn/wedding_2`. Intrinsic
+ * sizes come from each asset's viewBox — they are rendered at a fixed height
+ * with `w-auto`, so the differing aspect ratios stay honest.
+ */
+const ILLOS = {
+  arrive: { src: 'church.svg', width: 115, height: 123 },
+  ceremony: { src: 'floral-arch.svg', width: 92, height: 92 },
+  cocktails: { src: 'cocktails-two-glasses.svg', width: 112, height: 105 },
+  dinner: { src: 'wedding-cake-tiered.svg', width: 108, height: 100 },
+  dance: { src: 'dancing-couple-bride-groom.svg', width: 101, height: 105 },
+  fireworks: { src: 'fireworks.svg', width: 108, height: 104 },
+} as const;
+
+type EventIllo = keyof typeof ILLOS;
 
 const EVENTS: {
   time: string;
   what: string;
   detail: string;
-  icon: EventIconName;
+  illo: EventIllo;
 }[] = [
-  { time: '2:00 pm', what: 'Guests arrive', detail: 'Welcome drinks on the terrace.', icon: 'drink' },
-  { time: '2:30 pm', what: 'Ceremony', detail: 'In the garden, weather permitting.', icon: 'rings' },
-  { time: '3:15 pm', what: 'Cocktails & photos', detail: 'Canapés and a string quartet.', icon: 'camera' },
-  { time: '5:00 pm', what: 'Dinner', detail: 'Four seasonal courses in the Garden House.', icon: 'dinner' },
-  { time: '7:30 pm', what: 'First dance & party', detail: 'The dance floor opens.', icon: 'dance' },
-  { time: '10:00 pm', what: 'Sparkler send-off', detail: 'One last hurrah on the lawn.', icon: 'sparkler' },
+  { time: '2:00 pm', what: 'Guests arrive', detail: 'Welcome drinks on the terrace.', illo: 'arrive' },
+  { time: '2:30 pm', what: 'Ceremony', detail: 'In the garden, weather permitting.', illo: 'ceremony' },
+  { time: '3:15 pm', what: 'Cocktails & photos', detail: 'Canapés and a string quartet.', illo: 'cocktails' },
+  { time: '5:00 pm', what: 'Dinner', detail: 'Four seasonal courses in the Garden House.', illo: 'dinner' },
+  { time: '7:30 pm', what: 'First dance & party', detail: 'The dance floor opens.', illo: 'dance' },
+  { time: '10:00 pm', what: 'Fireworks', detail: 'One last hurrah on the lawn.', illo: 'fireworks' },
 ];
 
 export function DayItself() {
@@ -49,14 +59,17 @@ export function DayItself() {
           What we have planned
         </p>
 
-        <ol className="relative mx-auto mt-14 max-w-[46rem]">
-          {/* The single centre rail: left on mobile, dead-centre on md+. */}
+        <div className="relative mx-auto mt-14 max-w-[46rem]">
+          {/* The single centre rail: left on mobile, dead-centre on md+. It
+              starts at the first event; on md+ it runs on down to the getaway
+              car, on mobile it stops at the last event (car is hidden). */}
           <span
             aria-hidden
-            className="absolute inset-y-1 left-6 w-0.5 bg-[#91A17C]/60 md:left-1/2 md:-translate-x-1/2"
+            className="absolute bottom-1 left-6 top-1 w-0.5 bg-[#91A17C]/60 md:bottom-32 md:left-1/2 md:-translate-x-1/2"
           />
 
-          {EVENTS.map((e, i) => {
+          <ol className="relative">
+            {EVENTS.map((e, i) => {
             // Even rows: illustration left, description right. Odd: swapped.
             const illoRight = i % 2 === 1;
             return (
@@ -76,17 +89,19 @@ export function DayItself() {
                   className="absolute left-6 top-[0.95rem] h-0.5 w-8 bg-[#91A17C]/60 md:hidden"
                 />
 
-                {/* Illustration — a side cell on md+; on mobile it sits in the
-                    item body, after the description (order-2). */}
+                {/* Hand-drawn illustration — a side cell on md+; on mobile it
+                    sits in the item body, after the description (order-2). */}
                 <div
                   className={cn(
+                    // On md+ the illustration hugs the centre rail rather than
+                    // sitting in the middle of its half.
                     'order-2 flex shrink-0 justify-center md:order-2 md:shrink',
-                    illoRight ? 'md:order-3' : 'md:order-1'
+                    illoRight
+                      ? 'md:order-3 md:justify-start'
+                      : 'md:order-1 md:justify-end'
                   )}
                 >
-                  <span className="flex size-12 items-center justify-center rounded-full border border-[#91A17C]/60 bg-white/70 text-[#556D47] shadow-[0_2px_10px_-4px_rgba(85,109,71,0.5)] backdrop-blur-sm md:size-20">
-                    <EventIcon name={e.icon} className="size-[19px] md:size-9" />
-                  </span>
+                  <EventIllustration illo={e.illo} />
                 </div>
 
                 {/* Spacer for the centre rail track (md grid middle column). */}
@@ -117,75 +132,48 @@ export function DayItself() {
                   </p>
                 </div>
               </motion.li>
-            );
-          })}
-        </ol>
+              );
+            })}
+          </ol>
+
+          {/* Getaway car — where the rail ends. Hidden on mobile for now; on
+              md+ it hangs off the bottom of the centre rail. */}
+          <motion.div
+            className="relative hidden pt-8 md:flex md:justify-center"
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.7, ease: 'easeOut' }}
+          >
+            <Image
+              src="/icons/hand_drawn/wedding_2/wedding-car-couple.svg"
+              alt="Getaway car"
+              width={99}
+              height={99}
+              className="h-20 w-auto opacity-80 md:h-32"
+            />
+          </motion.div>
+        </div>
       </div>
     </section>
   );
 }
 
-/** Minimal sage line-icons, one per event. */
-function EventIcon({
-  name,
-  className,
-}: {
-  name: EventIconName;
-  className?: string;
-}) {
+/**
+ * Hand-drawn illustration for one event. Same treatment as the getaway car at
+ * the end of the rail: the asset's own ink, softened slightly, at a fixed
+ * height so every row lines up regardless of the drawing's aspect ratio.
+ */
+function EventIllustration({ illo }: { illo: EventIllo }) {
+  const { src, width, height } = ILLOS[illo];
   return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+    <Image
+      src={`/icons/hand_drawn/wedding_2/${src}`}
+      alt=""
       aria-hidden
-    >
-      {name === 'drink' ? (
-        <>
-          <path d="M6 4h12l-5 7v6" />
-          <path d="M9 20h6" />
-          <path d="M8 8h8" />
-        </>
-      ) : null}
-      {name === 'rings' ? (
-        <>
-          <circle cx="9" cy="14" r="5" />
-          <circle cx="15" cy="14" r="5" />
-          <path d="M10.5 4.5 12 3l1.5 1.5L12 6z" />
-        </>
-      ) : null}
-      {name === 'camera' ? (
-        <>
-          <path d="M3 8.5A1.5 1.5 0 0 1 4.5 7h2l1.2-2h6.6L15.5 7h4A1.5 1.5 0 0 1 21 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z" />
-          <circle cx="12" cy="12.5" r="3.2" />
-        </>
-      ) : null}
-      {name === 'dinner' ? (
-        <>
-          <path d="M6 3v7a2 2 0 0 0 4 0V3" />
-          <path d="M8 10v11" />
-          <path d="M17 3c-1.7 0-3 1.8-3 4s1.3 4 3 4" />
-          <path d="M17 3v18" />
-        </>
-      ) : null}
-      {name === 'dance' ? (
-        <>
-          <circle cx="8" cy="18" r="2.4" />
-          <path d="M10.4 17V6l7 2" />
-          <path d="M17.4 8v7" />
-          <circle cx="15" cy="15" r="2" />
-        </>
-      ) : null}
-      {name === 'sparkler' ? (
-        <>
-          <path d="M14 21 8 9" />
-          <path d="M17 3v3M20.5 4.5 18.5 6.5M21 9h-3M13 3.5 15 6" />
-        </>
-      ) : null}
-    </svg>
+      width={width}
+      height={height}
+      className="h-30 w-auto opacity-80 md:h-32"
+    />
   );
 }
