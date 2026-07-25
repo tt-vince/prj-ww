@@ -21,8 +21,7 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  * white paper and white thread on it:
  *
  *   • a hand-drawn camera charm hangs over the top of a centre thread;
- *   • each memory is a tilted white polaroid held by a strip of washi tape,
- *     with a handwritten caption and a small heart bead on the thread;
+ *   • each memory is a tilted white polaroid with a handwritten caption;
  *   • desktop (sm+) = design 4a: continuous centre spine, rows alternate
  *     left/right, text hugs the spine;
  *   • mobile = design 5a: a single centred column, camera on top, polaroids
@@ -45,9 +44,8 @@ type Memory = {
    * striped placeholder when unset.
    */
   image?: string;
-  /** Polaroid tilt + washi-tape tilt, in degrees (from the source design). */
+  /** Polaroid tilt, in degrees (from the source design). */
   tilt: number;
-  tape: number;
 };
 
 const MEMORIES: Memory[] = [
@@ -58,7 +56,6 @@ const MEMORIES: Memory[] = [
     caption: 'the café awning ♡',
     image: 'https://picsum.photos/seed/ww-umbrella/600/600',
     tilt: -2.4,
-    tape: -4,
   },
   {
     date: 'September 2020',
@@ -67,7 +64,6 @@ const MEMORIES: Memory[] = [
     caption: 'moving day',
     image: 'https://picsum.photos/seed/ww-apartment/600/600',
     tilt: 2,
-    tape: 5,
   },
   {
     date: 'June 2022',
@@ -76,7 +72,6 @@ const MEMORIES: Memory[] = [
     caption: 'Mochi arrives ♡',
     image: 'https://picsum.photos/seed/ww-mochi/600/600',
     tilt: 1.6,
-    tape: -3,
   },
   {
     date: 'October 2025',
@@ -85,7 +80,6 @@ const MEMORIES: Memory[] = [
     caption: 'same corner ♡',
     image: 'https://picsum.photos/seed/ww-proposal/600/600',
     tilt: -1.8,
-    tape: 4,
   },
   {
     date: 'Next summer',
@@ -94,7 +88,6 @@ const MEMORIES: Memory[] = [
     caption: 'the garden',
     image: 'https://picsum.photos/seed/ww-garden/600/600',
     tilt: 2.2,
-    tape: -5,
   },
 ];
 
@@ -149,7 +142,7 @@ export function OurStory() {
                       transition={rowTransition}
                       className={cn(
                         'flex justify-center',
-                        imageLeft ? 'sm:order-1 sm:pr-10' : 'sm:order-2 sm:pl-10'
+                        imageLeft ? 'sm:order-1' : 'sm:order-2'
                       )}
                     >
                       <Polaroid memory={m} />
@@ -218,21 +211,14 @@ export function OurStory() {
   );
 }
 
-/** A single tilted polaroid: washi tape, photo (or placeholder), handwritten note. */
+/** A single tilted polaroid: photo (or placeholder), handwritten note. */
 function Polaroid({ memory }: { memory: Memory }) {
-  const { image, caption, title, tilt, tape } = memory;
+  const { image, caption, title, tilt } = memory;
   return (
     <figure
       className="relative w-[min(74vw,15rem)] rounded-[2px] bg-white p-3 pb-9 shadow-[0_14px_28px_-6px_rgba(30,42,24,0.5),0_2px_5px_rgba(30,42,24,0.3)] sm:w-64"
       style={{ transform: `rotate(${tilt}deg)` }}
     >
-      {/* Washi tape holding the top edge. */}
-      <span
-        aria-hidden
-        className="absolute -top-3 left-1/2 h-6 w-24 bg-[repeating-linear-gradient(45deg,#ffffff,#ffffff_6px,transparent_6px,transparent_12px)] shadow-sm"
-        style={{ transform: `translateX(-50%) rotate(${tape}deg)` }}
-      />
-
       <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_rgba(30,42,24,0.3)]">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
