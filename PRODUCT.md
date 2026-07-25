@@ -82,10 +82,13 @@ imported hi-fi Claude Design files and are settled.
   - Alpha survives only where it is physically a scrim or a shadow: the hero's overlay on the
     lily photo, the frosted lace window, and box-shadows (ink-tinted). Text, rules, fills,
     borders and icons are always full white or full ink.
+  - The one exception to ink-tinting is the hero photo scrim, which is neutral `bg-black/50`:
+    ink-tinting it cast a green wash over the lily photograph, and a scrim's job is to darken
+    the image, not to colour it.
   - Two-colour consequences to respect rather than work around: hover states invert
-    (`hover:bg-white hover:text-ink`) instead of tinting; the Prenup progress rail has no
-    groove behind it (the ink line just grows on the paper); placeholder fills are hairline
-    stripes of one colour on the other, not a wash.
+    (`hover:bg-white hover:text-ink`) instead of tinting; rules and dividers are hairlines of
+    full ink on white, never a tinted groove; placeholder fills are hairline stripes of one
+    colour on the other, not a wash.
   - `destructive` is ink too. Error states are carried by `role="alert"` / `aria-invalid` and
     wording, never by hue.
   - **Exempt:** photographs (`/hero-lily.jpg`, `/beach-location.jpg`, the picsum stand-ins) and

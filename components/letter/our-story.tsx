@@ -116,7 +116,7 @@ export function OurStory() {
                 drawn by each item's own connector segment instead. */}
             <span
               aria-hidden
-              className="absolute top-0 bottom-[9rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white sm:block"
+              className="absolute top-0 bottom-[8rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white sm:block"
             />
 
             <ol className="space-y-6 sm:space-y-0">
@@ -184,10 +184,10 @@ export function OurStory() {
               })}
             </ol>
 
-            {/* The thread ends at a hand-drawn photo clothesline — same idea as
-                the getaway car closing the rail in `DayItself`. On mobile a
-                thread segment carries down to it (the sm+ spine stops just
-                above the drawing). */}
+            {/* The thread ends at a pair of hand-drawn wedding rings — same
+                idea as the getaway car closing the rail in `DayItself`. On
+                mobile a thread segment carries down to it (the sm+ spine stops
+                just above the drawing). */}
             <motion.div
               className="relative flex flex-col items-center"
               initial={{ opacity: 0, y: 24 }}
@@ -200,8 +200,8 @@ export function OurStory() {
                 className="my-3 h-16 w-[2px] rounded-full bg-white sm:hidden"
               />
               <InkCharm
-                src="/icons/hand_drawn/wedding_2/photo-clothesline.svg"
-                className="aspect-[110.0977/79.3906] w-44 sm:mt-2 sm:w-52"
+                src="/icons/hand_drawn/illustrations/wedding-rings-linework.svg"
+                className="aspect-[211.1815/126.2234] w-44 sm:mt-8 sm:w-52"
               />
             </motion.div>
           </div>
