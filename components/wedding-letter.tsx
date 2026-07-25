@@ -1,4 +1,5 @@
 import { Hero } from '@/components/letter/hero';
+import { CountdownBand } from '@/components/letter/countdown-band';
 import { OurStory } from '@/components/letter/our-story';
 import { DayItself } from '@/components/letter/day-itself';
 import { AttireGuide } from '@/components/letter/attire-guide';
@@ -23,6 +24,7 @@ export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) 
   return (
     <div>
       <Hero />
+      <CountdownBand />
       <OurStory />
       <DayItself />
       <AttireGuide />

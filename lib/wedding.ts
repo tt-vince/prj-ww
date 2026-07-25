@@ -22,6 +22,14 @@ export const WEDDING_MONTH_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
+/** "Saturday, April 10, 2027" — the full date anchor in the countdown band. */
+export const WEDDING_DAY_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
+  weekday: 'long',
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+
 /**
  * Seven days centered on the wedding day (±3 days), for the hero's calendar
  * strip. Derived from WEDDING_DATE_ISO so a date change moves the whole strip

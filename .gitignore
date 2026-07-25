@@ -28,6 +28,11 @@ yarn.lock
 .DS_Store
 *.pem
 
+# local hand-drawn icon library (full sets). Only the icons the site actually
+# references live under public/icons/hand_drawn/ and are committed; the rest
+# stays here so icons can be swapped in locally without repo weight.
+/public/icons/_library/
+
 # debug
 npm-debug.log*
 yarn-debug.log*

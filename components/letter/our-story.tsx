@@ -106,7 +106,7 @@ export function OurStory() {
               segments join into one continuous centre thread. */}
           <div className="relative mx-auto mt-24 max-w-[52rem] sm:mt-28">
             {/* Hand-drawn camera charm, centred over the top of the thread. */}
-            <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-24 -translate-x-1/2 -translate-y-[85%] sm:w-32" />
+            <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-28 -translate-x-1/2 -translate-y-[85%] sm:w-36" />
 
             {/* Continuous centre spine (sm+ only). On mobile the thread is
                 drawn by each item's own connector segment instead. */}
@@ -226,44 +226,27 @@ function Polaroid({ memory }: { memory: Memory }) {
   );
 }
 
-/** Hand-drawn camera charm from the source design, recoloured cream-on-green. */
+/**
+ * Hand-drawn camera charm (`public/icons/hand_drawn/wedding/Camera.svg`).
+ * The asset ships as solid #3a3b3a, so it is painted through a CSS mask to
+ * recolour it cream against the green dome.
+ */
 function CameraCharm({ className }: { className?: string }) {
+  const mask = "url('/icons/hand_drawn/wedding/Camera.svg')";
   return (
-    <svg
-      viewBox="0 0 148 150"
-      className={className}
-      fill="none"
+    <span
       aria-hidden
-      style={{ overflow: 'visible' }}
-    >
-      <defs>
-        <filter id="os-camera-sketch" x="-12%" y="-12%" width="124%" height="124%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.026" numOctaves="2" seed="7" result="n" />
-          <feDisplacementMap in="SourceGraphic" in2="n" scale="5.5" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-      </defs>
-      <g stroke="#f5efdd" strokeWidth="2.2" strokeLinecap="round" filter="url(#os-camera-sketch)">
-        {/* strap */}
-        <path d="M40 120 L38 143 Q38 147 43 147 L105 147 Q110 147 109 143 L107 120" fill="#2C3F25" stroke="#f5efdd" strokeWidth="2" />
-        <path d="M46 138 L100 138" stroke="#91A17C" strokeWidth="2" strokeLinecap="round" />
-        {/* body */}
-        <path d="M18 40 Q16 34 24 33 L124 32 Q132 33 131 41 L132 112 Q132 120 123 119 L23 120 Q15 120 16 111 Z" fill="#3a4d30" />
-        <path d="M24 33 L124 32" stroke="#f5efdd" strokeWidth="1.3" opacity="0.45" />
-        {/* viewfinder bump */}
-        <rect x="31" y="20" width="18" height="15" rx="4" fill="#3a4d30" />
-        {/* lens */}
-        <circle cx="74" cy="78" r="25" fill="none" />
-        <circle cx="74" cy="78" r="16" fill="none" />
-        <circle cx="74" cy="78" r="8" fill="none" />
-        {/* flash window */}
-        <rect x="100" y="44" width="20" height="14" rx="3" fill="none" />
-        {/* film accent stripes */}
-        <path d="M30 46 L30 100" stroke="#b7c2a1" strokeWidth="3" />
-        <path d="M35 46 L35 100" stroke="#91A17C" strokeWidth="3" />
-        <path d="M40 46 L40 100" stroke="#6f7f5c" strokeWidth="3" />
-        {/* little shutter tick */}
-        <path d="M52 20 Q56 15 62 18" stroke="#f5efdd" strokeWidth="1.6" opacity="0.5" />
-      </g>
-    </svg>
+      className={cn('block aspect-[461.3/349.7] bg-[#f5efdd]', className)}
+      style={{
+        maskImage: mask,
+        WebkitMaskImage: mask,
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
+      }}
+    />
   );
 }

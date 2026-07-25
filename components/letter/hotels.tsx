@@ -31,10 +31,36 @@ const HOTELS = [
   },
 ];
 
+/**
+ * Band-under-string-lights illustration that closes the section: full-bleed and
+ * flush with the top of the RSVP band, so the drawing reads as standing on the
+ * green. The asset ships as a single flat colour, so it is painted through a
+ * CSS mask to match the RSVP background (#2C3F25).
+ */
+function BandStringLights() {
+  const mask = "url('/icons/hand_drawn/illustrations/band-string-lights.svg')";
+  return (
+    <span
+      aria-hidden
+      className="block aspect-[1032.3529/411.4979] w-full bg-[#2C3F25]"
+      style={{
+        maskImage: mask,
+        WebkitMaskImage: mask,
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
+      }}
+    />
+  );
+}
+
 export function Hotels() {
   return (
-    <section className="bg-white px-5 py-24 sm:px-9">
-      <div className="mx-auto max-w-[56rem] text-center">
+    <section className="bg-white pt-24">
+      <div className="mx-auto max-w-[56rem] px-5 text-center sm:px-9">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           Where you can stay
         </h2>
@@ -72,6 +98,12 @@ export function Hotels() {
             </Card>
           ))}
         </div>
+      </div>
+
+      {/* Full-bleed, no bottom padding: the illustration's baseline meets the
+          RSVP section's green edge. */}
+      <div className="mt-16">
+        <BandStringLights />
       </div>
     </section>
   );
