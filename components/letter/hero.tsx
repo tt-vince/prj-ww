@@ -50,7 +50,7 @@ export function Hero() {
       {/* Dark overlay for text legibility (static). */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-black/50"
+        className="pointer-events-none absolute inset-0 bg-ink/55"
       />
       <header className="relative flex min-h-svh flex-col items-center justify-center px-5 py-16 text-center sm:px-9">
         <motion.div
@@ -75,7 +75,7 @@ export function Hero() {
             {/* The lace frame. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 drop-shadow-[0_8px_30px_rgba(0,0,0,0.5)]"
+              className="pointer-events-none absolute inset-0 drop-shadow-[0_8px_30px_rgba(30,42,24,0.55)]"
               style={{
                 backgroundImage: 'url(/lace.png)',
                 backgroundSize: 'contain',
@@ -84,7 +84,7 @@ export function Hero() {
               }}
             />
             {/* Names centered in the window, stacked to fit the square. */}
-            <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-[#f3e3e7] drop-shadow-[0_2px_14px_rgba(0,0,0,0.7)]">
+            <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]">
               <span className="text-6xl md:text-[4.875rem]">{NAME_A}</span>
               <span className="text-2xl opacity-75 md:text-[1.95rem]">&amp;</span>
               <span className="text-6xl md:text-[4.875rem]">{NAME_B}</span>
@@ -93,13 +93,13 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-script text-5xl tracking-[0.3em] text-white/70"
+            className="font-script text-5xl tracking-[0.3em] text-white"
           >
             are getting married!
           </motion.p>
           {/* <Countdown
             align="center"
-            className="mt-10 text-[#f3e3e7] drop-shadow-[0_1px_10px_rgba(0,0,0,0.6)]"
+            className="mt-10 text-white drop-shadow-[0_1px_10px_rgba(30,42,24,0.65)]"
           /> */}
         </motion.div>
       </header>

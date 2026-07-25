@@ -12,9 +12,8 @@ import {
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 /**
- * RSVP — the closing section (after Location). Solid deep forest green
- * (#2C3F25, matching Our Story) sits behind a single white Card holding the
- * reply form.
+ * RSVP — the closing section (after Location). Solid ink (#1E2A18, matching Our
+ * Story) sits behind a single white Card holding the reply form.
  *
  * Token-driven per docs/rsvp-spec.md: the personal invite link is `?id=<token>`.
  * The card shows one of three states — the form (pending reply), a thank-you
@@ -25,18 +24,18 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  */
 export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <section className="relative bg-[#2C3F25] px-5 py-24 sm:px-9">
+    <section className="relative bg-ink px-5 py-24 sm:px-9">
       <div className="mx-auto max-w-[32rem]">
         <div className="text-center">
-          <h2 className="font-script text-4xl leading-tight text-[#91A17C] sm:text-5xl">
+          <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
             Will you join us?
           </h2>
-          <p className="mt-2 font-countdown text-sm tracking-wide text-[#f5efdd]">
+          <p className="mt-2 font-countdown text-sm tracking-wide text-white">
             RSVP
           </p>
         </div>
 
-        <Card className="mt-10 px-2 py-8 shadow-[0_28px_60px_-30px_rgba(85,109,71,0.5)] sm:px-6">
+        <Card className="mt-10 px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] sm:px-6">
           <Suspense fallback={<RsvpBodyFallback />}>
             <RsvpBody searchParams={searchParams} />
           </Suspense>

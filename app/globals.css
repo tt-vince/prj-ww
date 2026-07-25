@@ -7,6 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  /* Guest letter ink — the only non-white colour on the home page. */
+  --color-ink: var(--ink);
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-serif: var(--font-gilda), ui-serif, Georgia, "Times New Roman", serif;
@@ -99,8 +101,12 @@
   --sidebar-border: #ece3ea;
   --sidebar-ring: #8a76b0;
 
-  /* Couple-name script accent (sage). */
+  /* Couple-name script accent (sage) — dashboard only. */
   --script: #556D47;
+
+  /* Home-page ink. Declared at the root so `text-ink` resolves everywhere,
+     but only the guest letter (.letter-theme) is built on it. */
+  --ink: #1e2a18;
 
   /* Stat numbers, progress bars, status dots, and status pills (hi-fi). */
   --stat-going: #5f7a48;
@@ -121,6 +127,45 @@
   --pill-pending-fg: #a9832f;
   --pill-declined-bg: #f5e7e3;
   --pill-declined-fg: #b06a4f;
+}
+
+/* ── Home page theme: white + ink #1E2A18, and nothing else ──────────
+   The guest letter (app/page.tsx -> components/wedding-letter.tsx ->
+   components/letter/*) is a two-colour document: white paper, #1E2A18 ink.
+   Both are used at FULL strength — no tints, no thinned ink: hierarchy comes
+   from size, face and weight, not tone. Alpha survives only where it is
+   physically a scrim or a shadow (the hero's overlay on the lily photo, the
+   frosted lace window, box-shadows). This block re-points the shadcn tokens for that subtree only, so
+   any shadcn component used inside the letter (Card, Button, Input, Separator…)
+   inherits the two-colour system without per-component overrides. The wisteria
+   & fig palette in :root above is untouched and still owns /dashboard and
+   /login. `@theme inline` is what makes this work — utilities emit
+   `var(--token)`, so a scoped redefinition wins at use site. */
+.letter-theme {
+  --background: #ffffff;
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--ink);
+  --primary-foreground: #ffffff;
+  --secondary: #ffffff;
+  --secondary-foreground: var(--ink);
+  --muted: #ffffff;
+  /* No thinned ink: secondary text is the same #1E2A18 as primary text, and
+     rank comes from size/face/weight instead of tone. */
+  --muted-foreground: var(--ink);
+  /* Hover/active surfaces invert rather than tint. */
+  --accent: var(--ink);
+  --accent-foreground: #ffffff;
+  /* No red: errors are carried by role="alert" / aria-invalid and wording,
+     not by hue. */
+  --destructive: var(--ink);
+  --border: var(--ink);
+  --input: var(--ink);
+  --ring: var(--ink);
+  --script: var(--ink);
 }
 
 /* Dark wisteria variant (no in-app toggle yet, but kept coherent). */

@@ -66,7 +66,33 @@ imported hi-fi Claude Design files and are settled.
 
 ## Brand Commitments
 
-- **Colors are locked.** The "wisteria & fig" token set in `app/globals.css` is binding.
+- **Colors are locked, and the home page is two colours only.** The guest letter
+  (`app/page.tsx` → `components/wedding-letter.tsx` → `components/letter/*`) uses **white
+  `#ffffff` and ink `#1E2A18`, and nothing else**. Both at FULL strength: no tints, no thinned
+  ink, no `ink/70`-style tiers. Whatever was green before is now exactly `#1E2A18`.
+  Hierarchy comes from size, face and weight — never from tone. No greens (`#2C3F25`, `#556D47`, `#91A17C`), creams
+  (`#f5efdd`, `#e6e8d0`), or blues (`#1f4453`, `#142a36`); those are gone from the letter.
+  Shadows are ink-tinted (`rgba(30,42,24,…)`), not black.
+  - Implementation: `--ink: #1e2a18` and the `--color-ink` theme key live in `app/globals.css`;
+    the `.letter-theme` scope re-points the shadcn tokens (`foreground`, `primary`, `muted-
+    foreground`, `border`, `input`, `ring`, `destructive`, `script`…) onto white + ink for that
+    subtree, so shadcn components used inside the letter need no per-component colour. Use the
+    `text-ink` / `bg-ink` / `border-ink` utilities with opacity modifiers — don't reintroduce
+    hex literals.
+  - Alpha survives only where it is physically a scrim or a shadow: the hero's overlay on the
+    lily photo, the frosted lace window, and box-shadows (ink-tinted). Text, rules, fills,
+    borders and icons are always full white or full ink.
+  - Two-colour consequences to respect rather than work around: hover states invert
+    (`hover:bg-white hover:text-ink`) instead of tinting; the Prenup progress rail has no
+    groove behind it (the ink line just grows on the paper); placeholder fills are hairline
+    stripes of one colour on the other, not a wash.
+  - `destructive` is ink too. Error states are carried by `role="alert"` / `aria-invalid` and
+    wording, never by hue.
+  - **Exempt:** photographs (`/hero-lily.jpg`, `/beach-location.jpg`, the picsum stand-ins) and
+    `public/attire-guide.png`, which is a multi-colour palette illustration and is the content.
+    Everything drawn in CSS or SVG obeys the two colours.
+- **The dashboard keeps "wisteria & fig."** The `:root` token set in `app/globals.css` is
+  binding for `/dashboard` and `/login` and must not be retuned to match the letter.
 - **Section set and order are locked.** Hero, countdown band, our story, the day itself, attire
   guide, location, hotels, RSVP, gifts, FAQ.
 - **Copy is not locked** — all guest-facing content is draft and may be rewritten.

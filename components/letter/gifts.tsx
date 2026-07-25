@@ -23,7 +23,7 @@ export async function Gifts() {
         width: 176,
         margin: 1,
         errorCorrectionLevel: 'M',
-        color: { dark: '#1c1c1c', light: '#ffffff' },
+        color: { dark: '#1e2a18', light: '#ffffff' },
       }),
     })),
   );
@@ -34,7 +34,7 @@ export async function Gifts() {
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           A little something
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-[#2C3F25]">
+        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
           Gift guide
         </p>
 
@@ -48,10 +48,10 @@ export async function Gifts() {
           {codes.map((c) => (
             <div key={c.method} className="flex flex-col items-center">
               <div
-                className="rounded-md border border-[#e6e2d4] bg-white p-2 [&>svg]:block"
+                className="rounded-md border border-ink bg-white p-2 [&>svg]:block"
                 dangerouslySetInnerHTML={{ __html: c.svg }}
               />
-              <p className="mt-4 font-heading text-lg text-[#556D47]">
+              <p className="mt-4 font-heading text-lg text-ink">
                 {c.method}
               </p>
             </div>

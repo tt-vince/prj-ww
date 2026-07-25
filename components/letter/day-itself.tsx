@@ -5,9 +5,10 @@ import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 /**
- * Sequence of events — EDGE-TO-EDGE white section. It slides up (-mt)
- * BEHIND Our Story's bottom dome (z-0 under its z-10), so the reverse dome
- * reveals this through the green's bottom corner notches.
+ * Sequence of events — EDGE-TO-EDGE white section. It used to be the section
+ * that slid up behind Our Story's bottom dome; `Prenup` now sits between them
+ * and carries that overlap (`-mt-48 pt-56`), so this just continues the same
+ * white flow underneath it.
  *
  * Layout: a single centre rail runs down the middle. Each event alternates
  * sides — a line-icon illustration on one half, the description on the other,
@@ -50,12 +51,12 @@ const EVENTS: {
 
 export function DayItself() {
   return (
-    <section className="relative z-0 -mt-48 bg-white pr-5 pt-56 pb-24 sm:px-9">
+    <section className="relative z-0 bg-white pr-5 pt-24 pb-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           The day itself
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-[#2C3F25]">
+        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
           What we have planned
         </p>
 
@@ -65,7 +66,7 @@ export function DayItself() {
               car, on mobile it stops at the last event (car is hidden). */}
           <span
             aria-hidden
-            className="absolute bottom-1 left-6 top-1 w-0.5 bg-[#91A17C]/60 md:bottom-32 md:left-1/2 md:-translate-x-1/2"
+            className="absolute bottom-1 left-6 top-1 w-0.5 bg-ink md:bottom-32 md:left-1/2 md:-translate-x-1/2"
           />
 
           <ol className="relative">
@@ -86,7 +87,7 @@ export function DayItself() {
                     centred on the title's first line. */}
                 <span
                   aria-hidden
-                  className="absolute left-6 top-[0.95rem] h-0.5 w-8 bg-[#91A17C]/60 md:hidden"
+                  className="absolute left-6 top-[0.95rem] h-0.5 w-8 bg-ink md:hidden"
                 />
 
                 {/* Hand-drawn illustration — a side cell on md+; on mobile it
@@ -120,14 +121,14 @@ export function DayItself() {
                   <span
                     aria-hidden
                     className={cn(
-                      'absolute top-[0.7rem] hidden h-0.5 w-10 bg-[#91A17C]/60 md:block',
+                      'absolute top-[0.7rem] hidden h-0.5 w-10 bg-ink md:block',
                       illoRight ? 'md:-right-10' : 'md:-left-10'
                     )}
                   />
-                  <p className="font-heading text-lg leading-snug text-[#556D47]">
+                  <p className="font-hand text-lg leading-snug text-ink">
                     {e.what}
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <p className="mt-2 text-sm leading-relaxed text-ink">
                     {e.detail}
                   </p>
                 </div>

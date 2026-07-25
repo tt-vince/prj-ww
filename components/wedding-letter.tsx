@@ -1,6 +1,7 @@
 import { Hero } from '@/components/letter/hero';
 import { CountdownBand } from '@/components/letter/countdown-band';
 import { OurStory } from '@/components/letter/our-story';
+import { Prenup } from '@/components/letter/prenup';
 import { DayItself } from '@/components/letter/day-itself';
 import { AttireGuide } from '@/components/letter/attire-guide';
 import { Location } from '@/components/letter/location';
@@ -19,13 +20,18 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  * sections can be added/reordered freely. `searchParams` is forwarded (not
  * awaited). The former envelope intro (components/envelope-reveal.tsx) no
  * longer wraps this content but is kept for reuse.
+ *
+ * `letter-theme` (app/globals.css) scopes the home page to its two-colour
+ * system — white paper, #1E2A18 ink — by re-pointing the shadcn tokens for this
+ * subtree only. The dashboard keeps the wisteria & fig palette.
  */
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <div>
+    <div className="letter-theme bg-white text-ink">
       <Hero />
       <CountdownBand />
       <OurStory />
+      <Prenup />
       <DayItself />
       <AttireGuide />
       <Location />

@@ -13,8 +13,10 @@ import { Separator } from '@/components/ui/separator';
 const initial: RsvpState = { ok: false };
 
 /**
- * Public RSVP form for a single invitee, styled in the "wisteria & fig" system
- * to sit on the reveal letter. `token` is the capability link id (`?id=<token>`);
+ * Public RSVP form for a single invitee. It is built purely on the shadcn
+ * tokens, so inside the letter's `.letter-theme` scope (app/globals.css) it
+ * renders in the home page's two-colour system — white paper, #1E2A18 ink —
+ * with no colour of its own. `token` is the capability link id (`?id=<token>`);
  * `maxGuests` bounds the party-size selector. On a successful reply it swaps to
  * a thank-you message.
  */

@@ -13,7 +13,7 @@ export function AttireGuide() {
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           What to wear
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-[#2C3F25]">
+        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
           Attire guide
         </p>
         <Image
@@ -25,7 +25,7 @@ export function AttireGuide() {
           sizes="(max-width: 640px) 92vw, min(80vw, 56rem)"
         />
         <div className="mx-auto mt-8 max-w-md space-y-3">
-          <p className="font-heading text-lg leading-snug text-[#556D47]">
+          <p className="font-heading text-lg leading-snug text-ink">
             Semi-formal — garden party
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">

@@ -35,14 +35,14 @@ const HOTELS = [
  * Band-under-string-lights illustration that closes the section: full-bleed and
  * flush with the top of the RSVP band, so the drawing reads as standing on the
  * green. The asset ships as a single flat colour, so it is painted through a
- * CSS mask to match the RSVP background (#2C3F25).
+ * CSS mask to match the RSVP background (the letter's ink).
  */
 function BandStringLights() {
   const mask = "url('/icons/hand_drawn/illustrations/band-string-lights.svg')";
   return (
     <span
       aria-hidden
-      className="block aspect-[1032.3529/411.4979] w-full bg-[#2C3F25]"
+      className="block aspect-[1032.3529/411.4979] w-full bg-ink"
       style={{
         maskImage: mask,
         WebkitMaskImage: mask,
@@ -64,7 +64,7 @@ export function Hotels() {
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           Where you can stay
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-[#2C3F25]">
+        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
           Recommended hotels
         </p>
 
@@ -72,10 +72,10 @@ export function Hotels() {
           {HOTELS.map((h) => (
             <Card
               key={h.name}
-              className="flex flex-col shadow-[0_20px_44px_-26px_rgba(85,109,71,0.5)]"
+              className="flex flex-col shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)]"
             >
               <CardHeader>
-                <CardTitle className="font-heading text-lg text-[#556D47]">
+                <CardTitle className="font-heading text-lg text-ink">
                   {h.name}
                 </CardTitle>
                 <CardDescription className="font-countdown text-xs tracking-wide">
@@ -90,7 +90,7 @@ export function Hotels() {
                   href={h.maps}
                   target="_blank"
                   rel="noreferrer"
-                  className="mt-4 inline-flex w-fit items-center gap-1 rounded-full bg-[#2C3F25] px-4 py-1.5 text-sm font-medium text-white transition hover:bg-[#37502f]"
+                  className="mt-4 inline-flex w-fit items-center gap-1 rounded-full border border-ink bg-ink px-4 py-1.5 text-sm font-medium text-white transition hover:bg-white hover:text-ink"
                 >
                   Open in Maps
                 </a>
