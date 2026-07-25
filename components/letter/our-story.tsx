@@ -17,10 +17,11 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  * Our story — EDGE-TO-EDGE green dome (kept: its `-mt-48` pulls up into the
  * Hero's lily backdrop, and DayItself slides up behind it at z-0). Inside the
  * dome the timeline is a SCRAPBOOK (imported design "Wedding Timeline" 4a/5a),
- * recoloured into the green palette:
+ * recoloured into the letter's two-colour system — an ink #1E2A18 dome with
+ * white paper and white thread on it:
  *
  *   • a hand-drawn camera charm hangs over the top of a centre thread;
- *   • each memory is a tilted cream polaroid held by a strip of washi tape,
+ *   • each memory is a tilted white polaroid held by a strip of washi tape,
  *     with a handwritten caption and a small heart bead on the thread;
  *   • desktop (sm+) = design 4a: continuous centre spine, rows alternate
  *     left/right, text hugs the spine;
@@ -35,9 +36,14 @@ type Memory = {
   date: string;
   title: string;
   body: string;
-  /** Handwritten note across the bottom of the polaroid. */
+  /** Handwritten note on the polaroid's bottom border. */
   caption: string;
-  /** Optional real photo (e.g. `/story/umbrella.jpg`). Placeholder until set. */
+  /**
+   * Photo for the polaroid. Currently stand-in shots from picsum.photos
+   * (seeded, so each memory keeps the same image between loads) — swap these
+   * for real files under `/public/story/` when we have them. Falls back to the
+   * striped placeholder when unset.
+   */
   image?: string;
   /** Polaroid tilt + washi-tape tilt, in degrees (from the source design). */
   tilt: number;
@@ -50,6 +56,7 @@ const MEMORIES: Memory[] = [
     title: 'A broken umbrella',
     body: `${NAME_B} and ${NAME_A} shelter under the same café awning in Nakameguro. The offered umbrella turns out to be broken — the argument about whether it still counts as chivalry lasts two hours.`,
     caption: 'the café awning ♡',
+    image: 'https://picsum.photos/seed/ww-umbrella/600/600',
     tilt: -2.4,
     tape: -4,
   },
@@ -58,6 +65,7 @@ const MEMORIES: Memory[] = [
     title: 'First apartment',
     body: 'Two suitcases, one very small kitchen, and a shared conviction that a rice cooker counts as furniture.',
     caption: 'moving day',
+    image: 'https://picsum.photos/seed/ww-apartment/600/600',
     tilt: 2,
     tape: 5,
   },
@@ -66,6 +74,7 @@ const MEMORIES: Memory[] = [
     title: 'Enter Mochi',
     body: 'A very opinionated cat adopts us. Sunday-morning pancake experiments begin in earnest (success rate: improving).',
     caption: 'Mochi arrives ♡',
+    image: 'https://picsum.photos/seed/ww-mochi/600/600',
     tilt: 1.6,
     tape: -3,
   },
@@ -74,6 +83,7 @@ const MEMORIES: Memory[] = [
     title: 'The proposal',
     body: 'Back on the same street corner where it began — with a working umbrella this time, and a ring hidden in its handle.',
     caption: 'same corner ♡',
+    image: 'https://picsum.photos/seed/ww-proposal/600/600',
     tilt: -1.8,
     tape: 4,
   },
@@ -82,6 +92,7 @@ const MEMORIES: Memory[] = [
     title: 'The next chapter',
     body: 'Gathering everyone we love in one garden, under one hopefully unnecessary canopy of umbrellas.',
     caption: 'the garden',
+    image: 'https://picsum.photos/seed/ww-garden/600/600',
     tilt: 2.2,
     tape: -5,
   },
@@ -90,13 +101,13 @@ const MEMORIES: Memory[] = [
 export function OurStory() {
   return (
     <section className="relative z-10 -mt-48">
-      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-[#2C3F25] px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
+      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
         <div className="mx-auto max-w-[64rem]">
           <div className="text-center">
-            <h2 className="font-script text-4xl leading-tight text-[#91A17C] sm:text-5xl">
+            <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
               Our Story
             </h2>
-            <p className="mt-2 font-countdown text-sm tracking-wide text-[#f5efdd]">
+            <p className="mt-2 font-countdown text-sm tracking-wide text-white">
               How it began
             </p>
           </div>
@@ -105,14 +116,14 @@ export function OurStory() {
               down the centre on sm+, and on mobile the per-item connector
               segments join into one continuous centre thread. */}
           <div className="relative mx-auto mt-24 max-w-[52rem] sm:mt-28">
-            {/* Hand-drawn camera charm, centred over the top of the thread. */}
-            <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-28 -translate-x-1/2 -translate-y-[85%] sm:w-36" />
+            {/* Hand-drawn polaroid-camera charm, centred over the top of the thread. */}
+            <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-24 -translate-x-1/2 -translate-y-[85%] sm:w-28" />
 
             {/* Continuous centre spine (sm+ only). On mobile the thread is
                 drawn by each item's own connector segment instead. */}
             <span
               aria-hidden
-              className="absolute top-0 bottom-4 left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white/60 sm:block"
+              className="absolute top-0 bottom-[9rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white sm:block"
             />
 
             <ol className="space-y-6 sm:space-y-0">
@@ -129,7 +140,7 @@ export function OurStory() {
                     {/* Mobile-only thread segment joining items into one thread. */}
                     <span
                       aria-hidden
-                      className="my-3 h-16 w-[2px] rounded-full bg-white/60 sm:hidden"
+                      className="my-3 h-16 w-[2px] rounded-full bg-white sm:hidden"
                     />
 
                     {/* Polaroid. */}
@@ -155,23 +166,23 @@ export function OurStory() {
                           : 'sm:order-1 sm:pr-10 sm:text-right'
                       )}
                     >
-                      <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-[#91A17C]">
+                      <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-white">
                         {m.date}
                       </p>
-                      <h3 className="relative mt-1 font-heading text-2xl leading-tight text-[#f5efdd] sm:text-[2rem]">
+                      <h3 className="relative mt-1 font-heading text-2xl leading-tight text-white sm:text-[2rem]">
                         {/* Connector from the centre spine to the title (sm+).
                             Width = text padding (pl/pr-10 = 40px) + half the
                             column gap (gap-x-16 = 64px). */}
                         <span
                           aria-hidden
                           className={cn(
-                            'absolute top-[0.55em] hidden h-[3px] w-[4.5rem] rounded-full bg-white/60 sm:block',
+                            'absolute top-[0.55em] hidden h-[3px] w-[4.5rem] rounded-full bg-white sm:block',
                             imageLeft ? 'sm:-left-[4.5rem]' : 'sm:-right-[4.5rem]'
                           )}
                         />
                         {m.title}
                       </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-[#e6e8d0]">
+                      <p className="mt-2 text-sm leading-relaxed text-white">
                         {m.body}
                       </p>
                     </motion.div>
@@ -179,6 +190,27 @@ export function OurStory() {
                 );
               })}
             </ol>
+
+            {/* The thread ends at a hand-drawn photo clothesline — same idea as
+                the getaway car closing the rail in `DayItself`. On mobile a
+                thread segment carries down to it (the sm+ spine stops just
+                above the drawing). */}
+            <motion.div
+              className="relative flex flex-col items-center"
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.7, ease: 'easeOut' }}
+            >
+              <span
+                aria-hidden
+                className="my-3 h-16 w-[2px] rounded-full bg-white sm:hidden"
+              />
+              <InkCharm
+                src="/icons/hand_drawn/wedding_2/photo-clothesline.svg"
+                className="aspect-[110.0977/79.3906] w-44 sm:mt-2 sm:w-52"
+              />
+            </motion.div>
           </div>
         </div>
       </div>
@@ -191,17 +223,17 @@ function Polaroid({ memory }: { memory: Memory }) {
   const { image, caption, title, tilt, tape } = memory;
   return (
     <figure
-      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-[#f5efdd] p-3 pb-9 shadow-[0_14px_28px_-6px_rgba(0,0,0,0.5),0_2px_5px_rgba(0,0,0,0.3)] sm:w-64"
+      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-white p-3 pb-9 shadow-[0_14px_28px_-6px_rgba(30,42,24,0.5),0_2px_5px_rgba(30,42,24,0.3)] sm:w-64"
       style={{ transform: `rotate(${tilt}deg)` }}
     >
       {/* Washi tape holding the top edge. */}
       <span
         aria-hidden
-        className="absolute -top-3 left-1/2 h-6 w-24 bg-[repeating-linear-gradient(45deg,rgba(145,161,124,0.55),rgba(145,161,124,0.55)_6px,rgba(145,161,124,0.3)_6px,rgba(145,161,124,0.3)_12px)] shadow-sm"
+        className="absolute -top-3 left-1/2 h-6 w-24 bg-[repeating-linear-gradient(45deg,#ffffff,#ffffff_6px,transparent_6px,transparent_12px)] shadow-sm"
         style={{ transform: `translateX(-50%) rotate(${tape}deg)` }}
       />
 
-      <div className="relative aspect-square overflow-hidden rounded-[1px] bg-[#2C3F25] shadow-[inset_0_2px_10px_rgba(0,0,0,0.25)]">
+      <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_rgba(30,42,24,0.3)]">
         {image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -211,32 +243,34 @@ function Polaroid({ memory }: { memory: Memory }) {
             loading="lazy"
           />
         ) : (
-          <div className="flex size-full items-center justify-center bg-[linear-gradient(135deg,rgba(255,255,255,0.14),rgba(0,0,0,0.08)),repeating-linear-gradient(45deg,#4a5c3c,#4a5c3c_10px,#556d47_10px,#556d47_20px)]">
-            <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-[#c7d1b6]/80">
+          <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_10px)]">
+            <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-white">
               photo · {caption.replace(/\s*♡$/, '')}
             </span>
           </div>
         )}
-        {/* Handwritten note across the bottom of the frame. */}
-        <figcaption className="absolute inset-x-0 bottom-1.5 text-center font-script text-lg text-[#f5efdd] drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]">
-          {caption}
-        </figcaption>
       </div>
+
+      {/* Handwritten note on the polaroid's white bottom border rather than
+          over the photo — on the frame it stays legible whatever the photo. */}
+      <figcaption className="absolute inset-x-3 bottom-1.5 text-center font-script text-lg leading-tight text-ink">
+        {caption}
+      </figcaption>
     </figure>
   );
 }
 
 /**
- * Hand-drawn camera charm (`public/icons/hand_drawn/wedding/Camera.svg`).
- * The asset ships as solid #3a3b3a, so it is painted through a CSS mask to
- * recolour it cream against the green dome.
+ * A hand-drawn asset painted white. These ship as solid dark ink, so they are
+ * drawn through a CSS mask to recolour them against the ink dome. The caller
+ * supplies the aspect ratio (from the asset's viewBox) and the width.
  */
-function CameraCharm({ className }: { className?: string }) {
-  const mask = "url('/icons/hand_drawn/wedding/Camera.svg')";
+function InkCharm({ src, className }: { src: string; className?: string }) {
+  const mask = `url('${src}')`;
   return (
     <span
       aria-hidden
-      className={cn('block aspect-[461.3/349.7] bg-[#f5efdd]', className)}
+      className={cn('block bg-white', className)}
       style={{
         maskImage: mask,
         WebkitMaskImage: mask,
@@ -247,6 +281,16 @@ function CameraCharm({ className }: { className?: string }) {
         maskPosition: 'center',
         WebkitMaskPosition: 'center',
       }}
+    />
+  );
+}
+
+/** Polaroid camera charm hanging over the top of the thread. */
+function CameraCharm({ className }: { className?: string }) {
+  return (
+    <InkCharm
+      src="/icons/hand_drawn/wedding_2/polaroid-camera.svg"
+      className={cn('aspect-[91.8867/89.3203]', className)}
     />
   );
 }
