@@ -1,144 +1,117 @@
-'use client';
-
-import { useEffect, useRef, useState } from 'react';
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
-
 /**
  * Prenup gallery — EDGE-TO-EDGE white section between Our Story and
- * DayItself. It now carries the overlap that DayItself used to: `-mt-48` pulls
- * it up BEHIND Our Story's bottom dome (z-0 under its z-10) and `pt-56` clears
+ * DayItself. It carries the overlap that DayItself used to: `-mt-48` pulls it
+ * up BEHIND Our Story's bottom dome (z-0 under its z-10) and `pt-76` clears
  * the dome again before any content. DayItself follows as a plain white
  * section, so the seam between them is invisible.
  *
- * Motion: the horizontal-scroll-gallery pattern from
- * https://motion.dev/examples/react-scroll-horizontal — a tall track holds a
- * sticky full-height viewport, and vertical scroll progress through the track
- * drives the photo rail sideways. Two changes from the example:
+ * `pt-76` (19rem) is the mirror of `countdown-band`'s `pb-72`: 7rem of visible
+ * gap plus the 12rem the dome bites out of it. Keep the two in step — the
+ * countdown sits above the dome with the same 7rem showing, so if that gap is
+ * retuned, retune this padding by the same amount.
  *
- *   • the pan distance is MEASURED (ResizeObserver) instead of computed from
- *     hardcoded card width + gap, so responsive card sizes can't desync it;
- *   • the track height is `100vh + distance`, which makes the mapping 1:1 —
- *     one pixel of vertical scroll moves the rail one pixel sideways.
+ * Layout: a photo mosaic — bare images, no frame, no rounding, no shadow, no
+ * caption, and no horizontal padding, so it runs to both screen edges. Every
+ * tile is the SAME HEIGHT (a fixed `grid-auto-rows`); tiles differ only in
+ * WIDTH, and landscape shots take two columns. 2 columns on phones, 4 from `sm`
+ * up, 6px gutter. Because heights are uniform there is no masonry packing and
+ * nothing needs measuring — the whole thing is static CSS, which is why this
+ * file is a server component with no hooks.
+ *
+ * The mosaic is capped at 2 rows on desktop and 3 on mobile, so it stays a band
+ * in the letter rather than an endless wall. The cap is a budget of column
+ * slots (cols x rows) that each shot spends 1 of, or 2 if it's landscape — see
+ * `fittingCount`. A shot beyond the budget is NOT rendered, so adding a seventh
+ * shot below does nothing until the row cap goes up. `grid-flow-row-dense`
+ * keeps a 2-column tile from leaving a hole in the column beside it.
  *
  * Photos are placeholders: seeded picsum stand-ins (same approach as
  * `our-story.tsx`) so each slot keeps its image between loads. Drop real files
- * in `/public/prenup/` and point `image` at them; unset falls back to the
- * striped "photo · …" placeholder.
+ * in `/public/prenup/`, point `image` at them, and set `w`/`h` to the file's
+ * real pixel size — that is what decides whether it takes one column or two.
+ * Unset `image` falls back to the striped placeholder. Once the files are local,
+ * `next/image` becomes usable here; remote picsum URLs cannot go through it
+ * because `next.config.ts` declares no `images.remotePatterns`.
  */
 
 type Shot = {
-  /** Handwritten note under the frame. */
-  caption: string;
+  /** Alt text — also labels the striped placeholder when `image` is unset. */
+  alt: string;
+  /** Intrinsic pixel size. Landscape (`w > h`) is what earns a 2-column tile. */
+  w: number;
+  h: number;
   image?: string;
 };
 
+// Slot costs run [1, 2, 1, 1, 1, 2]: the first five spend the mobile budget of
+// 6 exactly, and all six spend the desktop budget of 8 exactly — so both
+// breakpoints come out as full rectangles with no gaps.
 const SHOTS: Shot[] = [
-  { caption: 'the first look', image: 'https://picsum.photos/seed/ww-prenup-1/900/1100' },
-  { caption: 'rain again ♡', image: 'https://picsum.photos/seed/ww-prenup-2/900/1100' },
-  { caption: 'the long walk', image: 'https://picsum.photos/seed/ww-prenup-3/900/1100' },
-  { caption: 'golden hour', image: 'https://picsum.photos/seed/ww-prenup-4/900/1100' },
-  { caption: 'borrowed bicycle', image: 'https://picsum.photos/seed/ww-prenup-5/900/1100' },
-  { caption: 'one more, promise', image: 'https://picsum.photos/seed/ww-prenup-6/900/1100' },
+  { alt: 'the first look', w: 900, h: 1100, image: 'https://picsum.photos/seed/ww-prenup-1/900/1100' },
+  { alt: 'rain again', w: 1400, h: 900, image: 'https://picsum.photos/seed/ww-prenup-2/1400/900' },
+  { alt: 'the long walk', w: 900, h: 1100, image: 'https://picsum.photos/seed/ww-prenup-3/900/1100' },
+  { alt: 'golden hour', w: 900, h: 1350, image: 'https://picsum.photos/seed/ww-prenup-4/900/1350' },
+  { alt: 'borrowed bicycle', w: 900, h: 1100, image: 'https://picsum.photos/seed/ww-prenup-5/900/1100' },
+  { alt: 'one more, promise', w: 1500, h: 1000, image: 'https://picsum.photos/seed/ww-prenup-6/1500/1000' },
 ];
 
-export function Prenup() {
-  const trackRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const railRef = useRef<HTMLDivElement>(null);
-  const reduceMotion = useReducedMotion();
+/** Column count and row cap per breakpoint. Must match the grid's Tailwind classes. */
+const MOBILE = { cols: 2, rows: 3 };
+const DESKTOP = { cols: 4, rows: 2 };
 
-  /** How far the rail must travel for its last card to land at the right edge. */
-  const [distance, setDistance] = useState(0);
+/** A landscape shot occupies two columns, so it costs two slots of the budget. */
+function slotCost(shot: Shot) {
+  return shot.w > shot.h ? 2 : 1;
+}
 
-  useEffect(() => {
-    const rail = railRef.current;
-    const viewport = viewportRef.current;
-    if (!rail || !viewport) return;
-
-    const measure = () => {
-      setDistance(Math.max(0, rail.scrollWidth - viewport.clientWidth));
-    };
-    measure();
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(rail);
-    observer.observe(viewport);
-    return () => observer.disconnect();
-  }, []);
-
-  const { scrollYProgress } = useScroll({
-    target: trackRef,
-    offset: ['start start', 'end end'],
-  });
-  const x = useTransform(scrollYProgress, [0, 1], [0, -distance]);
-  const progress = useTransform(scrollYProgress, [0, 1], [0, 1]);
-
-  // Reduced motion: no pin, no transform — the rail is an ordinary
-  // swipeable/scrollable row (matches the example's media-query fallback).
-  if (reduceMotion) {
-    return (
-      <section id="prenup" className="relative z-0 -mt-48 bg-white pt-56">
-        <Heading />
-        <div className="mt-12 overflow-x-auto px-5 pb-4 sm:px-9">
-          <div className="flex gap-6">
-            {SHOTS.map((shot) => (
-              <Frame key={shot.caption} shot={shot} />
-            ))}
-          </div>
-        </div>
-        <div className="mt-10">
-          <FloralBorderPeonies />
-        </div>
-      </section>
-    );
+/** How many leading shots fit in `cols * rows` column slots. */
+function fittingCount({ cols, rows }: { cols: number; rows: number }) {
+  const budget = cols * rows;
+  let spent = 0;
+  let count = 0;
+  for (const shot of SHOTS) {
+    const cost = slotCost(shot);
+    if (spent + cost > budget) break;
+    spent += cost;
+    count += 1;
   }
+  return count;
+}
 
+const MOBILE_COUNT = fittingCount(MOBILE);
+const DESKTOP_COUNT = fittingCount(DESKTOP);
+
+// Rendered once and trimmed per breakpoint in CSS (`max-sm:hidden`), so the
+// count never depends on JS and nothing shifts on load.
+const VISIBLE = SHOTS.slice(0, Math.max(MOBILE_COUNT, DESKTOP_COUNT));
+
+export function Prenup() {
   return (
-    // `pt-32` (not the `pt-56` other overlapping sections use): the sticky
-    // column centres its content in the viewport, so it already contributes
-    // ~half its slack above the heading. 128px - 192px overlap + that slack
-    // lands the heading the same ~32px below the dome as DayItself used to.
-    <section id="prenup" className="relative z-0 -mt-48 bg-white pt-32">
-      <div
-        ref={trackRef}
-        className="relative"
-        // 1:1 mapping — see the note at the top of the file.
-        style={{ height: `calc(100dvh + ${distance}px)` }}
-      >
-        <div className="sticky top-0 flex h-dvh flex-col justify-center overflow-hidden">
-          <Heading />
+    <section id="prenup" className="relative z-0 -mt-48 bg-white pt-76">
+      <Heading />
 
-          {/* Progress rail — how far through the gallery we are. No track
-              behind it: with only white and ink available, a tinted groove is
-              not on the palette, so the ink line simply grows on the paper. */}
-          <div className="mx-auto mt-5 h-px w-32 overflow-hidden sm:w-40">
-            <motion.span
-              aria-hidden
-              className="block h-px origin-left bg-ink"
-              style={{ scaleX: progress }}
-            />
-          </div>
-
-          <div ref={viewportRef} className="mt-7 overflow-hidden">
-            <motion.div
-              ref={railRef}
-              className="flex w-max gap-6 px-5 will-change-transform sm:gap-10 sm:px-9"
-              style={{ x }}
-            >
-              {SHOTS.map((shot) => (
-                <Frame key={shot.caption} shot={shot} />
-              ))}
-            </motion.div>
-          </div>
-        </div>
+      {/* `auto-rows-*` is the shared tile height; `dense` stops a 2-column tile
+          from leaving the column beside it empty. */}
+      <div className="mt-10 grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
+        {VISIBLE.map((shot, index) => (
+          <Tile
+            key={shot.alt}
+            shot={shot}
+            className={[
+              slotCost(shot) === 2 ? 'col-span-2' : 'col-span-1',
+              // Past the mobile budget: shown on desktop, dropped on phones.
+              index >= MOBILE_COUNT ? 'max-sm:hidden' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+          />
+        ))}
       </div>
 
       {/* Full-bleed, no bottom padding: the border closes the section and the
           drawing's baseline meets DayItself's white. Same treatment as the
           band-under-string-lights that closes `Hotels` into the RSVP band. */}
-      <div className="mt-4">
-        <FloralBorderPeonies />
-      </div>
+      <FloralBorderPeonies />
     </section>
   );
 }
@@ -159,8 +132,11 @@ function FloralBorderPeonies() {
         WebkitMaskImage: mask,
         maskRepeat: 'no-repeat',
         WebkitMaskRepeat: 'no-repeat',
-        maskSize: 'contain',
-        WebkitMaskSize: 'contain',
+        // 20px wider than the box (scaled, so taller too) and centred: the
+        // SVG's own transparent margin gets cropped off instead of holding the
+        // drawing back from the screen edges.
+        maskSize: 'calc(100% + 20px) auto',
+        WebkitMaskSize: 'calc(100% + 20px) auto',
         maskPosition: 'center',
         WebkitMaskPosition: 'center',
       }}
@@ -181,35 +157,21 @@ function Heading() {
   );
 }
 
-/** One photo: white frame, handwritten caption under it. */
-function Frame({ shot }: { shot: Shot }) {
-  const { image, caption } = shot;
+/** One photo. No frame, no rounding, no shadow — the image is the whole tile. */
+function Tile({ shot, className }: { shot: Shot; className: string }) {
+  const { image, alt } = shot;
   return (
-    <figure className="shrink-0 rounded-[2px] bg-white p-3 pb-9 shadow-[0_14px_28px_-10px_rgba(30,42,24,0.35),0_2px_5px_rgba(30,42,24,0.18)]">
-      {/* Height-driven, not width-driven: the frame is sized off the viewport
-          so the pinned column fills its 100dvh predictably (leftover slack top
-          and bottom stays close to the 24-unit padding other sections use).
-          Width follows from the aspect ratio. */}
-      <div className="relative aspect-[4/5] h-[46dvh] overflow-hidden rounded-[1px] bg-white sm:h-[54dvh]">
-        {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={image}
-            alt={caption}
-            className="size-full object-cover"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#1e2a18,#1e2a18_1px,#ffffff_1px,#ffffff_10px)]">
-            <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink">
-              photo · {caption.replace(/\s*♡$/, '')}
-            </span>
-          </div>
-        )}
-      </div>
-      <figcaption className="mt-3 text-center font-script text-xl text-[color:var(--script)]">
-        {caption}
-      </figcaption>
-    </figure>
+    <div className={`relative overflow-hidden ${className}`}>
+      {image ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={image} alt={alt} className="size-full object-cover" loading="lazy" />
+      ) : (
+        <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#1e2a18,#1e2a18_1px,#ffffff_1px,#ffffff_10px)]">
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink">
+            photo · {alt}
+          </span>
+        </div>
+      )}
+    </div>
   );
 }

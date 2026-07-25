@@ -2,6 +2,7 @@
 
 import { Fragment } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
+import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
 import { WEDDING_DAY_LABEL, WEDDING_WEEK } from '@/lib/wedding';
 
@@ -105,6 +106,11 @@ export function CountdownBand() {
             </Fragment>
           ))}
         </div>
+
+        {/* The one action in the band: put the date somewhere it won't be
+            forgotten. Outlined rather than filled so the day count stays the
+            loudest thing on the section. */}
+        <AddToCalendar className="mt-8" />
       </motion.div>
     </section>
   );

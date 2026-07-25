@@ -1,7 +1,7 @@
 'use client';
 
 import { useActionState, useState } from 'react';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Send } from 'lucide-react';
 import { submitRsvp, type RsvpState } from '@/app/actions/submit-rsvp';
 import { DIETARY_OPTIONS } from '@/lib/dietary';
 import { Button } from '@/components/ui/button';
@@ -215,8 +215,9 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
         type="submit"
         size="lg"
         disabled={pending || status === '' || overCapacity}
-        className="h-11 w-full text-base"
+        className="h-11 w-full font-sans text-[11px] font-normal uppercase tracking-[0.14em] [&_svg]:size-3.5"
       >
+        <Send aria-hidden strokeWidth={1.5} />
         {pending ? 'Sending…' : 'Send RSVP'}
       </Button>
     </form>

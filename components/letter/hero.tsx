@@ -50,7 +50,7 @@ export function Hero() {
       {/* Dark overlay for text legibility (static). */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-ink/55"
+        className="pointer-events-none absolute inset-0 bg-black/50"
       />
       <header className="relative flex min-h-svh flex-col items-center justify-center px-5 py-16 text-center sm:px-9">
         <motion.div

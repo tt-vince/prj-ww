@@ -51,7 +51,7 @@ const EVENTS: {
 
 export function DayItself() {
   return (
-    <section className="relative z-0 bg-white pr-5 pt-24 pb-24 sm:px-9">
+    <section className="relative z-0 bg-white pr-5 pb-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           The day itself
