@@ -43,6 +43,13 @@
       "when": 1784636701403,
       "tag": "0005_funny_maggott",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1785078959983,
+      "tag": "0006_lucky_landau",
+      "breakpoints": true
     }
   ]
 }

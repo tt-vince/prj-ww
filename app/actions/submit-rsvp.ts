@@ -1,10 +1,14 @@
 'use server';
 
 import { updateTag } from 'next/cache';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '@/db';
-import { guests } from '@/db/schema';
-import { rsvpResponseSchema } from '@/lib/validation';
+import { companions, guests } from '@/db/schema';
+import {
+  collectCompanions,
+  companionsSchema,
+  rsvpResponseSchema,
+} from '@/lib/validation';
 
 /** Result of the RSVP submission, consumed via `useActionState` on the form. */
 export type RsvpState = {
@@ -17,17 +21,26 @@ export type RsvpState = {
  * Records a guest's RSVP reply.
  *
  * Input: FormData carrying `token`, `status` (`going`|`not_going`), `adults`,
- * `kids`, optional `email`/`phone`/`guestNote`. Re-validated server-side — the
- * client is never trusted. The `token` (capability link) identifies the row.
+ * `kids`, optional `email`/`phone`/`guestNote`, the invitee's own
+ * `dietary`/`dietaryOther`, and one group of `companion.<kind>-<n>.*` fields per
+ * person they are bringing. Re-validated server-side — the client is never
+ * trusted. The `token` (capability link) identifies the row.
  *
  * Behaviour:
  * - Unknown token → `{ ok: false, error }`.
  * - Already answered (status not `pending`) → `{ ok: false, error }` (no overwrite).
- * - `going`: requires `adults` ≥ 1 and `adults + kids` ≤ maxGuests.
- * - `not_going`: `adults`/`kids` forced to null and dietary cleared.
+ * - `going`: requires `adults` ≥ 1, `adults + kids` ≤ maxGuests, and exactly one
+ *   named companion per seat beyond the invitee (`adults - 1` adults + `kids`
+ *   kids). A party that does not add up is rejected rather than half-recorded.
+ * - `not_going`: `adults`/`kids` forced to null, dietary cleared, no companions.
  *
  * On success writes status/adults/kids/guestNote/dietary/dietaryOther/respondedAt
- * and returns `{ ok: true }`.
+ * plus the companion rows, and returns `{ ok: true }`.
+ *
+ * Companions are upserted on `(guest_id, kind, position)` BEFORE the guest row
+ * flips off `pending`: the neon-http driver has no interactive transaction, so
+ * this order means a failure between the two writes leaves the reply re-sendable
+ * and a retry heals itself instead of doubling the party.
  */
 export async function submitRsvp(
   _prev: RsvpState,
@@ -53,6 +66,16 @@ export async function submitRsvp(
     return { ok: false, fieldErrors };
   }
   const input = parsed.data;
+
+  const parsedCompanions = companionsSchema.safeParse(
+    collectCompanions(formData),
+  );
+  if (!parsedCompanions.success) {
+    return {
+      ok: false,
+      error: 'Please check the names of everyone you are bringing.',
+    };
+  }
 
   const [guest] = await db
     .select({ id: guests.id, status: guests.status, maxGuests: guests.maxGuests })
@@ -82,6 +105,23 @@ export async function submitRsvp(
     kids = input.kids;
   }
 
+  // The party has to add up: one named companion for every seat beyond the
+  // invitee. A decline carries nobody.
+  const party = input.status === 'going' ? parsedCompanions.data : [];
+  if (input.status === 'going') {
+    const expectedAdults = (adults ?? 1) - 1;
+    const expectedKids = kids ?? 0;
+    const gotAdults = party.filter((c) => c.kind === 'adult').length;
+    const gotKids = party.filter((c) => c.kind === 'kid').length;
+    if (gotAdults !== expectedAdults || gotKids !== expectedKids) {
+      return {
+        ok: false,
+        error:
+          'Please give us a name for everyone in your party before sending.',
+      };
+    }
+  }
+
   // Dietary only applies to a `going` reply; a decline clears it.
   const dietary = input.status === 'going' ? input.dietary : [];
   const dietaryOther =
@@ -100,6 +140,30 @@ export async function submitRsvp(
     ...(input.email ? { email: input.email } : {}),
     ...(input.phone ? { phone: input.phone } : {}),
   };
+
+  if (party.length > 0) {
+    await db
+      .insert(companions)
+      .values(
+        party.map((c) => ({
+          guestId: guest.id,
+          kind: c.kind,
+          position: c.position,
+          name: c.name,
+          dietary: c.dietary,
+          dietaryOther: c.dietaryOther ?? null,
+        })),
+      )
+      .onConflictDoUpdate({
+        target: [companions.guestId, companions.kind, companions.position],
+        set: {
+          name: sql`excluded.name`,
+          dietary: sql`excluded.dietary`,
+          dietaryOther: sql`excluded.dietary_other`,
+          updatedAt: new Date(),
+        },
+      });
+  }
 
   await db.update(guests).set(updates).where(eq(guests.id, guest.id));
 
