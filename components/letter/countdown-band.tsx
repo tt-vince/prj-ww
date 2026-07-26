@@ -1,18 +1,26 @@
 'use client';
 
-import { Fragment } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
-import { WEDDING_DAY_LABEL, WEDDING_WEEK } from '@/lib/wedding';
+import { VinylPlayer } from '@/components/vinyl-player';
+import { cn } from '@/lib/utils';
 
 /**
- * Countdown band — plain white section between Hero and Our Story (Hero's
- * lily photo ends flush above it, no overlap). Its `pb-72` gives Our Story
- * room to rise into: Our Story keeps its own `-mt-48` (12rem), so the green
- * dome overlaps only this white bottom padding, never the countdown text.
- * `pb-72` (18rem) = top `pt-28` (7rem) + the 12rem dome bite, so visible
- * white above and below the countdown reads roughly equal.
+ * Countdown band — white section between Hero and Our Story. It is a DOME at
+ * both ends: its own white dome rises `-mt-48` (12rem) into the Hero's lily
+ * photo (the Hero renders a 12rem strip of continued photo for it to sit in),
+ * and Our Story's ink dome rises into its bottom padding.
+ *
+ * Top: `border-radius: 50% 50% 0 0 / 180px 180px 0 0` — the apex touches the
+ * element's top edge at centre and the shoulders fall away, so the lily photo
+ * stays visible either side instead of ending on a hard horizontal seam.
+ * Padding is `pt-28 sm:pt-32`, the same pair Our Story uses inside its dome, so
+ * both domes seat their first line at the same depth under the curve.
+ *
+ * Bottom: `pb-72` gives Our Story room to rise into. Our Story keeps its own
+ * `-mt-48` (12rem), so the ink dome overlaps only this white bottom padding,
+ * never the countdown text.
  *
  * The section speaks one sentence, and the number is a word in it: the day
  * count is the display element and the script line finishes the thought. There
@@ -29,7 +37,7 @@ export function CountdownBand() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative z-10 bg-white px-5 pt-28 pb-72 text-center sm:px-9">
+    <section className="relative z-10 -mt-48 rounded-[50%_50%_0_0_/_180px_180px_0_0] bg-white px-5 pt-28 pb-72 text-center sm:px-9 sm:pt-32">
       <motion.div
         className="flex flex-col items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
@@ -37,81 +45,66 @@ export function CountdownBand() {
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
+        {/* The record sits in the dome's crown, above the count — the one
+            playable thing on the page, and the only round shape in a section
+            otherwise made of type. It is quiet until tapped: no autoplay,
+            no spin. Sized to stay inside the dome's curve on a phone. */}
+        <VinylPlayer className="mb-8" size="min(42vw, 10rem)" />
+
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-script text-xl leading-tight text-ink sm:text-2xl">
+        <h2 className="font-heading text-xl leading-tight text-ink sm:text-2xl">
           Counting down to the day
         </h2>
 
         {/* The row and the script line are one sentence: `Countdown` renders
-            the four-unit serif line, then this script label completes it.
-            Three faces, three jobs — one loud. */}
+            the four-unit serif line, then this script label completes it. The
+            intro above and the date below are both serif, like the count — the
+            script is kept for the two lines that speak (the ring on the record
+            and "until we say I do"), so rank comes from size, not face. */}
         <Countdown
           align="center"
           size="lg"
           className="mt-8 text-ink"
           srSuffix="until we say I do"
-          labelClassName="font-script text-[1.75rem] leading-tight text-ink sm:text-[2.125rem]"
+          labelClassName="font-script text-[2.75rem] leading-tight text-ink sm:text-[3.125rem]"
           tickClassName="text-ink"
           label="until we say I do"
         />
 
-        {/* The date to write down: full weekday-and-year line over the
-            calendar week strip, with the wedding day circled. */}
-        <p className="mt-14 font-heading text-base leading-none text-ink sm:text-lg">
-          {WEDDING_DAY_LABEL}
-        </p>
-        <div className="mt-5 flex items-center justify-center">
-          {WEDDING_WEEK.map((d, i) => (
-            <Fragment key={d.label}>
-              {i > 0 ? (
-                <span
-                  aria-hidden
-                  className="mx-2 size-[3px] shrink-0 rounded-full bg-ink sm:mx-4"
-                />
-              ) : null}
-              <span className="relative flex w-7 flex-col items-center gap-1 py-0.5 sm:w-8">
-                {d.isWeddingDay ? (
-                  <svg
-                    viewBox="0 0 64 64"
-                    preserveAspectRatio="none"
-                    aria-hidden
-                    className="pointer-events-none absolute -inset-x-2 -inset-y-2 text-ink h-[calc(100%+1rem)] w-[calc(100%+1rem)]"
-                  >
-                    {/* Fine closed ellipse — a calm, calligraphic ring
-                        around the day rather than a scribbled circle. */}
-                    <ellipse
-                      cx="32"
-                      cy="32"
-                      rx="29.5"
-                      ry="29.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      opacity="0.85"
-                    />
-                  </svg>
-                ) : null}
-                <span className="font-sans text-[9px] leading-none tracking-[0.14em] text-ink sm:text-[10px]">
-                  {d.label}
-                </span>
-                <span
-                  className={`font-heading text-sm leading-none text-ink sm:text-base ${
-                    d.isWeddingDay ? 'font-medium' : ''
-                  }`}
-                >
-                  {d.date}
-                </span>
-              </span>
-            </Fragment>
-          ))}
-        </div>
+        {/* Hand-drawn rope heart closing the sentence — a full stop after "until
+            we say I do", the way the wedding rings close the Our Story thread.
+            The asset ships as pure black, and the letter has no black in it, so
+            it is painted through a CSS mask in ink #1E2A18. Aspect ratio is the
+            viewBox's (91.7109 x 89.9102). */}
+        {/* <RopeHeart className="mt-6 w-24 sm:w-24" /> */}
 
         {/* The one action in the band: put the date somewhere it won't be
             forgotten. Outlined rather than filled so the day count stays the
             loudest thing on the section. */}
-        <AddToCalendar className="mt-8" />
+        <AddToCalendar className="mt-12" />
       </motion.div>
     </section>
+  );
+}
+
+/** The rope heart, drawn in ink through a mask (see the note at its usage). */
+function RopeHeart({ className }: { className?: string }) {
+  const mask = "url('/icons/hand_drawn/wedding_2/rope-heart-frame.svg')";
+  return (
+    <span
+      aria-hidden
+      className={cn('block aspect-[91.7109/89.9102] bg-ink', className)}
+      style={{
+        maskImage: mask,
+        WebkitMaskImage: mask,
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
+      }}
+    />
   );
 }

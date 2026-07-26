@@ -3,6 +3,7 @@
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { dietaryList } from "@/lib/dietary";
+import { companionsToText } from "@/lib/companions";
 import type { GuestRow } from "./guests-board";
 
 const STATUS_TEXT: Record<GuestRow["status"], string> = {
@@ -34,7 +35,8 @@ export function ExportGuestsButton({
       "Adults",
       "Kids",
       "Max guests",
-      "Dietary",
+      "Dietary (invitee)",
+      "Also coming",
       "Labels",
       "Guest note",
       "Admin note",
@@ -52,6 +54,8 @@ export function ExportGuestsButton({
         r.kids,
         r.maxGuests,
         dietaryList(r.dietary, r.dietaryOther).join("; "),
+        // `Adult 2: Marites Reyes [Vegan; Nut allergy]; Kid 1: Nino`
+        companionsToText(r.companions),
         r.labels.map((l) => l.name).join("; "),
         r.guestNote,
         r.adminNote,

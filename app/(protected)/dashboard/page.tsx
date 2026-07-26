@@ -32,6 +32,15 @@ export default async function DashboardPage() {
     dietaryOther: r.dietaryOther,
     respondedAt: r.respondedAt ? r.respondedAt.toISOString() : null,
     labels: r.guestLabels.map((gl) => ({ id: gl.labelId, name: gl.label.name })),
+    // The rest of the party, each with their own restrictions. Already ordered
+    // adults-then-kids by the query in lib/data.ts.
+    companions: r.companions.map((c) => ({
+      kind: c.kind,
+      position: c.position,
+      name: c.name,
+      dietary: c.dietary,
+      dietaryOther: c.dietaryOther,
+    })),
   }));
 
   const baseUrl = process.env.APP_URL ?? "";

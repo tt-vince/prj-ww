@@ -1,6 +1,9 @@
 import { Suspense } from 'react';
 import { getGuestByToken } from '@/lib/data';
+import { RSVP_DEADLINE_LABEL } from '@/lib/wedding';
+import { cn } from '@/lib/utils';
 import { RsvpForm } from '@/components/rsvp-form';
+import { RsvpReply } from '@/components/letter/rsvp-reply';
 import {
   Card,
   CardContent,
@@ -15,6 +18,13 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  * RSVP — the closing section (after Location). Solid ink (#1E2A18, matching Our
  * Story) sits behind a single white Card holding the reply form.
  *
+ * A white dome opens the section: the paper of the Hotels section above carries
+ * on into the ink as an arch, mirroring the white dome that opens the countdown
+ * band and the ink dome that opens Our Story. Same curve as those two
+ * (`180px`/12rem), inverted — the shoulders sit on the section's top edge and
+ * the crown dips into the ink. `pt-56` clears the deepest point of that curve,
+ * so the heading never rides into it.
+ *
  * Token-driven per docs/rsvp-spec.md: the personal invite link is `?id=<token>`.
  * The card shows one of three states — the form (pending reply), a thank-you
  * (already answered), or a note to open the personal link (no / unknown token).
@@ -24,8 +34,16 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  */
 export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <section className="relative bg-ink px-5 py-24 sm:px-9">
-      <div className="mx-auto max-w-[32rem]">
+    <section className="relative overflow-hidden bg-ink px-5 pt-56 pb-24 sm:px-9">
+      {/* The white dome. Full-bleed and flush with the top edge, so it reads as
+          the paper above flowing down rather than as a shape floating on the
+          ink. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-white"
+        style={{ borderRadius: '0 0 50% 50% / 0 0 180px 180px' }}
+      />
+      <div className="relative mx-auto max-w-[32rem]">
         <div className="text-center">
           <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
             Will you join us?
@@ -35,13 +53,71 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
           </p>
         </div>
 
-        <Card className="mt-10 px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] sm:px-6">
+        {/* Double rule: a 2px white outline held 2px off the card, so the ink
+            shows through the gap and the card reads as mounted on the section
+            rather than dropped on it. `outline-offset` leaves the gap
+            transparent, so it picks up the ink behind on its own. */}
+        <Card className="mt-10 px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] outline-2 outline-offset-2 outline-white sm:px-6">
           <Suspense fallback={<RsvpBodyFallback />}>
             <RsvpBody searchParams={searchParams} />
           </Suspense>
         </Card>
+
+        {/* When we hope to hear back. Only shown to a guest who arrived on
+            their personal link — without a token the card is asking them to go
+            find that link, and a deadline for a form they cannot fill in yet is
+            just pressure. Token-dependent, so it streams like the card body. */}
+        <Suspense fallback={null}>
+          <RsvpDeadline searchParams={searchParams} />
+        </Suspense>
+
+        {/* Hand-drawn bells closing the section, painted white through a mask
+            (the asset ships as pure black). Aspect ratio is the viewBox's
+            (87.2656 x 77.7148). */}
+        <WeddingBells className="mx-auto mt-10 w-20 sm:w-28" />
       </div>
     </section>
+  );
+}
+
+/**
+ * The reply-by note. Renders nothing unless the `?id=<token>` in the URL
+ * resolves to a guest, which is the same test `RsvpBody` uses to decide between
+ * the form and the "reply by your personal link" note.
+ */
+async function RsvpDeadline({ searchParams }: { searchParams: SearchParams }) {
+  const raw = (await searchParams).id;
+  const token = Array.isArray(raw) ? raw[0] : raw;
+  // `getGuestByToken` is a `'use cache'` query, so this shares RsvpBody's read
+  // rather than hitting the database twice.
+  const guest = token ? await getGuestByToken(token) : undefined;
+  if (!guest) return null;
+
+  return (
+    <p className="mt-6 text-center font-countdown text-sm leading-relaxed tracking-wide text-white">
+      To help us prepare everything with love and care, making sure the day is as unforgettable for you as it will be for us, we are hoping to receive your response by {RSVP_DEADLINE_LABEL}.
+    </p>
+  );
+}
+
+/** The bells, drawn in white through a mask (see the note at its usage). */
+function WeddingBells({ className }: { className?: string }) {
+  const mask = "url('/icons/hand_drawn/wedding_2/wedding-bells.svg')";
+  return (
+    <span
+      aria-hidden
+      className={cn('block aspect-[87.2656/77.7148] bg-white', className)}
+      style={{
+        maskImage: mask,
+        WebkitMaskImage: mask,
+        maskRepeat: 'no-repeat',
+        WebkitMaskRepeat: 'no-repeat',
+        maskSize: 'contain',
+        WebkitMaskSize: 'contain',
+        maskPosition: 'center',
+        WebkitMaskPosition: 'center',
+      }}
+    />
   );
 }
 
@@ -67,7 +143,7 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
         <p className="font-heading text-xl text-foreground">
           Reply by your personal link
         </p>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+        <p className="mx-auto mt-3 max-w-[22rem] font-countdown text-xs leading-relaxed tracking-wide">
           This RSVP is by invitation. Please open the personal link we sent you
           to let us know if you can make it.
         </p>
@@ -76,17 +152,24 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
   }
 
   // Already answered — don't offer to overwrite (mirrors submitRsvp's guard).
+  // Their own reply is read back to them instead of a bare thank-you, so the
+  // link stays useful: it is where they check what they told us.
   if (guest.status !== 'pending') {
     return (
-      <CardContent className="py-8 text-center">
-        <p className="font-script text-4xl text-[color:var(--script)]">
-          Thank you
-        </p>
-        <p className="mt-3 text-sm text-muted-foreground">
-          We&rsquo;ve already recorded your reply
-          {guest.name ? `, ${guest.name}` : ''}. Reach out to us if anything has
-          changed.
-        </p>
+      <CardContent className="py-6">
+        <RsvpReply
+          guestName={guest.name}
+          reply={{
+            status: guest.status,
+            adults: guest.adults,
+            kids: guest.kids,
+            dietary: guest.dietary,
+            dietaryOther: guest.dietaryOther,
+            guestNote: guest.guestNote,
+            respondedAt: guest.respondedAt,
+            companions: guest.companions,
+          }}
+        />
       </CardContent>
     );
   }
@@ -98,7 +181,7 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
         <CardTitle className="font-heading text-xl">
           {guest.name ? `Dear ${guest.name},` : 'Kindly reply'}
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="font-countdown text-xs leading-relaxed tracking-wide">
           We&rsquo;d be honoured to have you celebrate with us.
         </CardDescription>
       </CardHeader>

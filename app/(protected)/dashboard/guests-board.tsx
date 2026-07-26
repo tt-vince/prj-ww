@@ -13,6 +13,12 @@ import { ChevronDown, Search, Sparkle } from "lucide-react";
 import type { Label as LabelRow } from "@/db/schema";
 import { SNS_PLATFORMS, SNS_CONFIG, type SnsAccounts } from "@/lib/sns";
 import { dietaryList } from "@/lib/dietary";
+import {
+  companionDietary,
+  companionLabel,
+  sortCompanions,
+  type CompanionSummary,
+} from "@/lib/companions";
 import { SnsIcon } from "@/components/sns-icon";
 
 import { cn } from "@/lib/utils";
@@ -63,6 +69,12 @@ export type GuestRow = {
   dietaryOther: string | null;
   respondedAt: string | null;
   labels: { id: string; name: string }[];
+  /**
+   * Everyone this party is bringing, each with their OWN restrictions. The
+   * invitee is not in here — they are adult 1, and `dietary`/`dietaryOther`
+   * above are theirs alone (db/schema.ts `companions`).
+   */
+  companions: CompanionSummary[];
 };
 
 /**
@@ -346,10 +358,38 @@ function GuestCard({
       ) : null}
 
       {row.dietary.length || row.dietaryOther ? (
-        <CardMeta title="Dietary">
+        <CardMeta title="Dietary (invitee)">
           <p className="text-[11.5px] leading-relaxed" style={{ color: INK }}>
             {dietaryList(row.dietary, row.dietaryOther).join(", ")}
           </p>
+        </CardMeta>
+      ) : null}
+
+      {/* Who else is coming, each with their own restrictions underneath. This is
+          the seating/catering list, so a name with nothing under it means that
+          person told us they need nothing — not that we failed to ask. */}
+      {row.companions.length ? (
+        <CardMeta title="Also coming">
+          <ul className="space-y-1.5">
+            {sortCompanions(row.companions).map((c) => {
+              const diet = companionDietary(c);
+              return (
+                <li key={`${c.kind}-${c.position}`}>
+                  <p className="text-[11.5px] leading-relaxed" style={{ color: INK }}>
+                    {c.name}
+                    <span className="ml-1.5 text-[10px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
+                      {companionLabel(c.kind, c.position)}
+                    </span>
+                  </p>
+                  {diet ? (
+                    <p className="text-[11px] leading-relaxed" style={{ color: CHIP_TEXT }}>
+                      {diet}
+                    </p>
+                  ) : null}
+                </li>
+              );
+            })}
+          </ul>
         </CardMeta>
       ) : null}
 

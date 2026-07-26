@@ -18,6 +18,9 @@ export const userStatus = pgEnum('user_status', ['pending', 'active', 'disabled'
 /** RSVP reply state. Fixed set (not runtime-editable). `pending` = awaiting reply. */
 export const rsvpStatus = pgEnum('rsvp_status', ['pending', 'going', 'not_going']);
 
+/** Whether a companion counts against the party's adults or its kids. */
+export const companionKind = pgEnum('companion_kind', ['adult', 'kid']);
+
 /**
  * Authenticated admin users (Google-identified). Rows are provisioned
  * out-of-band (directly in the DB) — there is no self-sign-up; Google sign-in
@@ -86,6 +89,41 @@ export const guests = pgTable('guests', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
 });
 
+/**
+ * The other people in a party, one row each: everyone the invitee is bringing.
+ * The invitee is NOT here — they are adult 1, and their own restrictions live on
+ * `guests.dietary`.
+ *
+ * Written by the guest form via `submitRsvp`, which asks for a name and that
+ * person's own restrictions per companion, because `guests.dietary` could only
+ * ever describe the invitee. `position` is the number the form showed ("Adult 2",
+ * "Kid 1") so a reply renders back exactly as it was given; unique per guest and
+ * kind, which also makes a retried submission idempotent rather than doubled.
+ */
+export const companions = pgTable(
+  'companions',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    guestId: uuid('guest_id')
+      .notNull()
+      .references(() => guests.id, { onDelete: 'cascade' }),
+    kind: companionKind('kind').notNull(),
+    position: integer('position').notNull(), // adults are 2..N, kids are 1..M
+    name: text('name').notNull(),
+    dietary: text('dietary').array().notNull().default(sql`'{}'::text[]`), // preset keys (lib/dietary.ts)
+    dietaryOther: text('dietary_other'), // free text when "Something else" is picked
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex('companions_guest_kind_position_idx').on(
+      table.guestId,
+      table.kind,
+      table.position,
+    ),
+  ],
+);
+
 /** guest ↔ label join (many-to-many). Cascades so deleting either side is clean. */
 export const guestLabels = pgTable(
   'guest_labels',
@@ -102,6 +140,10 @@ export const guestLabels = pgTable(
 
 export const guestsRelations = relations(guests, ({ many }) => ({
   guestLabels: many(guestLabels),
+  companions: many(companions),
+}));
+export const companionsRelations = relations(companions, ({ one }) => ({
+  guest: one(guests, { fields: [companions.guestId], references: [guests.id] }),
 }));
 export const labelsRelations = relations(labels, ({ many }) => ({
   guestLabels: many(guestLabels),
@@ -117,4 +159,6 @@ export type Label = typeof labels.$inferSelect;
 export type NewLabel = typeof labels.$inferInsert;
 export type Guest = typeof guests.$inferSelect;
 export type NewGuest = typeof guests.$inferInsert;
+export type Companion = typeof companions.$inferSelect;
+export type NewCompanion = typeof companions.$inferInsert;
 export type GuestLabel = typeof guestLabels.$inferSelect;

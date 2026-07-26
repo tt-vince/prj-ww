@@ -16,7 +16,11 @@ export async function getGuestsWithLabels() {
   cacheTag('guests', 'labels');
   cacheLife('days');
   return db.query.guests.findMany({
-    with: { guestLabels: { with: { label: true } } },
+    with: {
+      guestLabels: { with: { label: true } },
+      // Everyone a party is bringing, in the order the guest filled them in.
+      companions: { orderBy: (c, { asc }) => [asc(c.kind), asc(c.position)] },
+    },
     orderBy: (g, { desc }) => [desc(g.createdAt)],
   });
 }
@@ -48,19 +52,40 @@ export async function getUserById(userId: string): Promise<User | null> {
   return user ?? null;
 }
 
-/** Invitee lookup for the public RSVP landing page (`?id=<token>`). */
+/**
+ * Invitee lookup for the public RSVP landing page (`?id=<token>`).
+ *
+ * Returns the guest's own reply as well as their invitation, so a guest who has
+ * already answered is shown what was recorded instead of an empty form. Deliberately
+ * NARROW: no `adminNote`, no admin-set contact, nothing the couple keeps to
+ * themselves — only what this guest told us, read back to them.
+ */
 export async function getGuestByToken(token: string) {
   'use cache';
   cacheTag('guests');
   cacheLife('hours');
-  const [guest] = await db
-    .select({
-      name: guests.name,
-      maxGuests: guests.maxGuests,
-      status: guests.status,
-      token: guests.token,
-    })
-    .from(guests)
-    .where(eq(guests.token, token));
-  return guest;
+  return db.query.guests.findFirst({
+    where: eq(guests.token, token),
+    columns: {
+      name: true,
+      maxGuests: true,
+      status: true,
+      token: true,
+      adults: true,
+      kids: true,
+      dietary: true,
+      dietaryOther: true,
+      guestNote: true,
+      respondedAt: true,
+    },
+    with: {
+      companions: {
+        columns: { kind: true, position: true, name: true, dietary: true, dietaryOther: true },
+        orderBy: (c, { asc }) => [asc(c.kind), asc(c.position)],
+      },
+    },
+  });
 }
+
+/** The reply a guest sees read back to them, and what the letter renders. */
+export type GuestReply = NonNullable<Awaited<ReturnType<typeof getGuestByToken>>>;

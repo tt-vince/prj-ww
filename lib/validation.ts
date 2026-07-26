@@ -111,6 +111,59 @@ export const rsvpResponseSchema = z.object({
 });
 export type RsvpResponse = z.infer<typeof rsvpResponseSchema>;
 
+/** FormData keys the guest form posts per companion: `companion.<kind>-<n>.<field>`. */
+const COMPANION_FIELD = /^companion\.(adult|kid)-(\d{1,2})\.(name|dietary|dietaryOther)$/;
+
+/** Dietary arrives zero-or-more times per companion; normalize to an array. */
+const toArray = (v: unknown) => (Array.isArray(v) ? v : v == null ? [] : [v]);
+
+/**
+ * One companion of a party: a person the invitee is bringing, with their own
+ * name and their own restrictions. `kind` + `position` mirror the label the form
+ * showed them under ("Adult 2", "Kid 1").
+ *
+ * The name is required here as well as in the browser — the `required` attribute
+ * is a courtesy, this is the rule.
+ */
+export const companionSchema = z.object({
+  kind: z.enum(['adult', 'kid']),
+  position: z.coerce.number().int().min(1).max(20),
+  name: z.string().trim().min(1, 'Every guest needs a name').max(120),
+  dietary: z.preprocess(toArray, z.array(z.enum(DIETARY_KEYS)).default([])),
+  dietaryOther: z.preprocess(blankToUndefined, z.string().trim().max(200).optional()),
+});
+export type CompanionInput = z.infer<typeof companionSchema>;
+
+export const companionsSchema = z.array(companionSchema).max(19);
+
+/**
+ * Gathers the flat `companion.adult-2.name`-style fields of a FormData back into
+ * one object per companion, sorted kids-after-adults and by position so the
+ * stored order matches the order the guest filled in.
+ *
+ * Returns the raw shapes; the caller validates them with `companionsSchema` so
+ * every failure is reported the same way as the rest of the reply.
+ */
+export function collectCompanions(formData: FormData): unknown[] {
+  const byKey = new Map<string, Record<string, unknown>>();
+
+  for (const key of new Set(formData.keys())) {
+    const match = COMPANION_FIELD.exec(key);
+    if (!match) continue;
+    const [, kind, position, field] = match;
+    const slug = `${kind}-${position}`;
+    const entry = byKey.get(slug) ?? { kind, position };
+    entry[field] =
+      field === 'dietary' ? formData.getAll(key) : formData.get(key);
+    byKey.set(slug, entry);
+  }
+
+  return [...byKey.values()].sort((a, b) => {
+    if (a.kind !== b.kind) return a.kind === 'adult' ? -1 : 1;
+    return Number(a.position) - Number(b.position);
+  });
+}
+
 /** Add/rename a label (tag). */
 export const labelInputSchema = z.object({
   name: z.string().trim().min(1, 'Label name is required').max(40),

@@ -471,6 +471,20 @@ integration, not a Claude MCP. `docx`/`pdf` skills considered and excluded.
 
 ## 13. Open questions (resolve before/at build time)
 
+- **Per-companion dietary data — BUILT end to end.** Everyone in a party except the invitee
+  (who is adult 1) gets a card in the guest form asking their **name** (required) and their
+  **own** restrictions, because `guests.dietary` could only ever describe the invitee. Fields
+  post as `companion.<kind>-<n>.{name,dietary,dietaryOther}` (`adult-2`…`adult-N` /
+  `kid-1`…`kid-M`); `collectCompanions` + `companionsSchema` (`lib/validation.ts`) validate
+  them — the name is required **server-side**, not just by the browser — and `submitRsvp`
+  upserts `companions` rows on `(guest_id, kind, position)` before flipping the guest off
+  `pending` (migration `drizzle/0006_lucky_landau.sql`, applied). The party must add up: one
+  named companion per seat beyond the invitee, or the whole reply is rejected rather than
+  half-recorded. Surfaced on the dashboard card ("Also coming") and in the CSV export
+  ("Also coming" column), and read back to the guest by `components/letter/rsvp-reply.tsx`,
+  which the form also renders on success so "just sent" and "already answered" cannot drift.
+  Still open: the admin guest dialog cannot edit or delete companion rows (only the guest form
+  writes them), and a guest cannot amend a sent reply — both are couple-side fixes for now.
 - Spam/abuse protection on the public form (honeypot field or lightweight rate-limit)? — optional, decide at build.
 - Should the same email submitting twice be allowed, de-duped, or upserted? — currently allowed (§4).
 - Admin cookie lifetime (session vs N days)?
