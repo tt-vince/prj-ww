@@ -13,6 +13,15 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  // We test this site on real phones and the iOS Simulator, which reach the dev
+  // server over the Mac's LAN address rather than localhost. Next blocks
+  // cross-origin requests to /_next/* dev resources by default, and the HMR
+  // websocket always sends an Origin header — so over a LAN IP the upgrade 403s
+  // and the dev client never hydrates: every `motion` element stays frozen at
+  // its `initial` style (the countdown band renders as blank white paper).
+  // Allowing the private ranges makes phone testing behave like localhost.
+  // Development-only setting; it has no effect on `next build`/`next start`.
+  allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.16.*.*', '*.local'],
 };
 
 export default nextConfig;

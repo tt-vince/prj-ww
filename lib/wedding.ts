@@ -30,6 +30,13 @@ export const WEDDING_DAY_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
+/**
+ * When we hope to hear back — the note under the RSVP card. Kept here with the
+ * rest of the occasion's dates rather than inline in the section, so the
+ * deadline is stated in one place.
+ */
+export const RSVP_DEADLINE_LABEL = 'December 2026';
+
 /** Venue name — shared by the Location section and the calendar event. */
 export const WEDDING_VENUE = 'Anvy Beach Resort';
 

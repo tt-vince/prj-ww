@@ -71,40 +71,9 @@ function Stars({ value }: { value: number }) {
   );
 }
 
-/**
- * Peony border that closes the section: full-bleed and flush with the top of
- * the RSVP band, so the drawing reads as standing on the green. Same asset as
- * the one closing `Prenup`, turned 180° so the blooms hang down into the band
- * instead of growing up out of it. The asset ships as a single flat colour, so
- * it is painted through a CSS mask to match the RSVP background (the letter's
- * ink). Aspect ratio is the viewBox's (1032.1908 x 270.9679).
- */
-function FloralBorderPeonies() {
-  const mask = "url('/icons/hand_drawn/illustrations/floral-border-peonies.svg')";
-  return (
-    <span
-      aria-hidden
-      className="block aspect-[1032.1908/270.9679] w-full rotate-180 bg-ink"
-      style={{
-        maskImage: mask,
-        WebkitMaskImage: mask,
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
-        // 20px wider than the box (scaled, so taller too) and centred: the
-        // SVG's own transparent margin gets cropped off instead of holding the
-        // drawing back from the screen edges.
-        maskSize: 'calc(100% + 20px) auto',
-        WebkitMaskSize: 'calc(100% + 20px) auto',
-        maskPosition: 'center',
-        WebkitMaskPosition: 'center',
-      }}
-    />
-  );
-}
-
 export function Hotels() {
   return (
-    <section className="bg-white pt-24">
+    <section className="bg-white py-24">
       <div className="mx-auto max-w-[56rem] px-5 text-center sm:px-9 lg:max-w-[64rem]">
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           Where you can stay
@@ -184,12 +153,6 @@ export function Hotels() {
             </Card>
           ))}
         </div>
-      </div>
-
-      {/* Full-bleed, no bottom padding: the illustration's baseline meets the
-          RSVP section's green edge. */}
-      <div className="mt-16">
-        <FloralBorderPeonies />
       </div>
     </section>
   );

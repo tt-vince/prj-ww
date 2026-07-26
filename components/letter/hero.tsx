@@ -2,7 +2,8 @@
 
 import { useRef } from 'react';
 import { motion, useScroll, useTransform, useMotionTemplate } from 'motion/react';
-import { COUPLE_NAMES } from '@/lib/wedding';
+import { WeekStrip } from '@/components/letter/week-strip';
+import { COUPLE_NAMES, WEDDING_DAY_LABEL } from '@/lib/wedding';
 
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
@@ -11,16 +12,32 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  * below it (no overlap). Our Story, further down, pulls up `-mt-48` into the
  * band's white bottom padding.
  *
+ * The section is 150svh tall and the content is `sticky top-0` inside it, one
+ * viewport high: the names stay centred on screen while the hero scrolls, then
+ * unpin and travel up with the page. The photo fills the whole 150svh, so it
+ * keeps going below the pinned content and the CountdownBand's white dome rises
+ * into its last 12rem.
+ *
+ * The sticky track stops 12rem short of the section's bottom — exactly the
+ * band's `-mt-48` bite. That hands the pin over the moment the dome's crown
+ * reaches the bottom of the screen, so the two never overlap: without it the
+ * dome slides up over the still-pinned names.
+ *
  * Scroll-zoom: the lily photo lives in its own `motion.div` layer so it can
  * scale up, blur, and fade as the hero scrolls out of view (Motion example
- * `react-scroll-zoom-hero`). The overlay + text sit above it, unscaled.
+ * `react-scroll-zoom-hero`). The overlay + text sit above it, unscaled. The
+ * offset ends at `end end` so the zoom finishes exactly as the pin releases.
+ *
+ * The photo layer is clipped by its OWN wrapper rather than by the section:
+ * `overflow-hidden` on an ancestor of a sticky element makes it stick inside a
+ * box that never scrolls, which kills the pin.
  */
 export function Hero() {
   const ref = useRef<HTMLDivElement>(null);
   // 0 while hero pinned at top -> 1 once fully scrolled past.
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start start', 'end start'],
+    offset: ['start start', 'end end'],
   });
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const blurPx = useTransform(scrollYProgress, [0, 1], [0, 8]);
@@ -33,28 +50,34 @@ export function Hero() {
   };
 
   return (
-    <div ref={ref} className="relative overflow-hidden">
-      {/* Full-bleed lily photo, zoom/blur/fade on scroll. */}
-      <motion.div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          scale,
-          filter,
-          transformOrigin: '50% 30%',
-          backgroundImage: 'url(/hero-lily.jpg)',
-          backgroundSize: 'cover',
-          backgroundPosition: '50% top',
-        }}
-      />
-      {/* Dark overlay for text legibility (static). */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-black/50"
-      />
-      <header className="relative flex min-h-svh flex-col items-center justify-center px-5 py-16 text-center sm:px-9">
+    <div ref={ref} className="relative h-[150svh]">
+      {/* Full-bleed lily photo, zoom/blur/fade on scroll, clipped here. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
-          className="flex flex-col items-center"
+          className="absolute inset-0"
+          style={{
+            scale,
+            filter,
+            transformOrigin: '50% 30%',
+            backgroundImage: 'url(/hero-lily.jpg)',
+            backgroundSize: 'cover',
+            backgroundPosition: '50% top',
+          }}
+        />
+        {/* Dark overlay for text legibility (static). */}
+        <div className="absolute inset-0 bg-black/50" />
+      </div>
+      {/* Sticky track: the section minus the dome's 12rem overlap. */}
+      <div className="h-[calc(150svh-12rem)]">
+        <header className="sticky top-0 flex h-svh flex-col px-5 text-center sm:px-9">
+        {/* Two groups, one screen. The lace + line ride in a `flex-1` row so
+            they sit centred in whatever space is left above the date, and the
+            date block is a `shrink-0` row pinned to the bottom. Because they are
+            separate flex rows they can never overlap: on a short screen the
+            centre row is the one that gives up height, and the lace is capped in
+            `svh` (below) so it shrinks with it instead of pushing through. */}
+        <motion.div
+          className="flex min-h-0 flex-1 flex-col items-center justify-center pb-8"
           initial="hidden"
           animate="show"
           transition={{ staggerChildren: 0.18, delayChildren: 0.15 }}
@@ -65,7 +88,7 @@ export function Hero() {
           <motion.div
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="relative mt-6 aspect-square w-[min(86vw,26rem)] -rotate-6 md:w-[min(86vw,33.8rem)]"
+            className="relative aspect-square w-[min(86vw,26rem,46svh)] -rotate-6 md:w-[min(86vw,33.8rem,46svh)]"
           >
             {/* Frosted glass filling the lace's open window. */}
             <div
@@ -93,7 +116,7 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-script text-5xl tracking-[0.3em] text-white"
+            className="font-script text-[clamp(2rem,7svh,3rem)] tracking-[0.3em] text-white"
           >
             are getting married!
           </motion.p>
@@ -102,7 +125,35 @@ export function Hero() {
             className="mt-10 text-white drop-shadow-[0_1px_10px_rgba(30,42,24,0.65)]"
           /> */}
         </motion.div>
-      </header>
+
+        {/* Bottom group. The hero says who, then what, then when: the
+            spelled-out date over the week strip with the day ringed, sitting on
+            the bottom edge of the screen. Both are white with the names' shadow
+            so they hold up over the photo; `WeekStrip` draws itself in
+            `currentColor`. Its stagger picks up where the centre group's left
+            off. */}
+        <motion.div
+          className="flex shrink-0 flex-col items-center pb-[max(2rem,5svh)]"
+          initial="hidden"
+          animate="show"
+          transition={{ staggerChildren: 0.18, delayChildren: 0.51 }}
+        >
+          <motion.p
+            variants={heroItem}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+            className="font-script text-xl leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)] sm:text-lg"
+          >
+            {WEDDING_DAY_LABEL}
+          </motion.p>
+          <motion.div
+            variants={heroItem}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+          >
+            <WeekStrip className="mt-5 text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]" />
+          </motion.div>
+        </motion.div>
+        </header>
+      </div>
     </div>
   );
 }

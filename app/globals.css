@@ -159,9 +159,15 @@
   /* Hover/active surfaces invert rather than tint. */
   --accent: var(--ink);
   --accent-foreground: #ffffff;
-  /* No red: errors are carried by role="alert" / aria-invalid and wording,
-     not by hue. */
-  --destructive: var(--ink);
+  /* The one hue outside white + ink, and only for the RSVP form's required marks
+     and error states: a brick red muted towards the ink's olive so it sits in the
+     letter rather than shouting over it. It never carries meaning on its own —
+     required marks are aria-hidden beside a real `required` attribute, and every
+     error is also stated in words through role="alert". */
+  --mark-required: #a4322b;
+  /* Pointed at that red so shadcn's built-in `aria-invalid:border-destructive`
+     and `text-destructive` mark the offending field without per-field colour. */
+  --destructive: var(--mark-required);
   --border: var(--ink);
   --input: var(--ink);
   --ring: var(--ink);
@@ -447,19 +453,26 @@
    envelope. It spins continuously (faster while playing) and toggles a looping
    placeholder track on click (components/vinyl-player.tsx). Black grooved wax,
    an ivory label echoing the envelope, and the same `.env-back` drop shadow. */
-.vinyl-section {
-  min-height: 100dvh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.6rem;
-  padding: 2rem 1.5rem;
+/* Square frame holding the record plus the ring of text set around it. The
+   frame is the disc plus a gutter on each side; the ring text is drawn on a
+   circle at 46% of the frame, i.e. inside that gutter. */
+.vinyl-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(
+    var(--vinyl-size, min(64vw, 300px)) + 2 * var(--vinyl-ring-gap, 1.5rem)
+  );
+  aspect-ratio: 1;
+  color: var(--muted-foreground);
 }
 
 .vinyl {
   display: block;
-  width: min(64vw, 300px);
+  /* Positioned so the label and spindle hole (absolute) sit on the disc.
+     Callers size the record with `--vinyl-size`. */
+  position: relative;
+  width: var(--vinyl-size, min(64vw, 300px));
   aspect-ratio: 1;
   padding: 0;
   border: none;
@@ -542,18 +555,54 @@
   animation: vinyl-spin 3s linear infinite;
 }
 
-.vinyl-hint {
-  margin: 0;
-  color: var(--muted-foreground);
-  font-size: 0.72rem;
-  font-weight: 500;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-}
-
 /* Reduced motion: keep the player usable, but never spin. */
 @media (prefers-reduced-motion: reduce) {
   .vinyl.is-spinning {
     animation: none;
   }
 }
+
+/* Guest-letter variant. The letter is a strict two-colour system — white paper
+   and ink #1E2A18 — so the record is pressed in ink rather than warm black, the
+   label is paper rather than ivory, and the shadow is tinted with ink instead of
+   the dashboard's wisteria. */
+.letter-theme .vinyl {
+  background:
+    radial-gradient(
+      circle at 30% 26%,
+      rgba(255, 255, 255, 0.34),
+      rgba(255, 255, 255, 0) 26%
+    ),
+    conic-gradient(
+      from 210deg at 50% 50%,
+      rgba(255, 255, 255, 0) 0deg,
+      rgba(255, 255, 255, 0.14) 38deg,
+      rgba(255, 255, 255, 0) 92deg,
+      rgba(255, 255, 255, 0) 210deg,
+      rgba(255, 255, 255, 0.07) 246deg,
+      rgba(255, 255, 255, 0) 300deg
+    ),
+    repeating-radial-gradient(
+      circle at center,
+      #1a2415 0 1px,
+      #2a3a22 1px 3px
+    ),
+    var(--ink);
+  box-shadow:
+    0 30px 58px -30px rgba(30, 42, 24, 0.4),
+    0 10px 22px -14px rgba(30, 42, 24, 0.22),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.35);
+}
+.letter-theme .vinyl-label {
+  background: #ffffff;
+  box-shadow:
+    0 0 0 1px rgba(30, 42, 24, 0.35),
+    inset 0 0 0 1px rgba(30, 42, 24, 0.08);
+}
+.letter-theme .vinyl-hole {
+  background: var(--ink);
+}
+.letter-theme .vinyl-ring {
+  color: var(--ink);
+}
+

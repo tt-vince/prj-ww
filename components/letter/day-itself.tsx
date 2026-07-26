@@ -57,7 +57,7 @@ export function DayItself() {
           The day itself
         </h2>
         <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
-          What we have planned
+          What we have planned on this special day
         </p>
 
         <div className="relative mx-auto mt-14 max-w-[46rem]">
@@ -127,6 +127,13 @@ export function DayItself() {
                   />
                   <p className="font-hand text-lg leading-snug text-ink">
                     {e.what}
+                  </p>
+                  {/* The hour, as a subtitle under its event. Small caps in the
+                      sans face — the same treatment the dates get on the Our
+                      Story polaroids — so it labels the line without competing
+                      with the handwritten title above it. */}
+                  <p className="mt-1 font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-ink">
+                    {e.time}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-ink">
                     {e.detail}
