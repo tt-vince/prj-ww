@@ -15,7 +15,7 @@ const choiceRow =
 /**
  * A radio or checkbox drawn as an ink row (see `choiceRow`). `size="lg"` is the
  * attendance answer, which is the decision the whole card exists for; the
- * default is the quieter chip used for the dietary presets, so the two do not
+ * default is the quieter chip used for the allergy presets, so the two do not
  * carry equal weight.
  */
 export function Choice({
@@ -46,8 +46,13 @@ export function Choice({
     <label
       className={cn(
         choiceRow,
+        // Both sizes are set at `meta`, the form's one control size. `lg` used
+        // to be `body`, which put the attendance radios 2.5px above the
+        // dietary chips right beside them and above the fields underneath —
+        // three sizes for the same act of answering. It stays the louder of
+        // the two through its padding and its medium weight instead.
         size === "lg"
-          ? "px-4 py-3.5 text-body"
+          ? "px-4 py-3.5 text-meta"
           : "px-3.5 py-2.5 text-meta whitespace-nowrap",
         invalid && "border-destructive",
         className,

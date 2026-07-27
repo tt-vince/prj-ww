@@ -22,7 +22,7 @@ const initial: RsvpState = { ok: false };
 
 /**
  * Public RSVP form for a single invitee, in five ruled sections: attendance,
- * party size, dietary restrictions, contact details, and a note for the couple.
+ * party size, allergies, contact details, and a note for the couple.
  * Contact is its own section rather than a tail on the note field — it is the
  * couple's way of reaching the guest back, not part of the message.
  *
@@ -205,11 +205,11 @@ export function RsvpForm({
       {status === "going" && (
         <>
           <Section
-            title="Anything we should know?"
+            title="Any allergies?"
             hint={
               solo
-                ? "Optional — anything we should keep off your plate."
-                : "Optional — your own dietary restrictions. We ask about anyone you bring below."
+                ? 'Anything you are allergic to, so the kitchen knows.'
+                : 'Anything you are allergic to. We ask about anyone you bring below.'
             }
           >
             <DietaryChoices
@@ -228,7 +228,7 @@ export function RsvpForm({
                   rows={2}
                   maxLength={200}
                   className="placeholder:italic"
-                  placeholder="Anything else we should keep off your plate"
+                  placeholder="Another allergy, or a diet we should cook around"
                 />
               </div>
             )}
@@ -328,7 +328,7 @@ export function RsvpForm({
 
       <Section
         title="How can we reach you?"
-        hint="Optional — only if you would like us to have these."
+        hint="Only if you would like us to have these."
       >
         <div className="space-y-2">
           <Label htmlFor="email" className={fieldLabel}>
@@ -376,12 +376,23 @@ export function RsvpForm({
 
       <Section
         title="A note for the two of us"
-        hint="Optional — a wish, a song request, anything at all."
+        hint="A congratulations, a blessing, a memory of us you love."
       >
         <Label htmlFor="guestNote" className="sr-only">
           Message for the couple
         </Label>
-        <Textarea id="guestNote" name="guestNote" rows={3} maxLength={1000} />
+        <Textarea
+          id="guestNote"
+          name="guestNote"
+          maxLength={1000}
+          placeholder="Congratulations, you two…"
+          // shadcn's Textarea is `field-sizing-content`, so it hugs whatever is
+          // typed and `rows` does nothing — the box rendered at its `min-h-16`
+          // floor, barely taller than the single-line inputs above it. Raising
+          // the floor is what gives it a note-sized opening; it still grows
+          // from there as the guest writes.
+          className="min-h-40"
+        />
       </Section>
 
       <SubmitArea

@@ -29,7 +29,11 @@ export function WeekStrip({ className }: { className?: string }) {
             <span
               aria-hidden
               className={cn(
-                'mx-2.5 size-[3px] shrink-0 rounded-full bg-current sm:mx-6',
+                // 24px between days on a phone, up from 20. The five visible
+                // cells are 36px each, so the row measures 276px — still inside
+                // the 280px a 320px screen leaves after the gutter, which is
+                // what caps this: mx-4 overflows there.
+                'mx-3 size-[3px] shrink-0 rounded-full bg-current sm:mx-6',
                 (isEdge(i) || isEdge(i - 1)) && 'hidden sm:block'
               )}
             />

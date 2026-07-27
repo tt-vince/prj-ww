@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 /**
- * One companion: their name and their own dietary restrictions. Framed by a thinned-ink
+ * One companion: their name and their own allergies. Framed by a thinned-ink
  * hairline rather than a real Card — the form already sits inside one, and a
  * nested card would read as a separate object dropped on the page instead of a
  * group inside this section.
@@ -92,7 +92,7 @@ export function CompanionFields({
       </div>
       <DietaryChoices
         name={`${field}.dietary`}
-        label="Dietary restrictions"
+        label="Allergies"
         otherOpen={otherOpen}
         onOther={onOther}
       />
@@ -107,7 +107,7 @@ export function CompanionFields({
             rows={2}
             maxLength={200}
             className="placeholder:italic"
-            placeholder="Anything else we should keep off their plate"
+            placeholder="Another allergy, or a diet we should cook around"
           />
         </div>
       )}

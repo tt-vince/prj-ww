@@ -116,7 +116,14 @@ export function OurStory() {
               a wrapped, ragged column in the middle of an empty screen. It
               widens twice on the way up so the memories read at a proper
               measure; the polaroid keeps its own fixed width either way. */}
-          <div className="relative mx-auto mt-24 max-w-[52rem] sm:mt-28 lg:max-w-[64rem] xl:max-w-[72rem]">
+          {/* The gap under the heading is `--spacing-heading` — the same rhythm
+              role DayItself uses — PLUS the camera charm's overhang. The charm
+              is centred on this wrapper's top edge and pulled up 85% of its own
+              height (93px at w-24, 109px at sm:w-28), so a bare `mt-heading`
+              here would put the drawing, not the thread, directly under the
+              kicker. Adding the overhang back makes the VISIBLE kicker-to-
+              content gap match The Day Itself. */}
+          <div className="relative mx-auto mt-[calc(var(--spacing-heading)+79px)] max-w-[52rem] sm:mt-[calc(var(--spacing-heading)+93px)] lg:max-w-[64rem] xl:max-w-[72rem]">
             {/* Hand-drawn polaroid-camera charm, centred over the top of the thread. */}
             <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-24 -translate-x-1/2 -translate-y-[85%] sm:w-28" />
 
@@ -127,7 +134,13 @@ export function OurStory() {
               className="absolute top-0 bottom-[8rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white sm:block"
             />
 
-            <ol className="space-y-10 sm:space-y-0">
+            {/* No mobile `space-y`: each item opens with its own thread
+                segment, and a list gap ABOVE that segment made the thread sit
+                40px below the previous memory but only 12px above the next
+                polaroid — one continuous line with visibly unequal ends. The
+                segment's own `my-6` is the whole gap now, so it is symmetric by
+                construction. */}
+            <ol className="sm:space-y-0">
               {MEMORIES.map((m, i) => {
                 const imageLeft = i % 2 === 0;
                 return (
@@ -138,19 +151,31 @@ export function OurStory() {
                     whileInView="show"
                     viewport={{ once: true, amount: 0.3 }}
                   >
-                    {/* Mobile-only thread segment joining items into one thread. */}
+                    {/* Mobile-only thread segment joining items into one thread.
+                        `my-6` is the only vertical gap between memories on a
+                        phone (see the note on the <ol>), so it reads the same
+                        above and below the line. */}
                     <span
                       aria-hidden
-                      className="my-3 h-16 w-[2px] rounded-full bg-white sm:hidden"
+                      className="my-6 h-16 w-[2px] rounded-full bg-white sm:hidden"
                     />
 
                     {/* Polaroid. */}
                     <motion.div
                       variants={rowItem}
                       transition={rowTransition}
+                      // Centred on mobile (single column); on sm+ the polaroid
+                      // hugs the centre spine rather than floating in the
+                      // middle of its half — same treatment the illustrations
+                      // get against the rail in DayItself. Its inner padding
+                      // matches the text column's (`sm:pl-10`/`sm:pr-10`), so
+                      // both halves stand off the spine by the same 4.5rem and
+                      // the row reads as one balanced pair.
                       className={cn(
                         'flex justify-center',
-                        imageLeft ? 'sm:order-1' : 'sm:order-2'
+                        imageLeft
+                          ? 'sm:order-1 sm:justify-end sm:pr-10'
+                          : 'sm:order-2 sm:justify-start sm:pl-10'
                       )}
                     >
                       <Polaroid memory={m} reduce={reduce} onOpen={() => setActive(m)} />
@@ -161,7 +186,10 @@ export function OurStory() {
                       variants={rowItem}
                       transition={rowTransition}
                       className={cn(
-                        'mt-2 max-w-sm px-2 text-center sm:mt-0 sm:max-w-none',
+                        // `mt-6` on a phone: at `mt-2` the caption sat close
+                        // enough to the polaroid's own bottom border to read as
+                        // part of the print rather than as the memory's text.
+                        'mt-6 max-w-sm px-2 text-center sm:mt-0 sm:max-w-none',
                         imageLeft
                           ? 'sm:order-2 sm:pl-10 sm:text-left'
                           : 'sm:order-1 sm:pr-10 sm:text-right'
@@ -172,12 +200,18 @@ export function OurStory() {
                       </p>
                       <h3 className="relative mt-1 font-script text-entry text-white">
                         {/* Connector from the centre spine to the title (sm+).
-                            Width = text padding (pl/pr-10 = 40px) + half the
-                            column gap (gap-x-16 = 64px). */}
+                            The run from the spine to this text box is 4.5rem —
+                            text padding (pl/pr-10 = 40px) plus half the column
+                            gap (gap-x-16 = 64px) — so the line is drawn 0.5rem
+                            SHORT of it. Full length made the script capital
+                            touch the rule; DayItself gets the same breathing
+                            room from the `md:pl-2` on its description instead.
+                            Offset stays at the full 4.5rem so the line still
+                            starts on the spine. */}
                         <span
                           aria-hidden
                           className={cn(
-                            'absolute top-[0.55em] hidden h-[3px] w-[4.5rem] rounded-full bg-white sm:block',
+                            'absolute top-[0.55em] hidden h-[3px] w-16 rounded-full bg-white sm:block',
                             imageLeft ? 'sm:-left-[4.5rem]' : 'sm:-right-[4.5rem]'
                           )}
                         />
@@ -203,7 +237,7 @@ export function OurStory() {
             >
               <span
                 aria-hidden
-                className="my-3 h-16 w-[2px] rounded-full bg-white sm:hidden"
+                className="my-6 h-16 w-[2px] rounded-full bg-white sm:hidden"
               />
               <InkCharm
                 src="/icons/hand_drawn/illustrations/wedding-rings-linework.svg"

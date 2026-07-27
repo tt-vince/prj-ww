@@ -26,7 +26,10 @@ export function PrenupMosaic({ shots, mobileCount }: { shots: Shot[]; mobileCoun
     <>
       {/* `auto-rows-*` is the shared tile height; `dense` stops a 2-column tile
           from leaving the column beside it empty. */}
-      <div className="mt-heading grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
+      {/* `mb-1.5` matches the grid's own `gap-1.5`: the gutter between tiles is
+          6px, so the bottom row met the peony border with no gap at all while
+          every other edge in the mosaic had one. */}
+      <div className="mt-heading mb-1.5 grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
         {shots.map((shot, index) => (
           <Tile
             key={shot.alt}

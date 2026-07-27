@@ -5,13 +5,13 @@ import { fieldLabel } from "@/components/letter/letter-type";
 import { Choice } from "@/components/letter/rsvp-form/choice";
 
 /**
- * The dietary presets plus the "Something else" toggle, shared by the invitee's
- * own section and every companion card so one set of restrictions is asked for
+ * The allergy presets plus the "Something else" toggle, shared by the invitee's
+ * own section and every companion card so one set of allergies is asked for
  * the same way whoever it belongs to. `name` is the field the presets post under; the
  * caller owns `otherOpen` because it also renders the matching free-text field.
  *
- * Content-width chips rather than a fixed grid: at phone width a two-column
- * grid breaks "Gluten-free" across two lines.
+ * Content-width chips rather than a fixed grid: the labels are one or two short
+ * words each, and a fixed grid would wrap the longer ones at phone width.
  */
 export function DietaryChoices({
   name,
@@ -42,11 +42,13 @@ export function DietaryChoices({
           label={opt.label}
         />
       ))}
-      {/* Its own line: it is not a seventh preset, it opens a field. */}
+      {/* Wraps in with the presets, sized to its own label like they are. It
+          used to be pushed onto its own full-width line to mark it as the one
+          chip that opens a field rather than posting a value; that read as a
+          separate control instead of the last option in the set. */}
       <Choice
         type="checkbox"
         label="Something else"
-        className="basis-full"
         checked={otherOpen}
         onChange={(e) => onOther(e.target.checked)}
       />

@@ -24,6 +24,7 @@ const twMerge = extendTailwindMerge({
           text: [
             "micro",
             "label",
+            "kicker",
             "meta",
             "body",
             "lead",

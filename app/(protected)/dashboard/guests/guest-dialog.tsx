@@ -234,7 +234,7 @@ function GuestForm({
                 : hasCounts
                   ? `Party size ${partySize} of ${seats} seat${seats === 1 ? '' : 's'} (adults + kids).`
                   : mode === 'create'
-                    ? 'Optional — pre-fill the expected head-count, or leave blank.'
+                    ? 'Pre-fill the expected head-count, or leave blank.'
                     : 'No reply yet — leave blank until the party responds.'}
             </p>
           )}
