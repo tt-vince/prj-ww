@@ -58,14 +58,17 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
         className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-white"
         style={{ borderRadius: "0 0 50% 50% / 0 0 180px 180px" }}
       />
-      <div className="relative mx-auto max-w-[32rem]">
+      {/* `max-w-2xl` (42rem), the same measure the FAQ cards use — the two are
+          the only carded sections in the letter, so a 32rem reply card under a
+          42rem FAQ card read as two different systems. */}
+      <div className="relative mx-auto max-w-2xl">
         <SectionHeading tone="white" title="Will you join us?" kicker="RSVP" />
 
         {/* Double rule: a 2px white outline held 2px off the card, so the ink
             shows through the gap and the card reads as mounted on the section
             rather than dropped on it. `outline-offset` leaves the gap
             transparent, so it picks up the ink behind on its own. */}
-        <Card className="mt-heading px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] outline-2 outline-offset-2 outline-white sm:px-6">
+        <Card className="mt-heading rounded-xl px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] outline-2 outline-offset-2 outline-white sm:px-6">
           <Suspense fallback={<RsvpBodyFallback />}>
             <RsvpBody searchParams={searchParams} />
           </Suspense>

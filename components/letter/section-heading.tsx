@@ -15,8 +15,9 @@ import { cn } from '@/lib/utils';
  * under the headline. Both matter. A script face carries very little ink for its
  * nominal size, and the kicker is usually the LONGER line — mass reads louder
  * than height — so a kicker set anywhere near reading size stops being a
- * subtitle and becomes the headline. It is the `label` role for that reason,
- * the same voice as the event times and polaroid dates elsewhere in the letter.
+ * subtitle and becomes the headline. It is the `kicker` role for that reason —
+ * `label`'s phone size, but growing faster on a desktop, where a 14px line under
+ * a 56px script headline reads as a caption instead of a subtitle.
  *
  * The kicker takes a node, not just a string, so a section can keep a longer
  * lead-in sentence (Hotels) — use `kickerClassName` to cap its measure.
@@ -53,7 +54,10 @@ export function SectionHeading({
       {kicker != null && (
         <p
           className={cn(
-            'mt-2 font-sans text-label tracking-[0.04em]',
+            // Caps, and wider tracking to go with them: at 0.04em a capitalised
+            // line sets too tight to read as a label. This is the same voice as
+            // the field labels and event times, one step up in size.
+            'mt-2 font-sans text-kicker uppercase tracking-[0.14em]',
             TONES[tone].kicker,
             kickerClassName,
           )}

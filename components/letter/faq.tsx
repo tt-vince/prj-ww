@@ -1,3 +1,4 @@
+import { Card, CardContent } from '@/components/ui/card';
 import { SectionHeading } from '@/components/letter/section-heading';
 
 /**
@@ -28,16 +29,23 @@ export function Faq() {
         <SectionHeading title="Good to know" kicker="FAQ" />
 
         <div className="mx-auto mt-heading grid max-w-2xl gap-5 text-left">
+          {/* A real shadcn Card, not a bare div: the map card and the hotel
+              cards are Cards too, and their inner text is inset by
+              `CardContent`'s own `--card-spacing` on top of the shell padding.
+              Hand-rolled markup got the shell padding alone, so the questions
+              sat half as far from the edge as every other card in the letter. */}
           {FAQS.map((f) => (
-            <div
+            <Card
               key={f.q}
-              className="rounded-xl bg-ink px-6 py-6 sm:px-8"
+              className="gap-0 rounded-xl bg-ink px-2 py-8 ring-0 sm:px-6"
             >
-              <p className="font-sans text-subhead text-white">{f.q}</p>
-              <p className="mt-2 text-body text-white">
-                {f.a}
-              </p>
-            </div>
+              <CardContent>
+                <p className="font-sans text-subhead text-white">{f.q}</p>
+                <p className="mt-2 text-body text-white">
+                  {f.a}
+                </p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

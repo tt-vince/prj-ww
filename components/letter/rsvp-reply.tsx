@@ -129,7 +129,7 @@ export function RsvpReply({
         ) : null}
 
         {going && ownDietary ? (
-          <Row label="Your restrictions">{ownDietary}</Row>
+          <Row label="Your allergies">{ownDietary}</Row>
         ) : null}
 
         {reply.guestNote ? (

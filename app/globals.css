@@ -92,6 +92,12 @@
   --text-micro--line-height: 1.1;
   --text-label: clamp(0.8125rem, 0.788rem + 0.11vw, 0.875rem);
   --text-label--line-height: 1.25;
+  /* `kicker` is the section-heading sub-line. It shares `label`'s phone floor —
+     under a script title on a 360px screen it must stay the quieter of the two —
+     but it grows about twice as fast, because on a desktop a 14px tracked line
+     under a 56px headline reads as a caption rather than a subtitle. */
+  --text-kicker: clamp(0.8125rem, 0.674rem + 0.616vw, 1.15625rem);
+  --text-kicker--line-height: 1.4;
   --text-meta: clamp(0.9375rem, 0.901rem + 0.16vw, 1.03125rem);
   --text-meta--line-height: 1.55;
   --text-body: clamp(1rem, 0.927rem + 0.33vw, 1.1875rem);
@@ -114,7 +120,7 @@
      size. Every title in the letter still fits on one line at 40px on a 360px
      phone. The `label`-sized kicker under it is what keeps the pair ranked —
      see components/letter/section-heading.tsx. */
-  --text-title: clamp(2.5rem, 2.109rem + 1.74vw, 3.5rem);
+  --text-title: clamp(2.5rem, 1.913rem + 2.609vw, 4rem);
   --text-title--line-height: 1.1;
   /* The floor is set by the countdown row, which must fit four number+unit
      pairs across a 360px phone: every 1px of figure costs ~5px of row width. */
@@ -282,10 +288,23 @@
   font-size: var(--text-meta);
   line-height: var(--text-meta--line-height);
 }
+/* `meta`, not `body`: every control in the RSVP form — radios, chips, inputs,
+   textareas — is set at one size, so answering never changes type size midway
+   down the card. Prose stays at `body`; a field is not prose. */
 .letter-theme [data-slot="input"],
 .letter-theme [data-slot="textarea"] {
-  font-size: var(--text-body);
-  line-height: var(--text-body--line-height);
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+}
+/* The one place the letter thins its ink. Placeholders inherit
+   `--muted-foreground`, which this theme points at full-strength #1E2A18 — so
+   a placeholder rendered identically to typed text, and the note field read as
+   already answered. Everywhere else rank comes from size/face/weight, but a
+   placeholder is not a quieter piece of content: it is the absence of content,
+   and only tone can say so inside a field. */
+.letter-theme [data-slot="input"]::placeholder,
+.letter-theme [data-slot="textarea"]::placeholder {
+  color: color-mix(in srgb, var(--ink) 45%, #ffffff);
 }
 .letter-theme [data-slot="input"] {
   height: auto;
