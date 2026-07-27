@@ -9,6 +9,9 @@
   --color-foreground: var(--foreground);
   /* Guest letter ink — the only non-white colour on the home page. */
   --color-ink: var(--ink);
+  /* Section-heading script colour (sage on white; re-pointed to ink inside
+     .letter-theme — see that block). */
+  --color-script: var(--script);
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-script: var(--font-parisienne), ui-serif, cursive;
@@ -600,5 +603,39 @@
 }
 .letter-theme .vinyl-ring {
   color: var(--ink);
+}
+
+/* Home loading screen (app/loading.tsx): the couple's names breathe while a
+   thin ink rule draws itself underneath — same two-colour letter system. */
+.letter-loading-names {
+  animation: letter-loading-breathe 2.6s ease-in-out infinite;
+}
+.letter-loading-line {
+  transform-origin: center;
+  animation: letter-loading-line 2.6s ease-in-out infinite;
+}
+@keyframes letter-loading-breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes letter-loading-line {
+  0%,
+  100% {
+    transform: scaleX(0.25);
+  }
+  50% {
+    transform: scaleX(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .letter-loading-names,
+  .letter-loading-line {
+    animation: none;
+  }
 }
 
