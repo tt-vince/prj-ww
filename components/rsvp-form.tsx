@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useActionState, useState } from 'react';
+import { useActionState, useState } from "react";
 import {
   Baby,
   Loader2,
@@ -9,17 +9,17 @@ import {
   Send,
   UserRound,
   type LucideIcon,
-} from 'lucide-react';
-import { submitRsvp, type RsvpState } from '@/app/actions/submit-rsvp';
-import { DIETARY_OPTIONS } from '@/lib/dietary';
-import { cn } from '@/lib/utils';
-import { letterButton } from '@/components/letter/letter-button';
-import { fieldLabel } from '@/components/letter/letter-type';
-import { RsvpReply, type ReplySummary } from '@/components/letter/rsvp-reply';
-import type { CompanionSummary } from '@/lib/companions';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "lucide-react";
+import { submitRsvp, type RsvpState } from "@/app/actions/submit-rsvp";
+import { DIETARY_OPTIONS } from "@/lib/dietary";
+import { cn } from "@/lib/utils";
+import { letterButton } from "@/components/letter/letter-button";
+import { fieldLabel } from "@/components/letter/letter-type";
+import { RsvpReply, type ReplySummary } from "@/components/letter/rsvp-reply";
+import type { CompanionSummary } from "@/lib/companions";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const initial: RsvpState = { ok: false };
 
@@ -28,7 +28,7 @@ const COMPANION_NAME_KEY = /^companion\.(adult|kid)-(\d{1,2})\.name$/;
 
 /** Blank or whitespace-only → null, so the read-back omits the row entirely. */
 const text = (value: FormDataEntryValue | null): string | null =>
-  (typeof value === 'string' ? value.trim() : '') || null;
+  (typeof value === "string" ? value.trim() : "") || null;
 
 /**
  * The outgoing FormData, read into the shape the read-back renders. Everything
@@ -36,8 +36,8 @@ const text = (value: FormDataEntryValue | null): string | null =>
  * dietary chips and note are included exactly as they were posted.
  */
 function summarizeReply(formData: FormData): ReplySummary {
-  const status = formData.get('status') === 'not_going' ? 'not_going' : 'going';
-  const going = status === 'going';
+  const status = formData.get("status") === "not_going" ? "not_going" : "going";
+  const going = status === "going";
 
   const count = (key: string): number | null => {
     const n = Number(formData.get(key));
@@ -51,9 +51,9 @@ function summarizeReply(formData: FormData): ReplySummary {
     const [, kind, position] = match;
     const field = `companion.${kind}-${position}`;
     companions.push({
-      kind: kind as 'adult' | 'kid',
+      kind: kind as "adult" | "kid",
       position: Number(position),
-      name: text(formData.get(key)) ?? '',
+      name: text(formData.get(key)) ?? "",
       dietary: formData.getAll(`${field}.dietary`).map(String),
       dietaryOther: text(formData.get(`${field}.dietaryOther`)),
     });
@@ -61,11 +61,11 @@ function summarizeReply(formData: FormData): ReplySummary {
 
   return {
     status,
-    adults: going ? count('adults') : null,
-    kids: going ? count('kids') : null,
-    dietary: going ? formData.getAll('dietary').map(String) : [],
-    dietaryOther: going ? text(formData.get('dietaryOther')) : null,
-    guestNote: text(formData.get('guestNote')),
+    adults: going ? count("adults") : null,
+    kids: going ? count("kids") : null,
+    dietary: going ? formData.getAll("dietary").map(String) : [],
+    dietaryOther: going ? text(formData.get("dietaryOther")) : null,
+    guestNote: text(formData.get("guestNote")),
     companions: going ? companions : [],
   };
 }
@@ -86,7 +86,7 @@ function summarizeReply(formData: FormData): ReplySummary {
  * document (cf. the two-colour note in app/globals.css) and is deliberate.
  */
 const sectionShell =
-  'relative mt-7 pt-7 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-ink/20 first-of-type:mt-0 first-of-type:pt-0 first-of-type:before:hidden';
+  "relative mt-7 pt-7 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-ink/20 first-of-type:mt-0 first-of-type:pt-0 first-of-type:before:hidden";
 
 /**
  * Every choice in the form — attendance radios and dietary checkboxes — is the
@@ -96,10 +96,10 @@ const sectionShell =
  * letter's offset ink outline, the same one `letterButton` uses.
  */
 const choiceRow =
-  'flex cursor-pointer items-center gap-3 rounded-xl border border-input leading-snug transition-colors accent-[color:var(--primary)] has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:accent-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring';
+  "flex cursor-pointer items-center gap-3 rounded-xl border border-input leading-snug transition-colors accent-[color:var(--primary)] has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:accent-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring";
 
 /** Errors carry no hue in this document — wording and italics do the work. */
-const errorText = 'block text-xs italic text-destructive';
+const errorText = "block text-xs italic text-destructive";
 
 /**
  * One disabled treatment for every button in the form: unfilled, with the
@@ -108,7 +108,7 @@ const errorText = 'block text-xs italic text-destructive';
  * The submit button therefore inks in the moment the reply can be sent.
  */
 const disabledControl =
-  'disabled:cursor-not-allowed disabled:border-dashed disabled:bg-transparent disabled:text-ink disabled:hover:bg-transparent disabled:hover:text-ink';
+  "disabled:cursor-not-allowed disabled:border-dashed disabled:bg-transparent disabled:text-ink disabled:hover:bg-transparent disabled:hover:text-ink";
 
 /**
  * Public RSVP form for a single invitee, in five ruled sections: attendance,
@@ -124,9 +124,15 @@ const disabledControl =
  * `token` is the capability link id (`?id=<token>`); `maxGuests` bounds the
  * party-size steppers. On a successful reply it swaps to a thank-you.
  */
-export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: number }) {
+export function RsvpForm({
+  token,
+  maxGuests,
+}: {
+  token: string;
+  maxGuests: number;
+}) {
   const [state, action, pending] = useActionState(submitRsvp, initial);
-  const [status, setStatus] = useState<'going' | 'not_going' | ''>('');
+  const [status, setStatus] = useState<"going" | "not_going" | "">("");
   const [adults, setAdults] = useState(1);
   const [kids, setKids] = useState(0);
   const [dietaryOther, setDietaryOther] = useState(false);
@@ -149,8 +155,14 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
   // the request is in flight cannot change what we read back.
   const [sent, setSent] = useState<ReplySummary | null>(null);
   const partySize = adults + kids;
-  const overCapacity = status === 'going' && partySize > maxGuests;
-  const seats = `${maxGuests} seat${maxGuests === 1 ? '' : 's'}`;
+  const overCapacity = status === "going" && partySize > maxGuests;
+  const atCapacity = status === "going" && partySize === maxGuests;
+  const seats = `${maxGuests} seat${maxGuests === 1 ? "" : "s"}`;
+  const extra = partySize - maxGuests;
+  // A one-seat invitation has nothing to count: the guest is adult 1 and there
+  // is no room for anyone else, so the counters would be four dead buttons
+  // asking a question with a single possible answer.
+  const solo = maxGuests === 1;
 
   /**
    * Everyone in the party except the invitee, who is adult 1 and answers for
@@ -161,12 +173,12 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
     ...Array.from({ length: Math.max(0, adults - 1) }, (_, i) => ({
       slug: `adult-${i + 2}`,
       label: `Adult ${i + 2}`,
-      kind: 'adult' as const,
+      kind: "adult" as const,
     })),
     ...Array.from({ length: kids }, (_, i) => ({
       slug: `kid-${i + 1}`,
       label: `Kid ${i + 1}`,
-      kind: 'kid' as const,
+      kind: "kid" as const,
     })),
   ];
 
@@ -178,11 +190,14 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
    */
   const missing: { field: string; message: string }[] = [];
   if (!status) {
-    missing.push({ field: 'status', message: 'Let us know if you can make it.' });
+    missing.push({
+      field: "status",
+      message: "Let us know if you can make it.",
+    });
   }
-  if (status === 'going') {
+  if (status === "going") {
     for (const c of companions) {
-      if (!(companionNames[c.slug] ?? '').trim()) {
+      if (!(companionNames[c.slug] ?? "").trim()) {
         missing.push({
           field: `${c.slug}-name`,
           message: `Add a name for ${c.label}.`,
@@ -191,16 +206,15 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
     }
     if (overCapacity) {
       missing.push({
-        field: 'party',
-        message: `Your party is larger than the ${seats} held in your name.`,
+        field: "party",
+        message: `We've saved ${seats} for you. You've used ${extra} too many.`,
       });
     }
   }
 
   /** True once this field should show as wrong rather than merely empty. */
   const showsError = (field: string) =>
-    (attemptedSend || blurred[field]) &&
-    missing.some((m) => m.field === field);
+    (attemptedSend || blurred[field]) && missing.some((m) => m.field === field);
 
   // Sent. The reply is read back from the snapshot taken as it went, in the same
   // component the letter uses for a guest who answered on an earlier visit — so
@@ -215,18 +229,18 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
    */
   function fallbackSummary(): ReplySummary {
     return {
-      status: status === 'not_going' ? 'not_going' : 'going',
-      adults: status === 'going' ? adults : null,
-      kids: status === 'going' ? kids : null,
+      status: status === "not_going" ? "not_going" : "going",
+      adults: status === "going" ? adults : null,
+      kids: status === "going" ? kids : null,
       dietary: [],
       dietaryOther: null,
       guestNote: null,
       companions:
-        status === 'going'
+        status === "going"
           ? companions.map((c) => ({
               kind: c.kind,
-              position: Number(c.slug.split('-')[1]),
-              name: (companionNames[c.slug] ?? '').trim(),
+              position: Number(c.slug.split("-")[1]),
+              name: (companionNames[c.slug] ?? "").trim(),
               dietary: [],
               dietaryOther: null,
             }))
@@ -248,14 +262,14 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
       <p className="mb-7 text-center font-countdown text-xs tracking-wide">
         <span aria-hidden className="text-[color:var(--mark-required)]">
           &#42;
-        </span>{' '}
+        </span>{" "}
         Required
       </p>
 
       <Section title="Will you attend?" required>
         <div
           className="grid gap-2.5"
-          aria-describedby={showsError('status') ? 'status-error' : undefined}
+          aria-describedby={showsError("status") ? "status-error" : undefined}
         >
           <Choice
             type="radio"
@@ -263,9 +277,9 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
             value="going"
             label="Joyfully accept"
             size="lg"
-            checked={status === 'going'}
-            onChange={() => setStatus('going')}
-            invalid={showsError('status')}
+            checked={status === "going"}
+            onChange={() => setStatus("going")}
+            invalid={showsError("status")}
             required
           />
           <Choice
@@ -274,23 +288,27 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
             value="not_going"
             label="Regretfully decline"
             size="lg"
-            checked={status === 'not_going'}
-            onChange={() => setStatus('not_going')}
-            invalid={showsError('status')}
+            checked={status === "not_going"}
+            onChange={() => setStatus("not_going")}
+            invalid={showsError("status")}
           />
         </div>
-        {showsError('status') && (
+        {showsError("status") && (
           <span id="status-error" role="alert" className={errorText}>
             Let us know if you can make it.
           </span>
         )}
       </Section>
 
-      {status === 'going' && (
+      {status === "going" && (
         <>
           <Section
             title="Anything we should know?"
-            hint="Optional — your own dietary restrictions. We ask about anyone you bring below."
+            hint={
+              solo
+                ? "Optional — anything we should keep off your plate."
+                : "Optional — your own dietary restrictions. We ask about anyone you bring below."
+            }
           >
             <DietaryChoices
               name="dietary"
@@ -314,78 +332,93 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
             )}
           </Section>
 
-          <Section title="Who is coming?" required>
-            {/* gap-6 between the two counters against gap-2 inside each one:
+          {solo ? (
+            // The counts still post, so the server reads a one-seat reply the
+            // same way it reads every other one.
+            <>
+              <input type="hidden" name="adults" value={adults} />
+              <input type="hidden" name="kids" value={kids} />
+            </>
+          ) : (
+            <Section title="Who is coming?" required>
+              {/* gap-6 between the two counters against gap-2 inside each one:
                 without that contrast the four round buttons read as one run of
                 four rather than as two separate counts. */}
-            <div className="grid grid-cols-2 gap-6">
-              <Stepper
-                label="Adults"
-                icon={UserRound}
-                name="adults"
-                value={adults}
-                setValue={setAdults}
-                min={1}
-                max={maxGuests}
-                canIncrement={partySize < maxGuests}
-                error={state.fieldErrors?.adults}
-              />
-              <Stepper
-                label="Kids"
-                icon={Baby}
-                name="kids"
-                value={kids}
-                setValue={setKids}
-                min={0}
-                max={maxGuests}
-                canIncrement={partySize < maxGuests}
-                error={state.fieldErrors?.kids}
-              />
-            </div>
-            <p
-              aria-live="polite"
-              className={cn(
-                'text-center text-sm',
-                overCapacity && 'font-medium text-destructive',
-              )}
-            >
-              {overCapacity
-                ? `A party of ${partySize} — more than the ${seats} held in your name.`
-                : `A party of ${partySize} — ${seats} held in your name.`}
-            </p>
-
-            {companions.length > 0 && (
-              <div className="space-y-3">
-                <p className="text-center font-countdown text-xs leading-relaxed tracking-wide">
-                  One for each of them, so we can seat everyone and get the food
-                  right.
-                </p>
-                {companions.map((c) => (
-                  <CompanionFields
-                    key={c.slug}
-                    slug={c.slug}
-                    label={c.label}
-                    kind={c.kind}
-                    name={companionNames[c.slug] ?? ''}
-                    onName={(v) =>
-                      setCompanionNames((prev) => ({ ...prev, [c.slug]: v }))
-                    }
-                    onNameBlur={() =>
-                      setBlurred((prev) => ({
-                        ...prev,
-                        [`${c.slug}-name`]: true,
-                      }))
-                    }
-                    nameError={showsError(`${c.slug}-name`)}
-                    otherOpen={!!companionOther[c.slug]}
-                    onOther={(open) =>
-                      setCompanionOther((prev) => ({ ...prev, [c.slug]: open }))
-                    }
-                  />
-                ))}
+              <div className="grid grid-cols-2 gap-6">
+                <Stepper
+                  label="Adults"
+                  icon={UserRound}
+                  name="adults"
+                  value={adults}
+                  setValue={setAdults}
+                  min={1}
+                  max={maxGuests}
+                  canIncrement={partySize < maxGuests}
+                  error={state.fieldErrors?.adults}
+                />
+                <Stepper
+                  label="Kids"
+                  icon={Baby}
+                  name="kids"
+                  value={kids}
+                  setValue={setKids}
+                  min={0}
+                  max={maxGuests}
+                  canIncrement={partySize < maxGuests}
+                  error={state.fieldErrors?.kids}
+                />
               </div>
-            )}
-          </Section>
+              <p
+                aria-live="polite"
+                className={cn(
+                  "text-center text-sm",
+                  overCapacity && "font-medium text-destructive",
+                )}
+              >
+                {overCapacity
+                  ? `We've saved ${seats} for you. You've used ${extra} too many.`
+                  : atCapacity
+                    ? `We've saved ${seats} for you. You've used all ${maxGuests}.`
+                    : `We've saved ${seats} for you. You've used ${partySize}.`}
+              </p>
+
+              {companions.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-center font-countdown text-xs leading-relaxed tracking-wide">
+                    We&rsquo;d love a name for each of them, and anything they
+                    can&rsquo;t eat &mdash; it helps us seat everyone and get
+                    the food right.
+                  </p>
+                  {companions.map((c) => (
+                    <CompanionFields
+                      key={c.slug}
+                      slug={c.slug}
+                      label={c.label}
+                      kind={c.kind}
+                      name={companionNames[c.slug] ?? ""}
+                      onName={(v) =>
+                        setCompanionNames((prev) => ({ ...prev, [c.slug]: v }))
+                      }
+                      onNameBlur={() =>
+                        setBlurred((prev) => ({
+                          ...prev,
+                          [`${c.slug}-name`]: true,
+                        }))
+                      }
+                      nameError={showsError(`${c.slug}-name`)}
+                      otherOpen={!!companionOther[c.slug]}
+                      onOther={(open) =>
+                        setCompanionOther((prev) => ({
+                          ...prev,
+                          [c.slug]: open,
+                        }))
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </Section>
+          )}
         </>
       )}
 
@@ -404,7 +437,9 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
             autoComplete="email"
             maxLength={200}
             aria-invalid={!!state.fieldErrors?.email}
-            aria-describedby={state.fieldErrors?.email ? 'email-error' : undefined}
+            aria-describedby={
+              state.fieldErrors?.email ? "email-error" : undefined
+            }
           />
           {state.fieldErrors?.email && (
             <span id="email-error" role="alert" className={errorText}>
@@ -423,7 +458,9 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
             autoComplete="tel"
             maxLength={30}
             aria-invalid={!!state.fieldErrors?.phone}
-            aria-describedby={state.fieldErrors?.phone ? 'phone-error' : undefined}
+            aria-describedby={
+              state.fieldErrors?.phone ? "phone-error" : undefined
+            }
           />
           {state.fieldErrors?.phone && (
             <span id="phone-error" role="alert" className={errorText}>
@@ -447,7 +484,10 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
           another section of it. Spacing alone carries the separation. */}
       <div className="mt-8 space-y-4">
         {state.error && (
-          <p role="alert" className="text-center text-sm italic text-destructive">
+          <p
+            role="alert"
+            className="text-center text-sm italic text-destructive"
+          >
             {state.error}
           </p>
         )}
@@ -479,10 +519,10 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
           <button
             type="submit"
             disabled={pending || missing.length > 0}
-            aria-describedby={missing.length > 0 ? 'send-blocked' : undefined}
+            aria-describedby={missing.length > 0 ? "send-blocked" : undefined}
             className={cn(
               letterButton(),
-              'h-11 w-full justify-center',
+              "h-11 w-full justify-center",
               disabledControl,
             )}
           >
@@ -491,7 +531,7 @@ export function RsvpForm({ token, maxGuests }: { token: string; maxGuests: numbe
             ) : (
               <Send aria-hidden strokeWidth={1.5} />
             )}
-            {pending ? 'Sending…' : 'Send RSVP'}
+            {pending ? "Sending…" : "Send RSVP"}
           </button>
         </div>
       </div>
@@ -646,7 +686,7 @@ function CompanionFields({
 }: {
   slug: string;
   label: string;
-  kind: 'adult' | 'kid';
+  kind: "adult" | "kid";
   name: string;
   onName: (value: string) => void;
   onNameBlur: () => void;
@@ -657,7 +697,7 @@ function CompanionFields({
   const field = `companion.${slug}`;
   // Lucide has no child figure; `Baby` is the nearest thing to one, and next to
   // `UserRound` at this size the pair reads as grown-up / little one.
-  const Icon = kind === 'kid' ? Baby : UserRound;
+  const Icon = kind === "kid" ? Baby : UserRound;
 
   return (
     <fieldset className="space-y-4 rounded-xl border border-ink/20 p-5">
@@ -699,11 +739,7 @@ function CompanionFields({
           aria-describedby={nameError ? `${slug}-name-error` : undefined}
         />
         {nameError && (
-          <span
-            id={`${slug}-name-error`}
-            role="alert"
-            className={errorText}
-          >
+          <span id={`${slug}-name-error`} role="alert" className={errorText}>
             We need their name to seat them.
           </span>
         )}
@@ -744,18 +780,18 @@ function Choice({
   name,
   value,
   label,
-  size = 'sm',
+  size = "sm",
   checked,
   onChange,
   required,
   invalid,
   className,
 }: {
-  type: 'radio' | 'checkbox';
+  type: "radio" | "checkbox";
   label: string;
   name?: string;
   value?: string;
-  size?: 'sm' | 'lg';
+  size?: "sm" | "lg";
   checked?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   required?: boolean;
@@ -767,10 +803,10 @@ function Choice({
     <label
       className={cn(
         choiceRow,
-        size === 'lg'
-          ? 'px-4 py-3.5 text-base'
-          : 'px-3.5 py-2.5 text-sm whitespace-nowrap',
-        invalid && 'border-destructive',
+        size === "lg"
+          ? "px-4 py-3.5 text-base"
+          : "px-3.5 py-2.5 text-sm whitespace-nowrap",
+        invalid && "border-destructive",
         className,
       )}
     >
@@ -783,7 +819,7 @@ function Choice({
         required={required}
         className="size-4 shrink-0"
       />
-      <span className={size === 'lg' ? 'font-medium' : undefined}>{label}</span>
+      <span className={size === "lg" ? "font-medium" : undefined}>{label}</span>
     </label>
   );
 }
@@ -820,8 +856,8 @@ function Stepper({
   error?: string;
 }) {
   const step = cn(
-    letterButton({ variant: 'outline' }),
-    'size-9 shrink-0 justify-center rounded-full p-0',
+    letterButton({ variant: "outline" }),
+    "size-9 shrink-0 justify-center rounded-full p-0",
     disabledControl,
   );
 
@@ -829,7 +865,7 @@ function Stepper({
     <div className="space-y-2">
       <Label
         htmlFor={`${name}-value`}
-        className={cn(fieldLabel, 'flex items-center justify-center gap-1.5')}
+        className={cn(fieldLabel, "flex items-center justify-center gap-1.5")}
       >
         <Icon aria-hidden strokeWidth={1.5} className="size-3.5 shrink-0" />
         {label}
