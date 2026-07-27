@@ -1,6 +1,7 @@
 import { MapPin, Phone, Star } from 'lucide-react';
 
 import { letterButton } from '@/components/letter/letter-button';
+import { SectionHeading } from '@/components/letter/section-heading';
 import {
   Card,
   CardContent,
@@ -75,13 +76,11 @@ export function Hotels() {
   return (
     <section className="bg-white py-24">
       <div className="mx-auto max-w-[56rem] px-5 text-center sm:px-9 lg:max-w-[64rem]">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          Where you can stay
-        </h2>
-        <p className="mx-auto mt-2 max-w-md font-sans text-sm leading-relaxed tracking-wide text-ink">
-          We want to make your visit as comfortable as possible. Here are our
-          recommended places to stay.
-        </p>
+        <SectionHeading
+          title="Where you can stay"
+          kicker="We want to make your visit as comfortable as possible. Here are our recommended places to stay."
+          kickerClassName="mx-auto max-w-md leading-relaxed"
+        />
 
         {/* Capped to one readable column on mobile; from sm up the pair fills
             the section's measure, which widens again at lg. */}

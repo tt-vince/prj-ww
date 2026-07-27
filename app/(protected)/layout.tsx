@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import {
   PageFloralBottomRight,
   PageFloralTopLeft,
-} from "@/components/dashboard-florals";
+} from "@/components/dashboard/florals";
 
 /**
  * Sidebar-less admin shell (imported single-page design): a full-width, centered

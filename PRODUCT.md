@@ -41,11 +41,11 @@ its own page. Personal correspondence that happens to collect data.
   the URL is the entire identity mechanism.
 - Guests may share their link, lose it, or reopen it many times over ~9 months.
 - Sections are full-bleed and deliberately overlap; the page scrolls natively as one document
-  (`components/wedding-letter.tsx` composes `components/letter/*`).
+  (`components/letter/wedding-letter.tsx` composes the `components/letter/*` sections).
 
 ## Capabilities and Constraints
 
-**Design scope is the top page only** (`app/page.tsx` → `components/wedding-letter.tsx` and
+**Design scope is the top page only** (`app/page.tsx` → `components/letter/wedding-letter.tsx` and
 everything under `components/letter/`). **Do not touch `/dashboard` or `/login`** — those follow
 imported hi-fi Claude Design files and are settled.
 
@@ -59,7 +59,7 @@ imported hi-fi Claude Design files and are settled.
 - Guest replies: `going` / `not_going` only, with `adults` + `kids` bounded by the party's
   `max_guests`, plus dietary presets and free text.
 - No i18n, no guest login, no email confirmations, no RSVP editing after submit.
-- Retired but kept for reuse: `components/envelope-reveal.tsx`, `components/vinyl-player.tsx`.
+- Retired but kept for reuse: `components/letter/envelope-reveal.tsx`; the vinyl player (`components/letter/vinyl-player.tsx`) spins in the countdown band.
   The envelope-intro scroll approach was tried and reverted — do not reintroduce it unasked.
 - `docs/rsvp-spec.md` is the source of truth for data model, DTOs, and admin behavior; keep it
   in sync when a decision there changes.
@@ -67,7 +67,7 @@ imported hi-fi Claude Design files and are settled.
 ## Brand Commitments
 
 - **Colors are locked: the home page is white + ink, with three named exceptions.** The guest
-  letter (`app/page.tsx` → `components/wedding-letter.tsx` → `components/letter/*`) uses **white
+  letter (`app/page.tsx` → `components/letter/wedding-letter.tsx` → `components/letter/*`) uses **white
   `#ffffff` and ink `#1E2A18`** for everything except the three cases listed under "Granted
   exceptions" below — anything not on that list is one of the two colours at FULL strength: no
   tints, no thinned ink, no `ink/70`-style tiers. Whatever was green before is now exactly
@@ -96,7 +96,7 @@ imported hi-fi Claude Design files and are settled.
     1. **The RSVP form's section rules are thinned ink (`ink/20`).** Approved 2026-07-27. Five
        full-ink hairlines inside one small card read as heavier than the answers they separate.
        Applies to the rules dividing the form's sections and the companion cards' frames
-       (`components/rsvp-form.tsx`, `components/letter/rsvp-reply.tsx`) — **not** to rules
+       (`components/letter/rsvp-form.tsx`, `components/letter/rsvp-reply.tsx`) — **not** to rules
        anywhere else in the letter, which stay full ink on white.
     2. **Required marks are red (`--mark-required: #a4322b`).** Approved 2026-07-27. A brick red
        muted towards the ink's olive so it sits in the letter rather than shouting over it.

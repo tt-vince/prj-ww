@@ -1,6 +1,8 @@
+import { SectionHeading } from '@/components/letter/section-heading';
+
 /**
  * FAQ — white section after Gifts (last in the letter). Same header pattern as
- * the other sections (font-script h2 + font-sans label), then a stack of
+ * the other sections (SectionHeading), then a stack of
  * question/answer items, each in its own solid ink card (#1E2A18 — the same ink
  * as the Rsvp section background). Placeholder copy — edit freely.
  */
@@ -23,12 +25,7 @@ export function Faq() {
   return (
     <section className="bg-white px-5 py-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          Good to know
-        </h2>
-        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
-          FAQ
-        </p>
+        <SectionHeading title="Good to know" kicker="FAQ" />
 
         <div className="mx-auto mt-10 grid max-w-2xl gap-5 text-left">
           {FAQS.map((f) => (

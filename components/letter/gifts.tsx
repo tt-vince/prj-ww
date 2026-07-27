@@ -1,4 +1,5 @@
 import QRCode from 'qrcode';
+import { SectionHeading } from '@/components/letter/section-heading';
 
 /**
  * Gifts — white section after Rsvp. Same header pattern as the other letter
@@ -31,12 +32,7 @@ export async function Gifts() {
   return (
     <section className="bg-white px-5 py-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          A little something
-        </h2>
-        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
-          Gift guide
-        </p>
+        <SectionHeading title="A little something" kicker="Gift guide" />
 
         <p className="mx-auto mt-8 max-w-md text-sm leading-relaxed text-muted-foreground">
           Your presence is the only gift we’re hoping for. But if you’d like to

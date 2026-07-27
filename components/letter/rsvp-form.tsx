@@ -1,0 +1,401 @@
+"use client";
+
+import { useActionState, useState } from "react";
+import { Baby, UserRound } from "lucide-react";
+import { submitRsvp, type RsvpState } from "@/app/actions/submit-rsvp";
+import { cn } from "@/lib/utils";
+import { fieldLabel } from "@/components/letter/letter-type";
+import { RsvpReply, type ReplySummary } from "@/components/letter/rsvp-reply";
+import { Choice } from "@/components/letter/rsvp-form/choice";
+import { CompanionFields } from "@/components/letter/rsvp-form/companion-fields";
+import { DietaryChoices } from "@/components/letter/rsvp-form/dietary-choices";
+import { errorText } from "@/components/letter/rsvp-form/form-style";
+import { Section } from "@/components/letter/rsvp-form/section";
+import { Stepper } from "@/components/letter/rsvp-form/stepper";
+import { SubmitArea } from "@/components/letter/rsvp-form/submit-area";
+import { summarizeReply } from "@/components/letter/rsvp-form/summarize-reply";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+
+const initial: RsvpState = { ok: false };
+
+/**
+ * Public RSVP form for a single invitee, in five ruled sections: attendance,
+ * party size, dietary restrictions, contact details, and a note for the couple.
+ * Contact is its own section rather than a tail on the note field — it is the
+ * couple's way of reaching the guest back, not part of the message.
+ *
+ * Styling is the guest letter's: shadcn tokens for every field (so the
+ * `.letter-theme` scope in app/globals.css paints it in white + #1E2A18 with no
+ * colour of its own) and the shared `letterButton` for every button, since this
+ * form only ever renders inside that letter.
+ *
+ * `token` is the capability link id (`?id=<token>`); `maxGuests` bounds the
+ * party-size steppers. On a successful reply it swaps to a thank-you.
+ */
+export function RsvpForm({
+  token,
+  maxGuests,
+}: {
+  token: string;
+  maxGuests: number;
+}) {
+  const [state, action, pending] = useActionState(submitRsvp, initial);
+  const [status, setStatus] = useState<"going" | "not_going" | "">("");
+  const [adults, setAdults] = useState(1);
+  const [kids, setKids] = useState(0);
+  const [dietaryOther, setDietaryOther] = useState(false);
+  // Which companion cards have their "Something else" field open, by slug.
+  const [companionOther, setCompanionOther] = useState<Record<string, boolean>>(
+    {},
+  );
+  // Companion names are controlled so the send button can judge the reply, and
+  // so a name survives a count going down and back up.
+  const [companionNames, setCompanionNames] = useState<Record<string, string>>(
+    {},
+  );
+  // A field only turns red once the guest has left it, or once they have tried
+  // to send: nothing is scolded for being empty before it has been reached.
+  const [blurred, setBlurred] = useState<Record<string, boolean>>({});
+  const [attemptedSend, setAttemptedSend] = useState(false);
+  // What was actually posted, captured as the form went. The dietary chips and
+  // the note are uncontrolled, so this snapshot is the only place their values
+  // exist on the client — and taking it at submit time means an edit made while
+  // the request is in flight cannot change what we read back.
+  const [sent, setSent] = useState<ReplySummary | null>(null);
+  const partySize = adults + kids;
+  const overCapacity = status === "going" && partySize > maxGuests;
+  const atCapacity = status === "going" && partySize === maxGuests;
+  const seats = `${maxGuests} seat${maxGuests === 1 ? "" : "s"}`;
+  const extra = partySize - maxGuests;
+  // A one-seat invitation has nothing to count: the guest is adult 1 and there
+  // is no room for anyone else, so the counters would be four dead buttons
+  // asking a question with a single possible answer.
+  const solo = maxGuests === 1;
+
+  /**
+   * Everyone in the party except the invitee, who is adult 1 and answers for
+   * themselves in the section above. Slugs are stable per position, so a card
+   * keeps its answers when the count of the OTHER kind changes.
+   */
+  const companions = [
+    ...Array.from({ length: Math.max(0, adults - 1) }, (_, i) => ({
+      slug: `adult-${i + 2}`,
+      label: `Adult ${i + 2}`,
+      kind: "adult" as const,
+    })),
+    ...Array.from({ length: kids }, (_, i) => ({
+      slug: `kid-${i + 1}`,
+      label: `Kid ${i + 1}`,
+      kind: "kid" as const,
+    })),
+  ];
+
+  /**
+   * Everything still standing between the guest and a sent reply, in the order
+   * the form asks for it. This is the single source for all three consequences:
+   * the send button is dead while it is non-empty, the note above the button says
+   * what is left, and the matching field is marked invalid.
+   */
+  const missing: { field: string; message: string }[] = [];
+  if (!status) {
+    missing.push({
+      field: "status",
+      message: "Let us know if you can make it.",
+    });
+  }
+  if (status === "going") {
+    for (const c of companions) {
+      if (!(companionNames[c.slug] ?? "").trim()) {
+        missing.push({
+          field: `${c.slug}-name`,
+          message: `Add a name for ${c.label}.`,
+        });
+      }
+    }
+    if (overCapacity) {
+      missing.push({
+        field: "party",
+        message: `We've saved ${seats} for you. You've used ${extra} too many.`,
+      });
+    }
+  }
+
+  /** True once this field should show as wrong rather than merely empty. */
+  const showsError = (field: string) =>
+    (attemptedSend || blurred[field]) && missing.some((m) => m.field === field);
+
+  // Sent. The reply is read back from the snapshot taken as it went, in the same
+  // component the letter uses for a guest who answered on an earlier visit — so
+  // "just sent" and "already answered" show the identical record.
+  if (state.ok) {
+    return <RsvpReply reply={sent ?? fallbackSummary()} />;
+  }
+
+  /**
+   * Last resort if the snapshot is somehow missing: the state we do hold. A
+   * function declaration, so it is hoisted above the `state.ok` return.
+   */
+  function fallbackSummary(): ReplySummary {
+    return {
+      status: status === "not_going" ? "not_going" : "going",
+      adults: status === "going" ? adults : null,
+      kids: status === "going" ? kids : null,
+      dietary: [],
+      dietaryOther: null,
+      guestNote: null,
+      companions:
+        status === "going"
+          ? companions.map((c) => ({
+              kind: c.kind,
+              position: Number(c.slug.split("-")[1]),
+              name: (companionNames[c.slug] ?? "").trim(),
+              dietary: [],
+              dietaryOther: null,
+            }))
+          : [],
+    };
+  }
+
+  return (
+    <form
+      action={action}
+      aria-busy={pending}
+      // Not preventDefault: the server action still runs. This only reads the
+      // outgoing FormData on the way past.
+      onSubmit={(e) => setSent(summarizeReply(new FormData(e.currentTarget)))}
+    >
+      <input type="hidden" name="token" value={token} />
+
+      {/* The key for the mark, before the first field that carries one. */}
+      <p className="mb-7 text-center font-sans text-xs tracking-wide">
+        <span aria-hidden className="text-[color:var(--mark-required)]">
+          &#42;
+        </span>{" "}
+        Required
+      </p>
+
+      <Section title="Will you attend?" required>
+        <div
+          className="grid gap-2.5"
+          aria-describedby={showsError("status") ? "status-error" : undefined}
+        >
+          <Choice
+            type="radio"
+            name="status"
+            value="going"
+            label="Joyfully accept"
+            size="lg"
+            checked={status === "going"}
+            onChange={() => setStatus("going")}
+            invalid={showsError("status")}
+            required
+          />
+          <Choice
+            type="radio"
+            name="status"
+            value="not_going"
+            label="Regretfully decline"
+            size="lg"
+            checked={status === "not_going"}
+            onChange={() => setStatus("not_going")}
+            invalid={showsError("status")}
+          />
+        </div>
+        {showsError("status") && (
+          <span id="status-error" role="alert" className={errorText}>
+            Let us know if you can make it.
+          </span>
+        )}
+      </Section>
+
+      {status === "going" && (
+        <>
+          <Section
+            title="Anything we should know?"
+            hint={
+              solo
+                ? "Optional — anything we should keep off your plate."
+                : "Optional — your own dietary restrictions. We ask about anyone you bring below."
+            }
+          >
+            <DietaryChoices
+              name="dietary"
+              otherOpen={dietaryOther}
+              onOther={setDietaryOther}
+            />
+            {dietaryOther && (
+              <div className="space-y-2">
+                <Label htmlFor="dietaryOther" className={fieldLabel}>
+                  Please tell us
+                </Label>
+                <Textarea
+                  id="dietaryOther"
+                  name="dietaryOther"
+                  rows={2}
+                  maxLength={200}
+                  className="placeholder:italic"
+                  placeholder="Anything else we should keep off your plate"
+                />
+              </div>
+            )}
+          </Section>
+
+          {solo ? (
+            // The counts still post, so the server reads a one-seat reply the
+            // same way it reads every other one.
+            <>
+              <input type="hidden" name="adults" value={adults} />
+              <input type="hidden" name="kids" value={kids} />
+            </>
+          ) : (
+            <Section title="Who is coming?" required>
+              {/* gap-6 between the two counters against gap-2 inside each one:
+                without that contrast the four round buttons read as one run of
+                four rather than as two separate counts. */}
+              <div className="grid grid-cols-2 gap-6">
+                <Stepper
+                  label="Adults"
+                  icon={UserRound}
+                  name="adults"
+                  value={adults}
+                  setValue={setAdults}
+                  min={1}
+                  max={maxGuests}
+                  canIncrement={partySize < maxGuests}
+                  error={state.fieldErrors?.adults}
+                />
+                <Stepper
+                  label="Kids"
+                  icon={Baby}
+                  name="kids"
+                  value={kids}
+                  setValue={setKids}
+                  min={0}
+                  max={maxGuests}
+                  canIncrement={partySize < maxGuests}
+                  error={state.fieldErrors?.kids}
+                />
+              </div>
+              <p
+                aria-live="polite"
+                className={cn(
+                  "text-center text-sm",
+                  overCapacity && "font-medium text-destructive",
+                )}
+              >
+                {overCapacity
+                  ? `We've saved ${seats} for you. You've used ${extra} too many.`
+                  : atCapacity
+                    ? `We've saved ${seats} for you. You've used all ${maxGuests}.`
+                    : `We've saved ${seats} for you. You've used ${partySize}.`}
+              </p>
+
+              {companions.length > 0 && (
+                <div className="space-y-3">
+                  <p className="text-center font-sans text-xs leading-relaxed tracking-wide">
+                    We&rsquo;d love a name for each of them, and anything they
+                    can&rsquo;t eat &mdash; it helps us seat everyone and get
+                    the food right.
+                  </p>
+                  {companions.map((c) => (
+                    <CompanionFields
+                      key={c.slug}
+                      slug={c.slug}
+                      label={c.label}
+                      kind={c.kind}
+                      name={companionNames[c.slug] ?? ""}
+                      onName={(v) =>
+                        setCompanionNames((prev) => ({ ...prev, [c.slug]: v }))
+                      }
+                      onNameBlur={() =>
+                        setBlurred((prev) => ({
+                          ...prev,
+                          [`${c.slug}-name`]: true,
+                        }))
+                      }
+                      nameError={showsError(`${c.slug}-name`)}
+                      otherOpen={!!companionOther[c.slug]}
+                      onOther={(open) =>
+                        setCompanionOther((prev) => ({
+                          ...prev,
+                          [c.slug]: open,
+                        }))
+                      }
+                    />
+                  ))}
+                </div>
+              )}
+            </Section>
+          )}
+        </>
+      )}
+
+      <Section
+        title="How can we reach you?"
+        hint="Optional — only if you would like us to have these."
+      >
+        <div className="space-y-2">
+          <Label htmlFor="email" className={fieldLabel}>
+            Email
+          </Label>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            autoComplete="email"
+            maxLength={200}
+            aria-invalid={!!state.fieldErrors?.email}
+            aria-describedby={
+              state.fieldErrors?.email ? "email-error" : undefined
+            }
+          />
+          {state.fieldErrors?.email && (
+            <span id="email-error" role="alert" className={errorText}>
+              {state.fieldErrors.email}
+            </span>
+          )}
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="phone" className={fieldLabel}>
+            Phone
+          </Label>
+          <Input
+            id="phone"
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            maxLength={30}
+            aria-invalid={!!state.fieldErrors?.phone}
+            aria-describedby={
+              state.fieldErrors?.phone ? "phone-error" : undefined
+            }
+          />
+          {state.fieldErrors?.phone && (
+            <span id="phone-error" role="alert" className={errorText}>
+              {state.fieldErrors.phone}
+            </span>
+          )}
+        </div>
+      </Section>
+
+      <Section
+        title="A note for the two of us"
+        hint="Optional — a wish, a song request, anything at all."
+      >
+        <Label htmlFor="guestNote" className="sr-only">
+          Message for the couple
+        </Label>
+        <Textarea id="guestNote" name="guestNote" rows={3} maxLength={1000} />
+      </Section>
+
+      <SubmitArea
+        pending={pending}
+        error={state.error}
+        missing={missing}
+        onAttemptSend={() => setAttemptedSend(true)}
+      />
+    </form>
+  );
+}

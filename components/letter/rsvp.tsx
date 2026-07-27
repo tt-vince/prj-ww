@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { getGuestByToken } from "@/lib/data";
 import { RSVP_DEADLINE_LABEL } from "@/lib/wedding";
 import { cn } from "@/lib/utils";
-import { RsvpForm } from "@/components/rsvp-form";
+import { RsvpForm } from "@/components/letter/rsvp-form";
 import { RsvpReply } from "@/components/letter/rsvp-reply";
+import { SectionHeading } from "@/components/letter/section-heading";
 import {
   Card,
   CardContent,
@@ -44,14 +45,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
         style={{ borderRadius: "0 0 50% 50% / 0 0 180px 180px" }}
       />
       <div className="relative mx-auto max-w-[32rem]">
-        <div className="text-center">
-          <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
-            Will you join us?
-          </h2>
-          <p className="mt-2 font-sans text-sm tracking-wide text-white">
-            RSVP
-          </p>
-        </div>
+        <SectionHeading tone="white" title="Will you join us?" kicker="RSVP" />
 
         {/* Double rule: a 2px white outline held 2px off the card, so the ink
             shows through the gap and the card reads as mounted on the section

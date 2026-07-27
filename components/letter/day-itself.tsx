@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { SectionHeading } from '@/components/letter/section-heading';
 
 /**
  * Sequence of events — EDGE-TO-EDGE white section. It used to be the section
@@ -53,12 +54,10 @@ export function DayItself() {
   return (
     <section className="relative z-0 bg-white pr-5 pb-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          The day itself
-        </h2>
-        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
-          What we have planned on this special day
-        </p>
+        <SectionHeading
+          title="The day itself"
+          kicker="What we have planned on this special day"
+        />
 
         <div className="relative mx-auto mt-14 max-w-[46rem]">
           {/* The single centre rail: left on mobile, dead-centre on md+. It

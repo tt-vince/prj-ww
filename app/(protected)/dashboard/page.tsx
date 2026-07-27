@@ -1,7 +1,7 @@
 import { requireUser, canEdit } from "@/lib/dal";
 import { getGuestsWithLabels, getAllLabels } from "@/lib/data";
-import { AccountMenu } from "@/components/account-menu";
-import { AccountGarland, CoupleFigures, NameSprig } from "@/components/dashboard-florals";
+import { AccountMenu } from "@/components/dashboard/account-menu";
+import { AccountGarland, CoupleFigures, NameSprig } from "@/components/dashboard/florals";
 import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";

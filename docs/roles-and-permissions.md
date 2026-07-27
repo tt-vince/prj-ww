@@ -51,8 +51,8 @@ Pure functions mirroring the gates, used to render the right controls:
 |---|---|---|
 | "Add guest" button | `app/(protected)/dashboard/page.tsx` | `canEdit(role)` |
 | Guest row edit / delete | `.../dashboard/guests-table.tsx` (`canEdit` prop) | `canEdit` |
-| "Manage labels" menu item | `components/account-menu.tsx` | `role !== 'viewer'` |
-| "Manage users" menu item | `components/account-menu.tsx` | `role === 'superadmin'` |
+| "Manage labels" menu item | `components/dashboard/account-menu.tsx` | `role !== 'viewer'` |
+| "Manage users" menu item | `components/dashboard/account-menu.tsx` | `role === 'superadmin'` |
 
 ## 4. Rules of thumb
 

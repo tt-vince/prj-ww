@@ -16,7 +16,7 @@ import {
   CoupleFigures,
   PageFloralBottomRight,
   PageFloralTopLeft,
-} from '@/components/dashboard-florals';
+} from '@/components/dashboard/florals';
 
 type LoginSearchParams = { pending?: string; error?: string };
 

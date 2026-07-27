@@ -4,7 +4,7 @@
  * (mobile opens the app when installed, else the web page). Stored as a jsonb
  * object keyed by platform on `guests.sns_accounts`.
  *
- * Adding a platform = one entry here + one brand path in `components/sns-icon.tsx`.
+ * Adding a platform = one entry here + one brand path in `components/dashboard/sns-icon.tsx`.
  * Kept icon-free (pure data) so this module is safe to import from server code.
  */
 export const SNS_PLATFORMS = ['messenger', 'instagram'] as const;

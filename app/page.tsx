@@ -1,4 +1,4 @@
-import { WeddingLetter } from '@/components/wedding-letter';
+import { WeddingLetter } from '@/components/letter/wedding-letter';
 
 /**
  * Landing page — the wedding site contents, rendered directly.
@@ -9,9 +9,8 @@ import { WeddingLetter } from '@/components/wedding-letter';
  * stays statically prerendered (Cache Components / PPR) and only the RSVP body
  * streams in. See docs/rsvp-spec.md.
  *
- * The envelope intro is retired: components/envelope-reveal.tsx is kept for
- * reuse but no longer wraps the content. The vinyl intro
- * (components/vinyl-player.tsx) is likewise kept but unused.
+ * The envelope intro is retired: components/letter/envelope-reveal.tsx is
+ * kept for reuse but no longer wraps the content.
  */
 export default function Home({
   searchParams,

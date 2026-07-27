@@ -1,3 +1,5 @@
+import { SectionHeading } from '@/components/letter/section-heading';
+
 /**
  * Prenup gallery — EDGE-TO-EDGE white section between Our Story and
  * DayItself. It carries the overlap that DayItself used to: `-mt-48` pulls it
@@ -146,14 +148,11 @@ function FloralBorderPeonies() {
 
 function Heading() {
   return (
-    <div className="px-5 text-center sm:px-9">
-      <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-        Before the day
-      </h2>
-      <p className="mt-2 font-sans text-sm tracking-wide text-ink">
-        Our prenup shoot — photos coming soon
-      </p>
-    </div>
+    <SectionHeading
+      className="px-5 sm:px-9"
+      title="Before the day"
+      kicker="Our prenup shoot — photos coming soon"
+    />
   );
 }
 

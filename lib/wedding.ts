@@ -1,7 +1,7 @@
 /**
  * Couple + occasion — the single source for the couple's names and wedding
  * date, shared by the dashboard header, the countdown, and the guest-facing
- * wedding letter (components/wedding-letter.tsx).
+ * wedding letter (components/letter/wedding-letter.tsx).
  *
  * The names are the design's placeholder pair from the dashboard header; swap
  * for the real ones here. The date is the single source of truth for the
