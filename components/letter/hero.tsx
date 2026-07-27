@@ -77,7 +77,7 @@ export function Hero() {
       </div>
       {/* Sticky track: the section minus the dome's 12rem overlap. */}
       <div className="h-[calc(150svh-12rem)]">
-        <header className="sticky top-0 flex h-svh flex-col px-5 text-center sm:px-9">
+        <header className="sticky top-0 flex h-svh flex-col px-gutter text-center">
         {/* Two groups, one screen. The lace + line ride in a `flex-1` row so
             they sit centred in whatever space is left above the date, and the
             date block is a `shrink-0` row pinned to the bottom. Because they are
@@ -119,6 +119,9 @@ export function Hero() {
             </div>
             {/* Names centered in the window, stacked to fit the square. */}
             <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]">
+              {/* Sized against the lace window rather than the type scale:
+                  the names have to fit the frame they sit in, so they track
+                  the frame's own breakpoint, not the document's. */}
               <span className="text-6xl md:text-[4.875rem]">{NAME_A}</span>
               <span className="text-2xl opacity-75 md:text-[1.95rem]">&amp;</span>
               <span className="text-6xl md:text-[4.875rem]">{NAME_B}</span>
@@ -127,7 +130,10 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-script text-[clamp(2rem,7svh,3rem)] tracking-[0.3em] text-white"
+            // `-mr-` cancels the trailing letter-space the tracking adds after
+            // the final glyph: without it the line is both off-centre and 0.3em
+            // wider than its column, which clipped it on a 360px phone.
+            className="-mr-[0.3em] font-script text-[clamp(2rem,7svh,3rem)] tracking-[0.3em] text-white"
           >
             are getting married!
           </motion.p>
@@ -152,7 +158,7 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-sans text-xl uppercase leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)] sm:text-lg"
+            className="font-sans text-subhead uppercase leading-none tracking-[0.16em] text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]"
           >
             {WEDDING_DAY_LABEL}
           </motion.p>

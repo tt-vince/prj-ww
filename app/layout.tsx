@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import {
-  DM_Sans,
+  Montserrat,
   Parisienne,
 } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
-const dmSans = DM_Sans({
-  variable: "--font-dm-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
   display: "swap",
 });
@@ -33,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${parisienne.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${parisienne.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <Providers>{children}</Providers>

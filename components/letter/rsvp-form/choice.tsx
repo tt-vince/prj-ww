@@ -47,8 +47,8 @@ export function Choice({
       className={cn(
         choiceRow,
         size === "lg"
-          ? "px-4 py-3.5 text-base"
-          : "px-3.5 py-2.5 text-sm whitespace-nowrap",
+          ? "px-4 py-3.5 text-body"
+          : "px-3.5 py-2.5 text-meta whitespace-nowrap",
         invalid && "border-destructive",
         className,
       )}

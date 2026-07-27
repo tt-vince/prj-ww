@@ -4,8 +4,8 @@ import { cva, type VariantProps } from 'class-variance-authority';
  * The guest letter's one button style.
  *
  * Every action in the letter — the two "Open in Maps" links, the calendar
- * pill, the RSVP submit — speaks in the same voice: DM Sans at 10/11px, upper
- * case, wide tracking. That treatment is deliberate. At letter sizes the ink
+ * pill, the RSVP submit — speaks in the same voice: the sans face in the scale's
+ * `label` role, upper case, wide tracking. That treatment is deliberate. At letter sizes the ink
  * text around it is set in serif and script faces, so a button reading as a
  * sentence competes with the prose; a tracked, uppercase label reads as a
  * control instead, which is how the calendar strip's weekday labels in
@@ -18,7 +18,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
  *             action does not become the loudest thing on the screen.
  */
 export const letterButton = cva(
-  'inline-flex w-fit items-center gap-2 rounded-full border border-ink px-4 py-2 font-sans text-[10px] uppercase tracking-[0.14em] transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink sm:text-[11px] [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex w-fit items-center gap-2 rounded-full border border-ink px-5 py-2.5 font-sans text-label uppercase tracking-[0.16em] transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {

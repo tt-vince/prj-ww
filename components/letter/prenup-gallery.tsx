@@ -26,7 +26,7 @@ export function PrenupMosaic({ shots, mobileCount }: { shots: Shot[]; mobileCoun
     <>
       {/* `auto-rows-*` is the shared tile height; `dense` stops a 2-column tile
           from leaving the column beside it empty. */}
-      <div className="mt-10 grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
+      <div className="mt-heading grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
         {shots.map((shot, index) => (
           <Tile
             key={shot.alt}
@@ -77,7 +77,7 @@ function Tile({
     return (
       <div className={`relative overflow-hidden ${span}${hidden}`}>
         <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#1e2a18,#1e2a18_1px,#ffffff_1px,#ffffff_10px)]">
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink">
+          <span className="font-mono text-micro uppercase tracking-[0.14em] text-ink">
             photo · {shot.alt}
           </span>
         </div>

@@ -52,14 +52,20 @@ const EVENTS: {
 
 export function DayItself() {
   return (
-    <section className="relative z-0 bg-white pr-5 pb-24 sm:px-9">
-      <div className="mx-auto max-w-[56rem] text-center">
+    // `px-gutter` on BOTH sides: this section used to carry `pr-5` alone, so on
+    // a phone it had no left gutter at all — the centred heading sat 10px off
+    // centre and a long one would have run into the screen edge.
+    <section className="relative z-0 bg-white px-gutter pb-section">
+      <div className="mx-auto max-w-[56rem] text-center lg:max-w-[76rem]">
         <SectionHeading
           title="The day itself"
           kicker="What we have planned on this special day"
         />
 
-        <div className="relative mx-auto mt-14 max-w-[46rem]">
+        {/* Same reasoning as the Our Story thread: each event's description
+            gets one half of this, less the centre gutter, so the phone-first
+            46rem wrapped short sentences onto two lines on a desktop. */}
+        <div className="relative mx-auto mt-heading max-w-[46rem] lg:max-w-[60rem] xl:max-w-[68rem]">
           {/* The single centre rail: left on mobile, dead-centre on md+. It
               starts at the first event; on md+ it runs on down to the getaway
               car, on mobile it stops at the last event (car is hidden). */}
@@ -86,7 +92,11 @@ export function DayItself() {
                     centred on the title's first line. */}
                 <span
                   aria-hidden
-                  className="absolute left-6 top-[0.95rem] h-0.5 w-8 bg-ink md:hidden"
+                  // Vertically centred on the title's FIRST LINE, expressed in
+                  // the title's own `em` (via `text-entry` on this span, which
+                  // has no text of its own) so it tracks the fluid role instead
+                  // of drifting off it. The extra 0.25rem is the body's `pt-1`.
+                  className="absolute left-6 top-[calc(0.625em+0.25rem)] h-0.5 w-8 bg-ink text-entry md:hidden"
                 />
 
                 {/* Hand-drawn illustration — a side cell on md+; on mobile it
@@ -120,11 +130,13 @@ export function DayItself() {
                   <span
                     aria-hidden
                     className={cn(
-                      'absolute top-[0.7rem] hidden h-0.5 w-10 bg-ink md:block',
+                      // Same anchoring as the mobile connector above; no
+                      // `pt-1` to compensate for here (`md:pt-0`).
+                      'absolute top-[0.625em] hidden h-0.5 w-10 bg-ink text-entry md:block',
                       illoRight ? 'md:-right-10' : 'md:-left-10'
                     )}
                   />
-                  <p className="font-script text-lg leading-snug text-ink">
+                  <p className="font-script text-entry text-ink">
                     {e.what}
                   </p>
                   {/* The hour, as a subtitle under its event. Small caps in the
@@ -136,15 +148,13 @@ export function DayItself() {
                       would just be noise on a narrow screen. */}
                   <p
                     className={cn(
-                      'mt-1 font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-ink',
+                      'mt-1 font-sans text-label font-medium uppercase tracking-[0.16em] text-ink',
                       i !== 0 && 'hidden md:block'
                     )}
                   >
                     {e.time}
                   </p>
-                  <p className="mt-2 text-sm leading-relaxed text-ink">
-                    {e.detail}
-                  </p>
+                  <p className="mt-2 text-body text-ink">{e.detail}</p>
                 </div>
               </motion.li>
               );

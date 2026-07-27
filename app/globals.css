@@ -12,7 +12,7 @@
   /* Section-heading script colour (sage on white; re-pointed to ink inside
      .letter-theme — see that block). */
   --color-script: var(--script);
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --font-script: var(--font-parisienne), ui-serif, cursive;
   --color-sidebar-ring: var(--sidebar-ring);
@@ -65,7 +65,93 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (DM Sans / Parisienne). */
+/* ── The letter's type scale ───────────────────────────────────────────
+   Eight named roles, each one fluid between a phone (360px) and a desktop
+   (1280px) so a single class covers both breakpoints. Before this the letter
+   had twenty ad-hoc sizes, almost none of which grew on desktop: prose was a
+   flat 14px everywhere, metadata 12px, placeholder tags 9px, and two elements
+   (the hero date, the countdown's unit labels) were actually LARGER on a phone
+   than on a monitor. The job of this page is to be read, so the roles are
+   named for what they say, not for how big they are:
+
+     micro    placeholder tags, the hero's weekday strip
+     label    tracked micro-caps — field labels, event times, buttons
+     meta     card descriptions, hints, addresses, errors, read-back values
+     body     prose. 16px on the narrowest phone, 19px on a desktop
+     lead     an intro paragraph that opens a section
+     subhead  card titles, FAQ questions, form section legends
+     heading  the loudest sans line in a section
+     title    the script section headline
+     figure   the countdown's digits
+
+   Line height rides with each role (leading-* still overrides where a line
+   needs it). Letter-spacing stays at the call site: only the tracked-caps
+   roles want any, and they want three different amounts. */
+@theme {
+  --text-micro: clamp(0.75rem, 0.726rem + 0.11vw, 0.8125rem);
+  --text-micro--line-height: 1.1;
+  --text-label: clamp(0.8125rem, 0.788rem + 0.11vw, 0.875rem);
+  --text-label--line-height: 1.25;
+  --text-meta: clamp(0.9375rem, 0.901rem + 0.16vw, 1.03125rem);
+  --text-meta--line-height: 1.55;
+  --text-body: clamp(1rem, 0.927rem + 0.33vw, 1.1875rem);
+  --text-body--line-height: 1.7;
+  --text-lead: clamp(1.09375rem, 1.008rem + 0.38vw, 1.3125rem);
+  --text-lead--line-height: 1.6;
+  --text-subhead: clamp(1.1875rem, 1.065rem + 0.54vw, 1.5rem);
+  --text-subhead--line-height: 1.35;
+  --text-heading: clamp(1.625rem, 1.429rem + 0.87vw, 2.125rem);
+  --text-heading--line-height: 1.2;
+  /* `entry` is `heading`'s script twin: the title of one item inside a section
+     (a memory in Our Story, an event in The Day Itself). It is much larger than
+     the sans role of the same rank for the same reason `title` is — Parisienne
+     reads at roughly half its nominal size, so a script item title set at
+     `heading` comes out QUIETER than the body copy underneath it. */
+  --text-entry: clamp(2rem, 1.706rem + 1.304vw, 2.75rem);
+  --text-entry--line-height: 1.25;
+  /* Parisienne is set larger than a sans headline of the same rank: its glyphs
+     fill very little of the em box, so it reads at roughly half its nominal
+     size. Every title in the letter still fits on one line at 40px on a 360px
+     phone. The `label`-sized kicker under it is what keeps the pair ranked —
+     see components/letter/section-heading.tsx. */
+  --text-title: clamp(2.5rem, 2.109rem + 1.74vw, 3.5rem);
+  --text-title--line-height: 1.1;
+  /* The floor is set by the countdown row, which must fit four number+unit
+     pairs across a 360px phone: every 1px of figure costs ~5px of row width. */
+  --text-figure: clamp(1.625rem, 1.087rem + 2.391vw, 3rem);
+  --text-figure--line-height: 1;
+
+  /* ── The letter's spacing rhythm ─────────────────────────────────────
+     Three roles, fluid between a 360px phone and a 1280px desktop for the same
+     reason the type roles are: one class, both breakpoints, no `sm:` twin to
+     forget. They replace a flat `py-24` and twenty-one hand-written
+     `px-5 sm:px-9` pairs.
+
+       gutter   the page's side padding — every full-bleed section
+       section  a section's vertical padding. Two of these stack between
+                adjacent sections, so this is HALF the gap you want to see:
+                144px between sections on a phone, 224px on a desktop.
+       heading  a SectionHeading and the content it introduces
+
+     Deliberately NOT covered: the dome overlaps (`-mt-48`, `pb-72`, `pt-76`,
+     `pt-56`, `pt-28`). Those are structural — they are measured against the
+     12rem bite each dome takes out of the section above it, not against this
+     rhythm, and retuning one means retuning its partner. See the notes in
+     countdown-band.tsx and prenup.tsx. */
+  --spacing-gutter: clamp(1.25rem, 0.859rem + 1.739vw, 2.25rem);
+  --spacing-section: clamp(4.5rem, 3.522rem + 4.348vw, 7rem);
+  --spacing-heading: clamp(2.5rem, 2.109rem + 1.739vw, 3.5rem);
+  /* Clearance for the one thing the rhythm above cannot express: the gap on the
+     far side of a dome. Every dome is 12rem deep — either the bite the next
+     section takes with `-mt-48`, or the height of the arch a section draws for
+     itself — so the padding that clears one is that 12rem plus exactly one
+     `section` of breathing room. Naming it keeps the three places that need it
+     in step: they used to be 18rem, 19rem and 14rem, which left 32px of air
+     under the RSVP arch against 112px under Our Story's dome. */
+  --spacing-dome: calc(12rem + var(--spacing-section));
+}
+
+/* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (Montserrat / Parisienne). */
 :root {
   --background: #ffffff;
   --foreground: #4a2f3a;
@@ -171,6 +257,54 @@
   --input: var(--ink);
   --ring: var(--ink);
   --script: var(--ink);
+}
+
+/* Letter-scoped sizing for the shadcn primitives. Their own base classes are
+   Tailwind utilities (`text-sm`, and `text-base md:text-sm` on the fields —
+   which shrinks the input text on desktop), and passing a competing `text-*`
+   class at the call site is not reliable: tailwind-merge does not recognise
+   these custom role names as font sizes, so it would emit both and leave the
+   winner to utility sort order. These rules are deliberately UNLAYERED, so they
+   beat the utility layer outright, and scoped to `.letter-theme`, so /dashboard
+   and /login keep the sizes their hi-fi designs specify.
+
+   The fields also grow: at 19px, shadcn's 32px control is shorter than its own
+   text, and PRODUCT.md asks for generous tap targets on phones. */
+.letter-theme [data-slot="card"] {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.letter-theme [data-slot="card-title"] {
+  font-size: var(--text-subhead);
+  line-height: var(--text-subhead--line-height);
+}
+.letter-theme [data-slot="card-description"] {
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+}
+.letter-theme [data-slot="input"],
+.letter-theme [data-slot="textarea"] {
+  font-size: var(--text-body);
+  line-height: var(--text-body--line-height);
+}
+.letter-theme [data-slot="input"] {
+  height: auto;
+  min-height: 2.75rem;
+  padding-block: 0.5rem;
+}
+.letter-theme [data-slot="textarea"] {
+  padding-block: 0.625rem;
+}
+
+/* The "Add to calendar" menu renders through a portal, so it lands OUTSIDE
+   `.letter-theme` and never sees the rules above. `letterMenu` (see
+   components/letter/add-to-calendar.tsx) is put on the popup itself so the
+   letter can still size and space it. */
+.letter-menu [data-slot="dropdown-menu-item"] {
+  font-size: var(--text-meta);
+  line-height: var(--text-meta--line-height);
+  padding-block: 0.5rem;
+  padding-inline: 0.75rem;
 }
 
 /* Dark wisteria variant (no in-app toggle yet, but kept coherent). */

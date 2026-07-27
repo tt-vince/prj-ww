@@ -106,16 +106,22 @@ export function Countdown({
         {/* One serif line, four units, all the same size and tone. Fixed `ch`
             slots keep the line from re-centring itself every second; only the
             days slot is wider because it carries three digits. */}
+        {/* The row is ONE type context: `text-figure` sets its size and every
+            part inside is sized in `em` against it, so the whole line scales
+            from a single knob and cannot outgrow its column. Sizing the parts
+            independently is what used to burst the line — at 360px the four
+            units measured ~410px against 320px of column and the overflow was
+            simply clipped by the page's `overflow-x-hidden`. */}
         <span
           aria-hidden
-          className="flex items-baseline whitespace-nowrap font-sans"
+          className="flex items-baseline whitespace-nowrap font-sans text-figure"
         >
           {units.map((u, i) => (
             <span key={u.label} className="flex items-baseline">
               {i > 0 ? (
                 <span
                   className={cn(
-                    "mx-2 text-base opacity-50 sm:mx-3",
+                    "mx-[0.5em] text-[0.4em] opacity-50",
                     tickClassName,
                   )}
                 >
@@ -124,7 +130,7 @@ export function Countdown({
               ) : null}
               <span
                 className={cn(
-                  "text-center text-[2rem] leading-none tabular-nums sm:text-[2.75rem]",
+                  "text-center tabular-nums",
                   i === 0 ? "min-w-[3ch]" : "min-w-[2ch]",
                 )}
               >
@@ -132,7 +138,18 @@ export function Countdown({
               </span>
               <span
                 className={cn(
-                  "ml-1 font-sans text-[14px] tracking-[0.12em] sm:text-xs",
+                  // The unit names are the one part of the row NOT sized in
+                  // `em`: at a fixed ratio to the digits they fell to 10px on a
+                  // phone, and any ratio that clears the 12px floor there is
+                  // oversized next to a 48px figure on a desktop. `micro` is
+                  // 12px/13px, so it stays legible at both ends.
+                  //
+                  // The two gaps have to stay ranked or the row stops reading
+                  // as four pairs: the space between a number and its own unit
+                  // must be visibly SMALLER than the space around the
+                  // separators. Tracking is near zero for the same reason — it
+                  // widened the row without making anything easier to read.
+                  "ml-1 font-sans text-micro tracking-[0.02em]",
                   tickClassName,
                 )}
               >

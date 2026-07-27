@@ -10,25 +10,25 @@ import { SectionHeading } from '@/components/letter/section-heading';
  */
 export function AttireGuide() {
   return (
-    <section className="bg-white px-5 pt-24 pb-24 sm:px-9">
+    <section className="bg-white px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="What to wear" kicker="Attire guide" />
         <Image
           src={attireGuide}
           alt="Illustrated guests wearing the wedding palette — wine, raspberry, lilac, mauve, olive, forest green and pale gold"
           placeholder="blur"
-          className="mx-auto mt-10 h-auto w-full"
+          className="mx-auto mt-heading h-auto w-full"
           sizes="(max-width: 640px) 92vw, min(80vw, 56rem)"
         />
         <div className="mx-auto mt-8 max-w-md space-y-3">
-          <p className="font-sans text-lg leading-snug text-ink">
+          <p className="font-sans text-subhead text-ink">
             Semi-formal — garden party
           </p>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-body text-muted-foreground">
             We would love to see you in the colours above — wear one, or mix a
             few.
           </p>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-body text-muted-foreground">
             Please leave white and ivory for the couple.
           </p>
         </div>

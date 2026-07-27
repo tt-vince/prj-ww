@@ -29,14 +29,14 @@ export function WeekStrip({ className }: { className?: string }) {
             <span
               aria-hidden
               className={cn(
-                'mx-4 size-[3px] shrink-0 rounded-full bg-current sm:mx-6',
+                'mx-2.5 size-[3px] shrink-0 rounded-full bg-current sm:mx-6',
                 (isEdge(i) || isEdge(i - 1)) && 'hidden sm:block'
               )}
             />
           ) : null}
           <span
             className={cn(
-              'relative flex w-7 flex-col items-center gap-1 py-0.5 sm:w-8',
+              'relative flex w-9 flex-col items-center gap-1 py-0.5 sm:w-10',
               isEdge(i) && 'hidden sm:flex'
             )}
           >
@@ -61,12 +61,12 @@ export function WeekStrip({ className }: { className?: string }) {
                 />
               </svg>
             ) : null}
-            <span className="font-sans text-[9px] leading-none tracking-[0.14em] sm:text-[10px]">
+            <span className="font-sans text-micro leading-none tracking-[0.14em]">
               {d.label}
             </span>
             <span
               className={cn(
-                'font-sans text-sm leading-none sm:text-base',
+                'font-sans text-meta leading-none',
                 d.isWeddingDay && 'font-medium'
               )}
             >

@@ -52,15 +52,15 @@ function Stars({ value }: { value: number }) {
       {[0, 1, 2, 3, 4].map((i) => {
         const fill = Math.min(1, Math.max(0, value - i));
         return (
-          <span key={i} className="relative block size-3.5">
-            <Star className="size-3.5 text-ink/25" strokeWidth={1.5} />
+          <span key={i} className="relative block size-4">
+            <Star className="size-4 text-ink/25" strokeWidth={1.5} />
             {fill > 0 && (
               <span
                 className="absolute inset-0 overflow-hidden"
                 style={{ width: `${fill * 100}%` }}
               >
                 <Star
-                  className="size-3.5 fill-ink text-ink"
+                  className="size-4 fill-ink text-ink"
                   strokeWidth={1.5}
                 />
               </span>
@@ -74,51 +74,47 @@ function Stars({ value }: { value: number }) {
 
 export function Hotels() {
   return (
-    <section className="bg-white py-24">
-      <div className="mx-auto max-w-[56rem] px-5 text-center sm:px-9 lg:max-w-[64rem]">
+    <section className="bg-white py-section">
+      <div className="mx-auto max-w-[56rem] px-gutter text-center lg:max-w-[64rem]">
         <SectionHeading
           title="Where you can stay"
           kicker="We want to make your visit as comfortable as possible. Here are our recommended places to stay."
-          kickerClassName="mx-auto max-w-md leading-relaxed"
+          kickerClassName="mx-auto max-w-sm"
         />
 
         {/* Capped to one readable column on mobile; from sm up the pair fills
             the section's measure, which widens again at lg. */}
-        <div className="mx-auto mt-10 grid max-w-2xl gap-5 text-left sm:max-w-none sm:grid-cols-2 lg:gap-6">
+        <div className="mx-auto mt-heading grid max-w-2xl gap-5 text-left sm:max-w-none sm:grid-cols-2 lg:gap-6">
           {HOTELS.map((h) => (
             <Card
               key={h.name}
               className="flex flex-col border-2 border-ink px-2 py-8 shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)] ring-0 sm:px-6"
             >
               <CardHeader>
-                <CardTitle className="font-sans text-lg text-ink">
-                  {h.name}
-                </CardTitle>
-                <CardDescription className="flex items-center gap-2 font-sans text-xs tracking-wide">
+                <CardTitle className="font-sans text-ink">{h.name}</CardTitle>
+                <CardDescription className="flex items-center gap-2 font-sans tracking-wide">
                   <Stars value={h.rating} />
                   <span className="sr-only">{h.rating} out of 5 stars — </span>
                   {h.tag}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col">
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {h.blurb}
-                </p>
+                <p className="text-body text-muted-foreground">{h.blurb}</p>
 
                 {/* Address and phone: caption-sized, same muted tone as the
                     blurb, one row each with the icon on the first line of
                     wrapped text. */}
-                <dl className="mt-3 space-y-1 text-xs leading-relaxed text-muted-foreground">
+                <dl className="mt-3 space-y-1 text-meta text-muted-foreground">
                   <div className="flex gap-1.5">
                     <dt className="pt-px">
-                      <MapPin aria-hidden className="size-3" strokeWidth={1.5} />
+                      <MapPin aria-hidden className="size-4" strokeWidth={1.5} />
                       <span className="sr-only">Address</span>
                     </dt>
                     <dd>{h.address}</dd>
                   </div>
                   <div className="flex gap-1.5">
                     <dt className="pt-px">
-                      <Phone aria-hidden className="size-3" strokeWidth={1.5} />
+                      <Phone aria-hidden className="size-4" strokeWidth={1.5} />
                       <span className="sr-only">Contact number</span>
                     </dt>
                     <dd>

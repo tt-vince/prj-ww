@@ -44,7 +44,7 @@ function Row({ label, children }: { label: string; children: React.ReactNode }) 
   return (
     <div className="space-y-1">
       <p className={cn(fieldLabel, 'text-center')}>{label}</p>
-      <p className="text-center text-sm leading-relaxed">{children}</p>
+      <p className="text-center text-body">{children}</p>
     </div>
   );
 }
@@ -76,10 +76,8 @@ export function RsvpReply({
         {/* One heading for both answers: the reply itself already says which
             one it was, and a different headline per status made the decline
             read as the consolation version of the acceptance. */}
-        <p className="font-script text-4xl leading-tight">
-          Thank you for telling us
-        </p>
-        <p className="mx-auto mt-2 max-w-[24rem] font-sans text-xs leading-relaxed tracking-wide">
+        <p className="font-script text-title">Thank you for telling us</p>
+        <p className="mx-auto mt-3 max-w-[26rem] font-sans text-meta">
           {going
             ? `Your reply is in${guestName ? `, ${guestName}` : ''} — we cannot wait to celebrate with you.`
             : `We will miss you${guestName ? `, ${guestName}` : ''}, and we are glad you let us know.`}
@@ -106,7 +104,7 @@ export function RsvpReply({
                     key={`${c.kind}-${c.position}`}
                     className="rounded-xl border border-ink/20 px-4 py-3 text-center"
                   >
-                    <p className="flex items-center justify-center gap-2 text-sm">
+                    <p className="flex items-center justify-center gap-2 text-body">
                       <Icon
                         aria-hidden
                         strokeWidth={1.5}
@@ -119,7 +117,7 @@ export function RsvpReply({
                       </span>
                     </p>
                     {diet ? (
-                      <p className="mt-1 font-sans text-xs leading-relaxed tracking-wide">
+                      <p className="mt-1 font-sans text-meta">
                         {diet}
                       </p>
                     ) : null}
@@ -141,7 +139,7 @@ export function RsvpReply({
         ) : null}
       </div>
 
-      <p className="mt-7 border-t border-ink/20 pt-6 text-center font-sans text-xs leading-relaxed tracking-wide">
+      <p className="mt-7 border-t border-ink/20 pt-6 text-center font-sans text-meta">
         If any of this needs changing, message us and we will put it right.
       </p>
     </div>

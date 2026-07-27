@@ -34,12 +34,12 @@ export function Section({
     <div className={sectionShell}>
       <fieldset>
         <legend className="w-full px-0 text-center">
-          <span className="block font-sans text-lg leading-snug">
+          <span className="block font-sans text-subhead">
             {title}
             {required && <RequiredMark />}
           </span>
           {hint && (
-            <span className="mt-1.5 block font-sans text-xs leading-relaxed tracking-wide">
+            <span className="mt-1.5 block font-sans text-meta">
               {hint}
             </span>
           )}

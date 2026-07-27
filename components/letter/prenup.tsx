@@ -4,14 +4,14 @@ import { PrenupMosaic, type Shot } from '@/components/letter/prenup-gallery';
 /**
  * Prenup gallery — EDGE-TO-EDGE white section between Our Story and
  * DayItself. It carries the overlap that DayItself used to: `-mt-48` pulls it
- * up BEHIND Our Story's bottom dome (z-0 under its z-10) and `pt-76` clears
+ * up BEHIND Our Story's bottom dome (z-0 under its z-10) and `pt-dome` clears
  * the dome again before any content. DayItself follows as a plain white
  * section, so the seam between them is invisible.
  *
- * `pt-76` (19rem) is the mirror of `countdown-band`'s `pb-72`: 7rem of visible
- * gap plus the 12rem the dome bites out of it. Keep the two in step — the
- * countdown sits above the dome with the same 7rem showing, so if that gap is
- * retuned, retune this padding by the same amount.
+ * `pt-dome` is the shared dome clearance from app/globals.css — the 12rem the
+ * dome bites out of this section plus one `section` of breathing room. It used
+ * to be a hand-tuned `pt-76`, which drifted out of step with the two other
+ * places that clear a dome; the token keeps all three honest.
  *
  * Layout: a photo mosaic — bare images, no frame, no rounding, no shadow, no
  * caption, and no horizontal padding, so it runs to both screen edges. Every
@@ -83,7 +83,7 @@ const VISIBLE = SHOTS.slice(0, Math.max(MOBILE_COUNT, DESKTOP_COUNT));
 
 export function Prenup() {
   return (
-    <section id="prenup" className="relative z-0 -mt-48 bg-white pt-76">
+    <section id="prenup" className="relative z-0 -mt-48 bg-white pt-dome">
       <Heading />
 
       <PrenupMosaic shots={VISIBLE} mobileCount={MOBILE_COUNT} />
@@ -127,7 +127,7 @@ function FloralBorderPeonies() {
 function Heading() {
   return (
     <SectionHeading
-      className="px-5 sm:px-9"
+      className="px-gutter"
       title="Before the day"
       kicker="Our prenup shoot — photos coming soon"
     />

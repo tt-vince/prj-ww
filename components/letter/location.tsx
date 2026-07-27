@@ -131,14 +131,14 @@ export function Location() {
   const bringToFront = (id: string) => setFrontIndex(DECK.indexOf(id));
 
   return (
-    <section className="px-5 py-24 sm:px-9">
+    <section className="px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center lg:max-w-[64rem]">
         <SectionHeading tone="ink" title="Where we’ll be" kicker="Location" />
 
         {/* Roughly three quarters of the section's measure: the card is a
             single column of text over a map, so it reads better slimmer than
             the two-up Hotels grid that shares the same container width. */}
-        <div className="relative mx-auto mt-10 max-w-2xl md:max-w-[42rem] lg:max-w-[48rem]">
+        <div className="relative mx-auto mt-heading max-w-2xl md:max-w-[42rem] lg:max-w-[48rem]">
           {/* Outer pad reserves the peek room, so the deepest card's bottom
               edge doesn't collide with whatever follows. The inner element is
               the positioning context: its height comes from the venue card,
@@ -170,10 +170,10 @@ export function Location() {
                   )}
                 >
                   <CardHeader className="text-center">
-                    <CardTitle className="font-sans text-lg text-ink">
+                    <CardTitle className="font-sans text-ink">
                       {VENUE.name}
                     </CardTitle>
-                    <CardDescription className="font-sans text-xs tracking-wide">
+                    <CardDescription className="font-sans tracking-wide">
                       {VENUE.tag}
                     </CardDescription>
                   </CardHeader>
@@ -181,12 +181,12 @@ export function Location() {
                     {/* Same address row as the Hotels cards, centred: pin icon
                         and street line on one line, icon aligned to the first
                         line of wrapped text. */}
-                    <dl className="text-sm text-muted-foreground">
+                    <dl className="text-meta text-muted-foreground">
                       <div className="flex justify-center gap-2">
                         <dt className="pt-0.5">
                           <MapPin
                             aria-hidden
-                            className="size-3.5"
+                            className="size-4"
                             strokeWidth={1.5}
                           />
                           <span className="sr-only">Address</span>
@@ -215,7 +215,7 @@ export function Location() {
 
                     {/* Measure-capped so the centred line doesn't run the full
                         width of the widened card on desktop. */}
-                    <p className="mx-auto mt-5 max-w-prose text-sm leading-relaxed text-muted-foreground">
+                    <p className="mx-auto mt-5 max-w-prose text-body text-muted-foreground">
                       {VENUE.caption}
                     </p>
 
