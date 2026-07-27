@@ -36,18 +36,23 @@ const ILLOS = {
 
 type EventIllo = keyof typeof ILLOS;
 
+/**
+ * Only the first event carries a time. Guests arrive at a fixed hour — that is
+ * the one thing they need to plan around; everything after it runs when it
+ * runs, so no other row gets a clock. Do NOT add times back to the rest.
+ */
 const EVENTS: {
-  time: string;
+  time?: string;
   what: string;
   detail: string;
   illo: EventIllo;
 }[] = [
   { time: '2:00 pm', what: 'Guests arrive', detail: 'Welcome drinks on the terrace.', illo: 'arrive' },
-  { time: '2:30 pm', what: 'Ceremony', detail: 'In the garden, weather permitting.', illo: 'ceremony' },
-  { time: '3:15 pm', what: 'Cocktails & photos', detail: 'Canapés and a string quartet.', illo: 'cocktails' },
-  { time: '5:00 pm', what: 'Dinner', detail: 'Four seasonal courses in the Garden House.', illo: 'dinner' },
-  { time: '7:30 pm', what: 'First dance & party', detail: 'The dance floor opens.', illo: 'dance' },
-  { time: '10:00 pm', what: 'Fireworks', detail: 'One last hurrah on the lawn.', illo: 'fireworks' },
+  { what: 'Ceremony', detail: 'In the garden, weather permitting.', illo: 'ceremony' },
+  { what: 'Cocktails & photos', detail: 'Canapés and a string quartet.', illo: 'cocktails' },
+  { what: 'Dinner', detail: 'Four seasonal courses in the Garden House.', illo: 'dinner' },
+  { what: 'First dance & party', detail: 'The dance floor opens.', illo: 'dance' },
+  { what: 'Fireworks', detail: 'One last hurrah on the lawn.', illo: 'fireworks' },
 ];
 
 export function DayItself() {
@@ -80,7 +85,7 @@ export function DayItself() {
             const illoRight = i % 2 === 1;
             return (
               <motion.li
-                key={e.time}
+                key={e.what}
                 className="relative flex flex-col items-start gap-3 pb-12 pl-16 last:pb-0 md:grid md:grid-cols-[1fr_auto_1fr] md:items-center md:gap-x-10 md:pl-0"
                 initial={{ opacity: 0, y: 24 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -142,18 +147,13 @@ export function DayItself() {
                   {/* The hour, as a subtitle under its event. Small caps in the
                       sans face — the same treatment the dates get on the Our
                       Story polaroids — so it labels the line without competing
-                      with the handwritten title above it. On mobile only the
-                      first event (when guests arrive) keeps its time — that is
-                      the one hour guests actually need to plan around; the rest
-                      would just be noise on a narrow screen. */}
-                  <p
-                    className={cn(
-                      'mt-1 font-sans text-label font-medium uppercase tracking-[0.16em] text-ink',
-                      i !== 0 && 'hidden md:block'
-                    )}
-                  >
-                    {e.time}
-                  </p>
+                      with the handwritten title above it. Only the arrival row
+                      has a `time` at all (see EVENTS). */}
+                  {e.time && (
+                    <p className="mt-1 font-sans text-label font-medium uppercase tracking-[0.16em] text-ink">
+                      {e.time}
+                    </p>
+                  )}
                   <p className="mt-2 text-body text-ink">{e.detail}</p>
                 </div>
               </motion.li>
