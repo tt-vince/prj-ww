@@ -131,14 +131,14 @@ export function Location() {
   const bringToFront = (id: string) => setFrontIndex(DECK.indexOf(id));
 
   return (
-    <section className="px-5 py-24 sm:px-9">
+    <section className="px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center lg:max-w-[64rem]">
         <SectionHeading tone="ink" title="Where we’ll be" kicker="Location" />
 
         {/* Roughly three quarters of the section's measure: the card is a
             single column of text over a map, so it reads better slimmer than
             the two-up Hotels grid that shares the same container width. */}
-        <div className="relative mx-auto mt-10 max-w-2xl md:max-w-[42rem] lg:max-w-[48rem]">
+        <div className="relative mx-auto mt-heading max-w-2xl md:max-w-[42rem] lg:max-w-[48rem]">
           {/* Outer pad reserves the peek room, so the deepest card's bottom
               edge doesn't collide with whatever follows. The inner element is
               the positioning context: its height comes from the venue card,

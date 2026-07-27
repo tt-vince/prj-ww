@@ -74,8 +74,8 @@ function Stars({ value }: { value: number }) {
 
 export function Hotels() {
   return (
-    <section className="bg-white py-24">
-      <div className="mx-auto max-w-[56rem] px-5 text-center sm:px-9 lg:max-w-[64rem]">
+    <section className="bg-white py-section">
+      <div className="mx-auto max-w-[56rem] px-gutter text-center lg:max-w-[64rem]">
         <SectionHeading
           title="Where you can stay"
           kicker="We want to make your visit as comfortable as possible. Here are our recommended places to stay."
@@ -84,7 +84,7 @@ export function Hotels() {
 
         {/* Capped to one readable column on mobile; from sm up the pair fills
             the section's measure, which widens again at lg. */}
-        <div className="mx-auto mt-10 grid max-w-2xl gap-5 text-left sm:max-w-none sm:grid-cols-2 lg:gap-6">
+        <div className="mx-auto mt-heading grid max-w-2xl gap-5 text-left sm:max-w-none sm:grid-cols-2 lg:gap-6">
           {HOTELS.map((h) => (
             <Card
               key={h.name}

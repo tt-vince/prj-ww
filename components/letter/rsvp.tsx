@@ -23,8 +23,22 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  * on into the ink as an arch, mirroring the white dome that opens the countdown
  * band and the ink dome that opens Our Story. Same curve as those two
  * (`180px`/12rem), inverted — the shoulders sit on the section's top edge and
- * the crown dips into the ink. `pt-56` clears the deepest point of that curve,
- * so the heading never rides into it.
+ * the crown dips into the ink. `pt-dome` clears the deepest point of that
+ * curve, so the heading never rides into it.
+ *
+ * `-mt-section` makes the arch OVERLAP Hotels' bottom padding instead of
+ * hanging below it, which is why the section carries `z-10`. Without it Hotels
+ * paid for the seam twice — its own `pb-section` AND the arch's full 12rem —
+ * leaving 264px of white under its last line. The arch is the tail now, and
+ * Hotels adds nothing on top of it.
+ *
+ * The bite is ONE SECTION, not the 12rem the other domes take. This dome is not
+ * like theirs: theirs are carved out of the section's own padding with a border
+ * radius, so they cost no extra height, while this one is an overlay that adds
+ * its full depth below the paper above. Biting 12rem here would pull the ink up
+ * over the bottom corners of the Hotels cards — at a card's edge the arch is
+ * already ~95px deep, so the shoulders, not the crown, are what decide how far
+ * this can safely rise.
  *
  * Token-driven per docs/rsvp-spec.md: the personal invite link is `?id=<token>`.
  * The card shows one of three states — the form (pending reply), a thank-you
@@ -35,7 +49,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  */
 export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <section className="relative overflow-hidden bg-ink px-5 pt-56 pb-24 sm:px-9">
+    <section className="relative z-10 -mt-section overflow-hidden bg-ink px-gutter pt-dome pb-section">
       {/* The white dome. Full-bleed and flush with the top edge, so it reads as
           the paper above flowing down rather than as a shape floating on the
           ink. */}
@@ -51,7 +65,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
             shows through the gap and the card reads as mounted on the section
             rather than dropped on it. `outline-offset` leaves the gap
             transparent, so it picks up the ink behind on its own. */}
-        <Card className="mt-10 px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] outline-2 outline-offset-2 outline-white sm:px-6">
+        <Card className="mt-heading px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] outline-2 outline-offset-2 outline-white sm:px-6">
           <Suspense fallback={<RsvpBodyFallback />}>
             <RsvpBody searchParams={searchParams} />
           </Suspense>

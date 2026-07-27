@@ -77,7 +77,7 @@ export function Hero() {
       </div>
       {/* Sticky track: the section minus the dome's 12rem overlap. */}
       <div className="h-[calc(150svh-12rem)]">
-        <header className="sticky top-0 flex h-svh flex-col px-5 text-center sm:px-9">
+        <header className="sticky top-0 flex h-svh flex-col px-gutter text-center">
         {/* Two groups, one screen. The lace + line ride in a `flex-1` row so
             they sit centred in whatever space is left above the date, and the
             date block is a `shrink-0` row pinned to the bottom. Because they are

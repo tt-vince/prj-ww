@@ -23,11 +23,11 @@ const FAQS = [
 
 export function Faq() {
   return (
-    <section className="bg-white px-5 py-24 sm:px-9">
+    <section className="bg-white px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="Good to know" kicker="FAQ" />
 
-        <div className="mx-auto mt-10 grid max-w-2xl gap-5 text-left">
+        <div className="mx-auto mt-heading grid max-w-2xl gap-5 text-left">
           {FAQS.map((f) => (
             <div
               key={f.q}

@@ -103,7 +103,7 @@ export function OurStory() {
 
   return (
     <section className="relative z-10 -mt-48">
-      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
+      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-gutter pt-28 pb-section text-center sm:pt-32">
         <div className="mx-auto max-w-[64rem] lg:max-w-[80rem]">
           <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 

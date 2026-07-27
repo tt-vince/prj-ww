@@ -17,9 +17,11 @@ import { VinylPlayer } from '@/components/letter/vinyl-player';
  * Padding is `pt-28 sm:pt-32`, the same pair Our Story uses inside its dome, so
  * both domes seat their first line at the same depth under the curve.
  *
- * Bottom: `pb-72` gives Our Story room to rise into. Our Story keeps its own
+ * Bottom: `pb-dome` gives Our Story room to rise into. Our Story keeps its own
  * `-mt-48` (12rem), so the ink dome overlaps only this white bottom padding,
- * never the countdown text.
+ * never the countdown text. `pb-dome` (app/globals.css) is that 12rem plus one
+ * `section` of breathing room, so what stays visible below the count is exactly
+ * one section's worth — the same gap Prenup and RSVP leave on their domes.
  *
  * The section speaks one sentence, and the number is a word in it: the day
  * count is the display element and the script line finishes the thought. There
@@ -36,7 +38,7 @@ export function CountdownBand() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative z-10 -mt-48 rounded-[50%_50%_0_0_/_180px_180px_0_0] bg-white px-5 pt-28 pb-72 text-center sm:px-9 sm:pt-32">
+    <section className="relative z-10 -mt-48 rounded-[50%_50%_0_0_/_180px_180px_0_0] bg-white px-gutter pt-28 pb-dome text-center sm:pt-32">
       <motion.div
         className="flex flex-col items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}

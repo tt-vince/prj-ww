@@ -52,7 +52,10 @@ const EVENTS: {
 
 export function DayItself() {
   return (
-    <section className="relative z-0 bg-white pr-5 pb-24 sm:px-9">
+    // `px-gutter` on BOTH sides: this section used to carry `pr-5` alone, so on
+    // a phone it had no left gutter at all — the centred heading sat 10px off
+    // centre and a long one would have run into the screen edge.
+    <section className="relative z-0 bg-white px-gutter pb-section">
       <div className="mx-auto max-w-[56rem] text-center lg:max-w-[76rem]">
         <SectionHeading
           title="The day itself"
@@ -62,7 +65,7 @@ export function DayItself() {
         {/* Same reasoning as the Our Story thread: each event's description
             gets one half of this, less the centre gutter, so the phone-first
             46rem wrapped short sentences onto two lines on a desktop. */}
-        <div className="relative mx-auto mt-14 max-w-[46rem] lg:max-w-[60rem] xl:max-w-[68rem]">
+        <div className="relative mx-auto mt-heading max-w-[46rem] lg:max-w-[60rem] xl:max-w-[68rem]">
           {/* The single centre rail: left on mobile, dead-centre on md+. It
               starts at the first event; on md+ it runs on down to the getaway
               car, on mobile it stops at the last event (car is hidden). */}

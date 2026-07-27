@@ -148,6 +148,32 @@ imported hi-fi Claude Design files and are settled.
   - The shadcn primitives are sized for the letter by unlayered `.letter-theme [data-slot=…]`
     rules in the same file, because their own base classes are utilities that a call-site
     class cannot reliably beat. Change the size there, not per component.
+- **The spacing rhythm is locked too, and it is also a role scale.** Three roles in
+  `app/globals.css` — `gutter` (page side padding), `section` (a section's vertical padding)
+  and `heading` (a SectionHeading and the content it introduces) — each one fluid between a
+  360px phone and a 1280px desktop. Use `px-gutter`, `py-section`, `mt-heading`; do not
+  hand-write `px-5 sm:px-9` or `py-24` again. Two `section` paddings stack between adjacent
+  sections, so the role is half the visible gap: 144px on a phone, 224px on a desktop.
+  - Unlike the type roles these need no tailwind-merge entry: an unrecognised `px-gutter`
+    falls into no existing group, so the worst case is a missed de-duplication, not the
+    silent drop that unregistered `text-*` roles suffer.
+  - **The domes have their own token, `dome` = `12rem + section`.** Every dome in the letter
+    is 12rem deep — either the bite the next section takes with `-mt-48`, or the height of
+    the arch a section draws for itself — so the padding that clears one is that 12rem plus
+    one `section` of breathing room. `pb-dome` (countdown band), `pt-dome` (prenup, RSVP).
+    These were hand-tuned to 18rem, 19rem and 14rem, which left 32px of air under the RSVP
+    arch against 112px under Our Story's dome; the token keeps all three in step.
+  - **A dome has two sides, and both need checking.** The run from the previous section's
+    last content down to the dome, and the run from the dome down to the next heading. The
+    RSVP arch was correct on its lower side and 264px against everyone else's 72px on its
+    upper side, because it is the one dome drawn as an OVERLAY — the other three are carved
+    out of a section's own padding with a border radius and cost no extra height. It bites
+    `-mt-section`, not `-mt-48`: at a Hotels card's edge the arch is already ~95px deep, so
+    the shoulders, not the crown, limit how far it can rise before ink covers the cards.
+  - `-mt-48` and the `180px` curve radius stay literal: they are the dome geometry itself,
+    not spacing, and `dome` is derived from them. `pt-28 sm:pt-32` (countdown band and Our
+    Story) is a different relationship again — content seated under a section's OWN crown,
+    where the curve rises above the content rather than dipping into it.
   - Exceptions, both deliberate: the hero's couple names are sized against the lace frame
     they sit inside rather than the scale, and the countdown row sizes its parts in `em`
     against a single `text-figure` on the row, so the whole line scales from one knob and

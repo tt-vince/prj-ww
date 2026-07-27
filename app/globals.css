@@ -120,6 +120,35 @@
      pairs across a 360px phone: every 1px of figure costs ~5px of row width. */
   --text-figure: clamp(1.625rem, 1.087rem + 2.391vw, 3rem);
   --text-figure--line-height: 1;
+
+  /* ── The letter's spacing rhythm ─────────────────────────────────────
+     Three roles, fluid between a 360px phone and a 1280px desktop for the same
+     reason the type roles are: one class, both breakpoints, no `sm:` twin to
+     forget. They replace a flat `py-24` and twenty-one hand-written
+     `px-5 sm:px-9` pairs.
+
+       gutter   the page's side padding — every full-bleed section
+       section  a section's vertical padding. Two of these stack between
+                adjacent sections, so this is HALF the gap you want to see:
+                144px between sections on a phone, 224px on a desktop.
+       heading  a SectionHeading and the content it introduces
+
+     Deliberately NOT covered: the dome overlaps (`-mt-48`, `pb-72`, `pt-76`,
+     `pt-56`, `pt-28`). Those are structural — they are measured against the
+     12rem bite each dome takes out of the section above it, not against this
+     rhythm, and retuning one means retuning its partner. See the notes in
+     countdown-band.tsx and prenup.tsx. */
+  --spacing-gutter: clamp(1.25rem, 0.859rem + 1.739vw, 2.25rem);
+  --spacing-section: clamp(4.5rem, 3.522rem + 4.348vw, 7rem);
+  --spacing-heading: clamp(2.5rem, 2.109rem + 1.739vw, 3.5rem);
+  /* Clearance for the one thing the rhythm above cannot express: the gap on the
+     far side of a dome. Every dome is 12rem deep — either the bite the next
+     section takes with `-mt-48`, or the height of the arch a section draws for
+     itself — so the padding that clears one is that 12rem plus exactly one
+     `section` of breathing room. Naming it keeps the three places that need it
+     in step: they used to be 18rem, 19rem and 14rem, which left 32px of air
+     under the RSVP arch against 112px under Our Story's dome. */
+  --spacing-dome: calc(12rem + var(--spacing-section));
 }
 
 /* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (Montserrat / Parisienne). */

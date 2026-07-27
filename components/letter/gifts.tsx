@@ -30,11 +30,11 @@ export async function Gifts() {
   );
 
   return (
-    <section className="bg-white px-5 py-24 sm:px-9">
+    <section className="bg-white px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="A little something" kicker="Gift guide" />
 
-        <p className="mx-auto mt-8 max-w-lg text-lead text-muted-foreground">
+        <p className="mx-auto mt-heading max-w-lg text-lead text-muted-foreground">
           Your presence is the only gift we’re hoping for. But if you’d like to
           give a little more, you can scan a code below with your banking app.
         </p>
