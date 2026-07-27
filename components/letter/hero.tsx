@@ -1,7 +1,10 @@
 'use client';
 
 import { useRef } from 'react';
+import Image from 'next/image';
 import { motion, useScroll, useTransform, useMotionTemplate } from 'motion/react';
+import heroLily from '@/public/hero-lily.jpg';
+import lacePng from '@/public/lace.png';
 import { WeekStrip } from '@/components/letter/week-strip';
 import { COUPLE_NAMES, WEDDING_DAY_LABEL } from '@/lib/wedding';
 
@@ -55,15 +58,20 @@ export function Hero() {
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute inset-0"
-          style={{
-            scale,
-            filter,
-            transformOrigin: '50% 30%',
-            backgroundImage: 'url(/hero-lily.jpg)',
-            backgroundSize: 'cover',
-            backgroundPosition: '50% top',
-          }}
-        />
+          style={{ scale, filter, transformOrigin: '50% 30%' }}
+        >
+          {/* next/image (static import): responsive srcset, preload as the LCP
+              image, and an inline blur-up placeholder while it streams in. */}
+          <Image
+            src={heroLily}
+            alt=""
+            fill
+            priority
+            placeholder="blur"
+            sizes="100vw"
+            className="object-cover object-[50%_top]"
+          />
+        </motion.div>
         {/* Dark overlay for text legibility (static). */}
         <div className="absolute inset-0 bg-black/50" />
       </div>
@@ -99,13 +107,16 @@ export function Hero() {
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 drop-shadow-[0_8px_30px_rgba(30,42,24,0.55)]"
-              style={{
-                backgroundImage: 'url(/lace.png)',
-                backgroundSize: 'contain',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-              }}
-            />
+            >
+              <Image
+                src={lacePng}
+                alt=""
+                fill
+                priority
+                sizes="(max-width: 768px) 86vw, 541px"
+                className="object-contain"
+              />
+            </div>
             {/* Names centered in the window, stacked to fit the square. */}
             <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]">
               <span className="text-6xl md:text-[4.875rem]">{NAME_A}</span>
@@ -141,7 +152,7 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-script text-xl leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)] sm:text-lg"
+            className="font-sans text-xl uppercase leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)] sm:text-lg"
           >
             {WEDDING_DAY_LABEL}
           </motion.p>

@@ -3,8 +3,7 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
-import { VinylPlayer } from '@/components/vinyl-player';
-import { cn } from '@/lib/utils';
+import { VinylPlayer } from '@/components/letter/vinyl-player';
 
 /**
  * Countdown band — white section between Hero and Our Story. It is a DOME at
@@ -53,8 +52,8 @@ export function CountdownBand() {
 
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-heading text-xl leading-tight text-ink sm:text-2xl">
-          Counting down to the day
+        <h2 className="font-sans text-xl leading-tight text-ink sm:text-2xl">
+          counting down to the day
         </h2>
 
         {/* The row and the script line are one sentence: `Countdown` renders
@@ -72,39 +71,11 @@ export function CountdownBand() {
           label="until we say I do"
         />
 
-        {/* Hand-drawn rope heart closing the sentence — a full stop after "until
-            we say I do", the way the wedding rings close the Our Story thread.
-            The asset ships as pure black, and the letter has no black in it, so
-            it is painted through a CSS mask in ink #1E2A18. Aspect ratio is the
-            viewBox's (91.7109 x 89.9102). */}
-        {/* <RopeHeart className="mt-6 w-24 sm:w-24" /> */}
-
         {/* The one action in the band: put the date somewhere it won't be
             forgotten. Outlined rather than filled so the day count stays the
             loudest thing on the section. */}
         <AddToCalendar className="mt-12" />
       </motion.div>
     </section>
-  );
-}
-
-/** The rope heart, drawn in ink through a mask (see the note at its usage). */
-function RopeHeart({ className }: { className?: string }) {
-  const mask = "url('/icons/hand_drawn/wedding_2/rope-heart-frame.svg')";
-  return (
-    <span
-      aria-hidden
-      className={cn('block aspect-[91.7109/89.9102] bg-ink', className)}
-      style={{
-        maskImage: mask,
-        WebkitMaskImage: mask,
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
-        maskSize: 'contain',
-        WebkitMaskSize: 'contain',
-        maskPosition: 'center',
-        WebkitMaskPosition: 'center',
-      }}
-    />
   );
 }

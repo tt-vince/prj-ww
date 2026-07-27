@@ -2,8 +2,9 @@ import { Suspense } from "react";
 import { getGuestByToken } from "@/lib/data";
 import { RSVP_DEADLINE_LABEL } from "@/lib/wedding";
 import { cn } from "@/lib/utils";
-import { RsvpForm } from "@/components/rsvp-form";
+import { RsvpForm } from "@/components/letter/rsvp-form";
 import { RsvpReply } from "@/components/letter/rsvp-reply";
+import { SectionHeading } from "@/components/letter/section-heading";
 import {
   Card,
   CardContent,
@@ -44,14 +45,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
         style={{ borderRadius: "0 0 50% 50% / 0 0 180px 180px" }}
       />
       <div className="relative mx-auto max-w-[32rem]">
-        <div className="text-center">
-          <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
-            Will you join us?
-          </h2>
-          <p className="mt-2 font-countdown text-sm tracking-wide text-white">
-            RSVP
-          </p>
-        </div>
+        <SectionHeading tone="white" title="Will you join us?" kicker="RSVP" />
 
         {/* Double rule: a 2px white outline held 2px off the card, so the ink
             shows through the gap and the card reads as mounted on the section
@@ -99,7 +93,7 @@ async function RsvpDeadline({ searchParams }: { searchParams: SearchParams }) {
   const answered = guest.status !== "pending";
 
   return (
-    <p className="mt-6 text-center font-countdown text-sm leading-relaxed tracking-wide text-white">
+    <p className="mt-6 text-center font-sans text-sm leading-relaxed tracking-wide text-white">
       To help us prepare everything with love and care, making sure the day is
       as unforgettable for you as it will be for us, we are hoping to{" "}
       {answered ? "finalize the plans" : "receive your response"} by{" "}
@@ -139,7 +133,7 @@ function RsvpBodyFallback() {
       className="py-10 text-center text-muted-foreground"
       aria-hidden
     >
-      <p className="font-heading text-lg">Loading your invitation…</p>
+      <p className="font-sans text-lg">Loading your invitation…</p>
     </CardContent>
   );
 }
@@ -154,10 +148,10 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
   if (!guest) {
     return (
       <CardContent className="py-6 text-center">
-        <p className="font-heading text-xl text-foreground">
+        <p className="font-sans text-xl text-foreground">
           Reply by your personal link
         </p>
-        <p className="mx-auto mt-3 max-w-[22rem] font-countdown text-xs leading-relaxed tracking-wide">
+        <p className="mx-auto mt-3 max-w-[22rem] font-sans text-xs leading-relaxed tracking-wide">
           This RSVP is by invitation. Please open the personal link we sent you
           to let us know if you can make it.
         </p>
@@ -192,10 +186,10 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
   return (
     <>
       <CardHeader className="text-center">
-        <CardTitle className="font-heading text-xl">
+        <CardTitle className="font-sans text-xl">
           {guest.name ? `Dear ${guest.name},` : "Kindly reply"}
         </CardTitle>
-        <CardDescription className="font-countdown text-xs leading-relaxed tracking-wide">
+        <CardDescription className="font-sans text-xs leading-relaxed tracking-wide">
           We&rsquo;d be honoured to have you celebrate with us.
         </CardDescription>
       </CardHeader>

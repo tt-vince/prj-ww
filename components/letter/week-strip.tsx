@@ -66,7 +66,7 @@ export function WeekStrip({ className }: { className?: string }) {
             </span>
             <span
               className={cn(
-                'font-heading text-sm leading-none sm:text-base',
+                'font-sans text-sm leading-none sm:text-base',
                 d.isWeddingDay && 'font-medium'
               )}
             >

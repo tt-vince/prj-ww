@@ -1,7 +1,7 @@
 /**
  * Couple + occasion — the single source for the couple's names and wedding
  * date, shared by the dashboard header, the countdown, and the guest-facing
- * wedding letter (components/wedding-letter.tsx).
+ * wedding letter (components/letter/wedding-letter.tsx).
  *
  * The names are the design's placeholder pair from the dashboard header; swap
  * for the real ones here. The date is the single source of truth for the
@@ -22,11 +22,9 @@ export const WEDDING_MONTH_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
-/** "Saturday, April 10, 2027" — the full date anchor in the countdown band. */
+/** "April 2027" — the date anchor in the countdown band. */
 export const WEDDING_DAY_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
-  weekday: 'long',
   month: 'long',
-  day: 'numeric',
   year: 'numeric',
 });
 

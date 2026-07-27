@@ -14,6 +14,7 @@ import {
 import { cn } from '@/lib/utils';
 import { WEDDING_VENUE } from '@/lib/wedding';
 import { letterButton } from '@/components/letter/letter-button';
+import { SectionHeading } from '@/components/letter/section-heading';
 import {
   Card,
   CardContent,
@@ -107,7 +108,7 @@ const PAGER_ARROW =
 
 /**
  * Location — section after AttireGuide. Centred header (font-script h2 +
- * font-countdown label) over a draggable card stack, after the Motion card
+ * font-sans label) over a draggable card stack, after the Motion card
  * stack example (motion.dev/examples/react-card-stack). The map card leads the
  * deck; venue photos sit behind it, peeking at the bottom edge. Throwing the
  * front card sideways sends it to the back; the dots under the stack are the
@@ -132,12 +133,7 @@ export function Location() {
   return (
     <section className="px-5 py-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center lg:max-w-[64rem]">
-        <h2 className="font-script text-4xl leading-tight text-ink sm:text-5xl">
-          Where we’ll be
-        </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
-          Location
-        </p>
+        <SectionHeading tone="ink" title="Where we’ll be" kicker="Location" />
 
         {/* Roughly three quarters of the section's measure: the card is a
             single column of text over a map, so it reads better slimmer than
@@ -174,10 +170,10 @@ export function Location() {
                   )}
                 >
                   <CardHeader className="text-center">
-                    <CardTitle className="font-heading text-lg text-ink">
+                    <CardTitle className="font-sans text-lg text-ink">
                       {VENUE.name}
                     </CardTitle>
-                    <CardDescription className="font-countdown text-xs tracking-wide">
+                    <CardDescription className="font-sans text-xs tracking-wide">
                       {VENUE.tag}
                     </CardDescription>
                   </CardHeader>

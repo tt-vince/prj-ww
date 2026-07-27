@@ -1,10 +1,7 @@
 import type { Metadata } from "next";
 import {
-  Beth_Ellen,
   DM_Sans,
-  Gilda_Display,
   Parisienne,
-  Playwrite_US_Modern,
 } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
@@ -15,31 +12,9 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
-// Elegant serif for display headings + stat numbers (design `Gilda Display`).
-const gilda = Gilda_Display({
-  variable: "--font-gilda",
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-});
-
 // Calligraphic accent for the couple's names (design `Parisienne`).
 const parisienne = Parisienne({
   variable: "--font-parisienne",
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
-});
-
-// Upright script for the countdown numbers (design `Playwrite US Modern`).
-const playwrite = Playwrite_US_Modern({
-  variable: "--font-playwrite",
-  display: "swap",
-});
-
-// Casual handwriting, for pen-on-paper notes in the guest letter (`--font-hand`).
-const bethEllen = Beth_Ellen({
-  variable: "--font-beth-ellen",
   weight: "400",
   subsets: ["latin"],
   display: "swap",
@@ -58,7 +33,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${gilda.variable} ${parisienne.variable} ${playwrite.variable} ${bethEllen.variable} h-full antialiased`}
+      className={`${dmSans.variable} ${parisienne.variable} h-full antialiased`}
     >
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <Providers>{children}</Providers>

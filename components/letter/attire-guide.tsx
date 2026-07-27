@@ -1,4 +1,6 @@
 import Image from 'next/image';
+import attireGuide from '@/public/attire-guide.png';
+import { SectionHeading } from '@/components/letter/section-heading';
 
 /**
  * Attire guide — white section after DayItself, same header pattern. Shows
@@ -10,22 +12,16 @@ export function AttireGuide() {
   return (
     <section className="bg-white px-5 pt-24 pb-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          What to wear
-        </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
-          Attire guide
-        </p>
+        <SectionHeading title="What to wear" kicker="Attire guide" />
         <Image
-          src="/attire-guide.png"
+          src={attireGuide}
           alt="Illustrated guests wearing the wedding palette — wine, raspberry, lilac, mauve, olive, forest green and pale gold"
-          width={3168}
-          height={1344}
+          placeholder="blur"
           className="mx-auto mt-10 h-auto w-full"
           sizes="(max-width: 640px) 92vw, min(80vw, 56rem)"
         />
         <div className="mx-auto mt-8 max-w-md space-y-3">
-          <p className="font-heading text-lg leading-snug text-ink">
+          <p className="font-sans text-lg leading-snug text-ink">
             Semi-formal — garden party
           </p>
           <p className="text-sm leading-relaxed text-muted-foreground">

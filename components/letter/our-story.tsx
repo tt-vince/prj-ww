@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { COUPLE_NAMES } from '@/lib/wedding';
+import { SectionHeading } from '@/components/letter/section-heading';
 
 // Both slots (photo + text) share this variant so a row reveals as one unit.
 const rowItem = {
@@ -96,14 +97,7 @@ export function OurStory() {
     <section className="relative z-10 -mt-48">
       <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
         <div className="mx-auto max-w-[64rem]">
-          <div className="text-center">
-            <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
-              Our Story
-            </h2>
-            <p className="mt-2 font-countdown text-sm tracking-wide text-white">
-              How it began
-            </p>
-          </div>
+          <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 
           {/* Scrapbook thread. Camera charm hangs over the top; the spine runs
               down the centre on sm+, and on mobile the per-item connector
@@ -162,7 +156,7 @@ export function OurStory() {
                       <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-white">
                         {m.date}
                       </p>
-                      <h3 className="relative mt-1 font-heading text-2xl leading-tight text-white sm:text-[2rem]">
+                      <h3 className="relative mt-1 font-sans text-2xl leading-tight text-white sm:text-[2rem]">
                         {/* Connector from the centre spine to the title (sm+).
                             Width = text padding (pl/pr-10 = 40px) + half the
                             column gap (gap-x-16 = 64px). */}

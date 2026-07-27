@@ -40,14 +40,14 @@ export default async function UsersPage() {
         ← Back to dashboard
       </Link>
       <div className="flex flex-col gap-1">
-        <h1 className="font-serif text-2xl font-semibold tracking-tight">Users</h1>
+        <h1 className="font-sans text-2xl font-semibold tracking-tight">Users</h1>
         <p className="text-sm text-muted-foreground">
           Approve pending admins so they can sign in. You cannot change your own account.
         </p>
       </div>
       <Card className="gap-0 overflow-hidden rounded-[18px] py-0">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-3 px-5 pt-5 pb-4 sm:px-6">
-          <h2 className="font-serif text-[21px] leading-none text-foreground">Admin accounts</h2>
+          <h2 className="font-sans text-[21px] leading-none text-foreground">Admin accounts</h2>
           <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs text-muted-foreground">
             {rows.length}
           </span>

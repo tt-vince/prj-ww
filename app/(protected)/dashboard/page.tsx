@@ -1,7 +1,7 @@
 import { requireUser, canEdit } from "@/lib/dal";
 import { getGuestsWithLabels, getAllLabels } from "@/lib/data";
-import { AccountMenu } from "@/components/account-menu";
-import { AccountGarland, CoupleFigures, NameSprig } from "@/components/dashboard-florals";
+import { AccountMenu } from "@/components/dashboard/account-menu";
+import { AccountGarland, CoupleFigures, NameSprig } from "@/components/dashboard/florals";
 import { GuestsBoard, type GuestRow } from "./guests-board";
 import { ExportGuestsButton } from "./export-guests-button";
 import { GuestDialog } from "./guests/guest-dialog";
@@ -57,7 +57,7 @@ export default async function DashboardPage() {
             </div>
             <NameSprig />
           </div>
-          <h1 className="mt-1 font-serif text-[28px] leading-[1.02] text-foreground sm:text-[42px]">
+          <h1 className="mt-1 font-sans text-[28px] leading-[1.02] text-foreground sm:text-[42px]">
             Manage RSVP
           </h1>
           <div className="mt-2.5 text-[10.5px] tracking-[0.14em] text-muted-foreground uppercase sm:text-xs">

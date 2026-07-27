@@ -1,6 +1,7 @@
 import { MapPin, Phone, Star } from 'lucide-react';
 
 import { letterButton } from '@/components/letter/letter-button';
+import { SectionHeading } from '@/components/letter/section-heading';
 import {
   Card,
   CardContent,
@@ -11,7 +12,7 @@ import {
 
 /**
  * Recommended hotels — white section after Location. Same header pattern as
- * the other sections (font-script h2 + font-countdown label), then a short
+ * the other sections (font-script h2 + font-sans label), then a short
  * list of nearby places to stay as cards. Placeholder recommendations — edit
  * freely (names, blurbs and map links are dummy data).
  */
@@ -75,13 +76,11 @@ export function Hotels() {
   return (
     <section className="bg-white py-24">
       <div className="mx-auto max-w-[56rem] px-5 text-center sm:px-9 lg:max-w-[64rem]">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          Where you can stay
-        </h2>
-        <p className="mx-auto mt-2 max-w-md font-countdown text-sm leading-relaxed tracking-wide text-ink">
-          We want to make your visit as comfortable as possible. Here are our
-          recommended places to stay.
-        </p>
+        <SectionHeading
+          title="Where you can stay"
+          kicker="We want to make your visit as comfortable as possible. Here are our recommended places to stay."
+          kickerClassName="mx-auto max-w-md leading-relaxed"
+        />
 
         {/* Capped to one readable column on mobile; from sm up the pair fills
             the section's measure, which widens again at lg. */}
@@ -92,10 +91,10 @@ export function Hotels() {
               className="flex flex-col border-2 border-ink px-2 py-8 shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)] ring-0 sm:px-6"
             >
               <CardHeader>
-                <CardTitle className="font-heading text-lg text-ink">
+                <CardTitle className="font-sans text-lg text-ink">
                   {h.name}
                 </CardTitle>
-                <CardDescription className="flex items-center gap-2 font-countdown text-xs tracking-wide">
+                <CardDescription className="flex items-center gap-2 font-sans text-xs tracking-wide">
                   <Stars value={h.rating} />
                   <span className="sr-only">{h.rating} out of 5 stars — </span>
                   {h.tag}

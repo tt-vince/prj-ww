@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 import { WEDDING_DATE_ISO } from "@/lib/wedding";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +13,29 @@ function diff(target: Date) {
   const minutes = Math.floor((ms % 3_600_000) / 60_000);
   const seconds = Math.floor((ms % 60_000) / 1000);
   return { days, hours, minutes, seconds };
+}
+
+// The ticking clock as an external store: the server snapshot is `null` (so
+// SSR and hydration both show the placeholder), and each mounted countdown
+// re-reads a per-second cached snapshot. The cache matters — returning a fresh
+// object from every getSnapshot() call would loop React's store check.
+let lastTick: ReturnType<typeof diff> | null = null;
+function getTick() {
+  const next = diff(TARGET_DATE);
+  if (
+    !lastTick ||
+    next.days !== lastTick.days ||
+    next.hours !== lastTick.hours ||
+    next.minutes !== lastTick.minutes ||
+    next.seconds !== lastTick.seconds
+  ) {
+    lastTick = next;
+  }
+  return lastTick;
+}
+function subscribeTick(onTick: () => void) {
+  const id = setInterval(onTick, 1000);
+  return () => clearInterval(id);
 }
 
 /**
@@ -56,15 +79,9 @@ export function Countdown({
   /** Read after the day count by screen readers, in place of the visual label. */
   srSuffix?: string;
 }) {
-  // Start as null so the server-rendered HTML and the first client render
-  // both show the placeholder; the live value is only computed after mount.
-  const [t, setT] = useState<ReturnType<typeof diff> | null>(null);
-
-  useEffect(() => {
-    setT(diff(TARGET_DATE));
-    const id = setInterval(() => setT(diff(TARGET_DATE)), 1000);
-    return () => clearInterval(id);
-  }, []);
+  // null on the server and during hydration (placeholder), live from the
+  // first client render after mount — no effect, no set-state-in-effect.
+  const t = useSyncExternalStore(subscribeTick, getTick, () => null);
 
   const units = [
     { label: "days", value: t?.days },
@@ -91,7 +108,7 @@ export function Countdown({
             days slot is wider because it carries three digits. */}
         <span
           aria-hidden
-          className="flex items-baseline whitespace-nowrap font-serif"
+          className="flex items-baseline whitespace-nowrap font-sans"
         >
           {units.map((u, i) => (
             <span key={u.label} className="flex items-baseline">
@@ -115,7 +132,7 @@ export function Countdown({
               </span>
               <span
                 className={cn(
-                  "ml-1 font-sans text-[10px] tracking-[0.12em] sm:text-xs",
+                  "ml-1 font-sans text-[14px] tracking-[0.12em] sm:text-xs",
                   tickClassName,
                 )}
               >
@@ -134,7 +151,7 @@ export function Countdown({
   return (
     <div
       className={cn(
-        "mt-2 flex items-baseline gap-3 font-countdown",
+        "mt-2 flex items-baseline gap-3 font-sans",
         align === "center" && "justify-center",
         className ?? "text-(--script)",
       )}

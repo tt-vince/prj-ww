@@ -79,7 +79,7 @@ export function RsvpReply({
         <p className="font-script text-4xl leading-tight">
           Thank you for telling us
         </p>
-        <p className="mx-auto mt-2 max-w-[24rem] font-countdown text-xs leading-relaxed tracking-wide">
+        <p className="mx-auto mt-2 max-w-[24rem] font-sans text-xs leading-relaxed tracking-wide">
           {going
             ? `Your reply is in${guestName ? `, ${guestName}` : ''} — we cannot wait to celebrate with you.`
             : `We will miss you${guestName ? `, ${guestName}` : ''}, and we are glad you let us know.`}
@@ -119,7 +119,7 @@ export function RsvpReply({
                       </span>
                     </p>
                     {diet ? (
-                      <p className="mt-1 font-countdown text-xs leading-relaxed tracking-wide">
+                      <p className="mt-1 font-sans text-xs leading-relaxed tracking-wide">
                         {diet}
                       </p>
                     ) : null}
@@ -141,7 +141,7 @@ export function RsvpReply({
         ) : null}
       </div>
 
-      <p className="mt-7 border-t border-ink/20 pt-6 text-center font-countdown text-xs leading-relaxed tracking-wide">
+      <p className="mt-7 border-t border-ink/20 pt-6 text-center font-sans text-xs leading-relaxed tracking-wide">
         If any of this needs changing, message us and we will put it right.
       </p>
     </div>

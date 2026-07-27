@@ -18,7 +18,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  * DayItself are full-bleed and overlap each other (see the -mt/z-index notes
  * in those files). It is ordinary document flow and scrolls natively, so
  * sections can be added/reordered freely. `searchParams` is forwarded (not
- * awaited). The former envelope intro (components/envelope-reveal.tsx) no
+ * awaited). The former envelope intro (components/letter/envelope-reveal.tsx) no
  * longer wraps this content but is kept for reuse.
  *
  * `letter-theme` (app/globals.css) scopes the home page to its two-colour

@@ -4,7 +4,7 @@ import { useActionState, useEffect, useState, type ReactNode } from 'react';
 import { Check, Pencil, Plus } from 'lucide-react';
 import type { Label as LabelRow } from '@/db/schema';
 import { SNS_PLATFORMS, SNS_CONFIG, type SnsAccounts } from '@/lib/sns';
-import { SnsIcon } from '@/components/sns-icon';
+import { SnsIcon } from '@/components/dashboard/sns-icon';
 import { createGuest, updateGuest, type ActionState } from './actions';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

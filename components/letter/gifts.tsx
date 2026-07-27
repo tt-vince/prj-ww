@@ -1,8 +1,9 @@
 import QRCode from 'qrcode';
+import { SectionHeading } from '@/components/letter/section-heading';
 
 /**
  * Gifts — white section after Rsvp. Same header pattern as the other letter
- * sections (font-script h2 + font-countdown label), an intro line, then a
+ * sections (font-script h2 + font-sans label), an intro line, then a
  * cash-gift block with one QR for GCash and one for BDO, each labelled below.
  *
  * The QR SVGs are generated server-side from each method's `payload`. Replace
@@ -31,12 +32,7 @@ export async function Gifts() {
   return (
     <section className="bg-white px-5 py-24 sm:px-9">
       <div className="mx-auto max-w-[56rem] text-center">
-        <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
-          A little something
-        </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
-          Gift guide
-        </p>
+        <SectionHeading title="A little something" kicker="Gift guide" />
 
         <p className="mx-auto mt-8 max-w-md text-sm leading-relaxed text-muted-foreground">
           Your presence is the only gift we’re hoping for. But if you’d like to
@@ -51,7 +47,7 @@ export async function Gifts() {
                 className="rounded-md border border-ink bg-white p-2 [&>svg]:block"
                 dangerouslySetInnerHTML={{ __html: c.svg }}
               />
-              <p className="mt-4 font-heading text-lg text-ink">
+              <p className="mt-4 font-sans text-lg text-ink">
                 {c.method}
               </p>
             </div>
