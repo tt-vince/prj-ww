@@ -22,11 +22,9 @@ export const WEDDING_MONTH_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
   year: 'numeric',
 });
 
-/** "Saturday, April 10, 2027" — the full date anchor in the countdown band. */
+/** "April 2027" — the date anchor in the countdown band. */
 export const WEDDING_DAY_LABEL = WEDDING_DATE.toLocaleDateString('en-US', {
-  weekday: 'long',
   month: 'long',
-  day: 'numeric',
   year: 'numeric',
 });
 

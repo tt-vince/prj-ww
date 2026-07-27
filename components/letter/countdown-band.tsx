@@ -53,8 +53,8 @@ export function CountdownBand() {
 
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-heading text-xl leading-tight text-ink sm:text-2xl">
-          Counting down to the day
+        <h2 className="font-sans text-xl leading-tight text-ink sm:text-2xl">
+          counting down to the day
         </h2>
 
         {/* The row and the script line are one sentence: `Countdown` renders

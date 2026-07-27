@@ -91,7 +91,7 @@ export function Countdown({
             days slot is wider because it carries three digits. */}
         <span
           aria-hidden
-          className="flex items-baseline whitespace-nowrap font-serif"
+          className="flex items-baseline whitespace-nowrap font-sans"
         >
           {units.map((u, i) => (
             <span key={u.label} className="flex items-baseline">
@@ -115,7 +115,7 @@ export function Countdown({
               </span>
               <span
                 className={cn(
-                  "ml-1 font-sans text-[10px] tracking-[0.12em] sm:text-xs",
+                  "ml-1 font-sans text-[14px] tracking-[0.12em] sm:text-xs",
                   tickClassName,
                 )}
               >
@@ -134,7 +134,7 @@ export function Countdown({
   return (
     <div
       className={cn(
-        "mt-2 flex items-baseline gap-3 font-countdown",
+        "mt-2 flex items-baseline gap-3 font-sans",
         align === "center" && "justify-center",
         className ?? "text-(--script)",
       )}

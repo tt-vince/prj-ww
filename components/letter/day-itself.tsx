@@ -56,7 +56,7 @@ export function DayItself() {
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           The day itself
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
+        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
           What we have planned on this special day
         </p>
 
@@ -125,14 +125,22 @@ export function DayItself() {
                       illoRight ? 'md:-right-10' : 'md:-left-10'
                     )}
                   />
-                  <p className="font-hand text-lg leading-snug text-ink">
+                  <p className="font-script text-lg leading-snug text-ink">
                     {e.what}
                   </p>
                   {/* The hour, as a subtitle under its event. Small caps in the
                       sans face — the same treatment the dates get on the Our
                       Story polaroids — so it labels the line without competing
-                      with the handwritten title above it. */}
-                  <p className="mt-1 font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-ink">
+                      with the handwritten title above it. On mobile only the
+                      first event (when guests arrive) keeps its time — that is
+                      the one hour guests actually need to plan around; the rest
+                      would just be noise on a narrow screen. */}
+                  <p
+                    className={cn(
+                      'mt-1 font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-ink',
+                      i !== 0 && 'hidden md:block'
+                    )}
+                  >
                     {e.time}
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-ink">

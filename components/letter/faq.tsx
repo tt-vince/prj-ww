@@ -1,6 +1,6 @@
 /**
  * FAQ — white section after Gifts (last in the letter). Same header pattern as
- * the other sections (font-script h2 + font-countdown label), then a stack of
+ * the other sections (font-script h2 + font-sans label), then a stack of
  * question/answer items, each in its own solid ink card (#1E2A18 — the same ink
  * as the Rsvp section background). Placeholder copy — edit freely.
  */
@@ -26,7 +26,7 @@ export function Faq() {
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           Good to know
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
+        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
           FAQ
         </p>
 
@@ -36,7 +36,7 @@ export function Faq() {
               key={f.q}
               className="rounded-xl bg-ink px-6 py-6 sm:px-8"
             >
-              <p className="font-heading text-lg text-white">{f.q}</p>
+              <p className="font-sans text-lg text-white">{f.q}</p>
               <p className="mt-2 text-sm leading-relaxed text-white">
                 {f.a}
               </p>

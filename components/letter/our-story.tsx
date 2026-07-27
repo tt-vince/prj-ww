@@ -100,7 +100,7 @@ export function OurStory() {
             <h2 className="font-script text-4xl leading-tight text-white sm:text-5xl">
               Our Story
             </h2>
-            <p className="mt-2 font-countdown text-sm tracking-wide text-white">
+            <p className="mt-2 font-sans text-sm tracking-wide text-white">
               How it began
             </p>
           </div>
@@ -162,7 +162,7 @@ export function OurStory() {
                       <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-white">
                         {m.date}
                       </p>
-                      <h3 className="relative mt-1 font-heading text-2xl leading-tight text-white sm:text-[2rem]">
+                      <h3 className="relative mt-1 font-sans text-2xl leading-tight text-white sm:text-[2rem]">
                         {/* Connector from the centre spine to the title (sm+).
                             Width = text padding (pl/pr-10 = 40px) + half the
                             column gap (gap-x-16 = 64px). */}

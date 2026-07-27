@@ -141,7 +141,7 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-script text-xl leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)] sm:text-lg"
+            className="font-sans text-xl uppercase leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)] sm:text-lg"
           >
             {WEDDING_DAY_LABEL}
           </motion.p>

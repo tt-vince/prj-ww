@@ -150,7 +150,7 @@ function Heading() {
       <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
         Before the day
       </h2>
-      <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
+      <p className="mt-2 font-sans text-sm tracking-wide text-ink">
         Our prenup shoot — photos coming soon
       </p>
     </div>

@@ -81,7 +81,7 @@ export default async function LoginPage({
           <CardSprayBottomLeft />
           <Card className="w-full">
             <CardHeader className="text-center">
-              <CardTitle className="flex items-center justify-center gap-2 font-serif text-xl">
+              <CardTitle className="flex items-center justify-center gap-2 font-sans text-xl">
                 <CoupleFigures className="h-[36px] w-auto shrink-0" />
                 Admin sign in
               </CardTitle>

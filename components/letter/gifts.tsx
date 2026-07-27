@@ -2,7 +2,7 @@ import QRCode from 'qrcode';
 
 /**
  * Gifts — white section after Rsvp. Same header pattern as the other letter
- * sections (font-script h2 + font-countdown label), an intro line, then a
+ * sections (font-script h2 + font-sans label), an intro line, then a
  * cash-gift block with one QR for GCash and one for BDO, each labelled below.
  *
  * The QR SVGs are generated server-side from each method's `payload`. Replace
@@ -34,7 +34,7 @@ export async function Gifts() {
         <h2 className="font-script text-4xl leading-tight text-[color:var(--script)] sm:text-5xl">
           A little something
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
+        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
           Gift guide
         </p>
 
@@ -51,7 +51,7 @@ export async function Gifts() {
                 className="rounded-md border border-ink bg-white p-2 [&>svg]:block"
                 dangerouslySetInnerHTML={{ __html: c.svg }}
               />
-              <p className="mt-4 font-heading text-lg text-ink">
+              <p className="mt-4 font-sans text-lg text-ink">
                 {c.method}
               </p>
             </div>

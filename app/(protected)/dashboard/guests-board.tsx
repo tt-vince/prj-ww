@@ -277,7 +277,7 @@ function GuestCard({
           </div>
         </div>
         <div
-          className="flex-none font-serif text-[15px] text-stat-going"
+          className="flex-none font-sans text-[15px] text-stat-going"
           title={answered ? "Party size" : "Seat allotment"}
         >
           ×{partySize(row)}
@@ -496,7 +496,7 @@ function ColumnStats({
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5">
       <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-        <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+        <span className={cn("font-sans leading-none", num)} style={{ color: INK }}>
           {people}
         </span>
         <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
@@ -507,7 +507,7 @@ function ColumnStats({
         <>
           <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
           <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-            <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+            <span className={cn("font-sans leading-none", num)} style={{ color: INK }}>
               {adults}
             </span>
             <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
@@ -516,7 +516,7 @@ function ColumnStats({
           </div>
           <div className="h-5 w-px" style={{ background: CHIP_BORDER }} />
           <div className="flex items-baseline gap-1.5 whitespace-nowrap">
-            <span className={cn("font-serif leading-none", num)} style={{ color: INK }}>
+            <span className={cn("font-sans leading-none", num)} style={{ color: INK }}>
               {kids}
             </span>
             <span className="text-[10.5px] tracking-[0.08em] uppercase" style={{ color: MUT }}>
@@ -683,7 +683,7 @@ export function GuestsBoard({
                 </span>
               </span>
               <span
-                className="mt-1 block font-serif text-2xl leading-none"
+                className="mt-1 block font-sans text-2xl leading-none"
                 style={{ color: on ? INK : "#c4b7a0" }}
               >
                 {headcount(byStatus[key])}
@@ -751,7 +751,7 @@ export function GuestsBoard({
                   className="size-[9px] flex-none rounded-full"
                   style={{ background: col.dot }}
                 />
-                <h2 className="font-serif text-[19px] leading-none" style={{ color: INK }}>
+                <h2 className="font-sans text-[19px] leading-none" style={{ color: INK }}>
                   {col.label}
                 </h2>
               </div>

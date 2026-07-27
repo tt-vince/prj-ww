@@ -80,7 +80,7 @@ export function VinylPlayer({
           fontSize="7"
           letterSpacing="0.2"
           textAnchor="middle"
-          className="font-script"
+          className="font-sans"
         >
           <textPath href={`#${pathId}`} startOffset="25%">
             {phrase}

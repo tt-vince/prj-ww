@@ -107,7 +107,7 @@ const PAGER_ARROW =
 
 /**
  * Location — section after AttireGuide. Centred header (font-script h2 +
- * font-countdown label) over a draggable card stack, after the Motion card
+ * font-sans label) over a draggable card stack, after the Motion card
  * stack example (motion.dev/examples/react-card-stack). The map card leads the
  * deck; venue photos sit behind it, peeking at the bottom edge. Throwing the
  * front card sideways sends it to the back; the dots under the stack are the
@@ -135,7 +135,7 @@ export function Location() {
         <h2 className="font-script text-4xl leading-tight text-ink sm:text-5xl">
           Where we’ll be
         </h2>
-        <p className="mt-2 font-countdown text-sm tracking-wide text-ink">
+        <p className="mt-2 font-sans text-sm tracking-wide text-ink">
           Location
         </p>
 
@@ -174,10 +174,10 @@ export function Location() {
                   )}
                 >
                   <CardHeader className="text-center">
-                    <CardTitle className="font-heading text-lg text-ink">
+                    <CardTitle className="font-sans text-lg text-ink">
                       {VENUE.name}
                     </CardTitle>
-                    <CardDescription className="font-countdown text-xs tracking-wide">
+                    <CardDescription className="font-sans text-xs tracking-wide">
                       {VENUE.tag}
                     </CardDescription>
                   </CardHeader>

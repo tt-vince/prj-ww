@@ -72,7 +72,7 @@ function summarizeReply(formData: FormData): ReplySummary {
 
 /**
  * One shell for every block of the form. Each block is a `fieldset` with the
- * same header voice (Gilda title + Playwrite hint, centred like the letter's
+ * same header voice (sans title + sans hint, centred like the letter's
  * section headings) opened by the same ink hairline — the first block drops the
  * rule, so the sequence reads as one ruled page rather than a stack of cards.
  *
@@ -259,7 +259,7 @@ export function RsvpForm({
       <input type="hidden" name="token" value={token} />
 
       {/* The key for the mark, before the first field that carries one. */}
-      <p className="mb-7 text-center font-countdown text-xs tracking-wide">
+      <p className="mb-7 text-center font-sans text-xs tracking-wide">
         <span aria-hidden className="text-[color:var(--mark-required)]">
           &#42;
         </span>{" "}
@@ -384,7 +384,7 @@ export function RsvpForm({
 
               {companions.length > 0 && (
                 <div className="space-y-3">
-                  <p className="text-center font-countdown text-xs leading-relaxed tracking-wide">
+                  <p className="text-center font-sans text-xs leading-relaxed tracking-wide">
                     We&rsquo;d love a name for each of them, and anything they
                     can&rsquo;t eat &mdash; it helps us seat everyone and get
                     the food right.
@@ -555,12 +555,12 @@ function Section({
     <div className={sectionShell}>
       <fieldset>
         <legend className="w-full px-0 text-center">
-          <span className="block font-heading text-lg leading-snug">
+          <span className="block font-sans text-lg leading-snug">
             {title}
             {required && <RequiredMark />}
           </span>
           {hint && (
-            <span className="mt-1.5 block font-countdown text-xs leading-relaxed tracking-wide">
+            <span className="mt-1.5 block font-sans text-xs leading-relaxed tracking-wide">
               {hint}
             </span>
           )}
@@ -712,7 +712,7 @@ function CompanionFields({
       <legend className="sr-only">{label}</legend>
       <p
         aria-hidden
-        className="flex items-center justify-center gap-2 font-heading text-base leading-snug"
+        className="flex items-center justify-center gap-2 font-sans text-base leading-snug"
       >
         <Icon aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
         {label}
@@ -883,7 +883,7 @@ function Stepper({
         <output
           id={`${name}-value`}
           aria-live="polite"
-          className="min-w-8 flex-1 text-center font-heading text-xl tabular-nums"
+          className="min-w-8 flex-1 text-center font-sans text-xl tabular-nums"
         >
           {value}
         </output>
