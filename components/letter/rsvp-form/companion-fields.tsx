@@ -58,7 +58,7 @@ export function CompanionFields({
       <legend className="sr-only">{label}</legend>
       <p
         aria-hidden
-        className="flex items-center justify-center gap-2 font-sans text-base leading-snug"
+        className="flex items-center justify-center gap-2 font-sans text-subhead"
       >
         <Icon aria-hidden strokeWidth={1.5} className="size-4 shrink-0" />
         {label}

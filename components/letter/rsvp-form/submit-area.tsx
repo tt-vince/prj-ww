@@ -28,7 +28,7 @@ export function SubmitArea({
     // another section of it. Spacing alone carries the separation.
     <div className="mt-8 space-y-4">
       {error && (
-        <p role="alert" className="text-center text-sm italic text-destructive">
+        <p role="alert" className="text-center text-meta italic text-destructive">
           {error}
         </p>
       )}
@@ -40,7 +40,7 @@ export function SubmitArea({
         <div
           id="send-blocked"
           aria-live="polite"
-          className="space-y-1 text-center text-xs italic text-destructive"
+          className="space-y-1 text-center text-meta italic text-destructive"
         >
           {missing.map((m) => (
             <p key={m.field}>{m.message}</p>
@@ -58,9 +58,12 @@ export function SubmitArea({
           type="submit"
           disabled={pending || missing.length > 0}
           aria-describedby={missing.length > 0 ? "send-blocked" : undefined}
+          // One step above the shared button voice: every other control in the
+          // letter is a secondary action, and this is the one the site exists
+          // for. The voice is unchanged — same face, caps and tracking.
           className={cn(
             letterButton(),
-            "h-11 w-full justify-center",
+            "h-12 w-full justify-center text-meta",
             disabledControl,
           )}
         >

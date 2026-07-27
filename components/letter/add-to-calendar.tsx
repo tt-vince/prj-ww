@@ -107,7 +107,10 @@ export function AddToCalendar({ className }: { className?: string }) {
         Add to calendar
         <ChevronDown aria-hidden strokeWidth={1.5} />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" className="min-w-52 text-left">
+      {/* `letter-menu` (app/globals.css) sizes the items: this popup renders
+          through a portal, so it lands outside `.letter-theme` and the letter's
+          own rules never reach it. */}
+      <DropdownMenuContent align="center" className="letter-menu min-w-56 text-left">
         <DropdownMenuItem
           onClick={() => window.open(GOOGLE_URL, '_blank', 'noopener')}
         >

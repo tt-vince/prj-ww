@@ -169,7 +169,7 @@ export function RsvpForm({
       <input type="hidden" name="token" value={token} />
 
       {/* The key for the mark, before the first field that carries one. */}
-      <p className="mb-7 text-center font-sans text-xs tracking-wide">
+      <p className="mb-7 text-center font-sans text-meta">
         <span aria-hidden className="text-[color:var(--mark-required)]">
           &#42;
         </span>{" "}
@@ -251,10 +251,12 @@ export function RsvpForm({
             </>
           ) : (
             <Section title="Who is coming?" required>
-              {/* gap-6 between the two counters against gap-2 inside each one:
-                without that contrast the four round buttons read as one run of
-                four rather than as two separate counts. */}
-              <div className="grid grid-cols-2 gap-6">
+              {/* The gap between the two counters stays wider than the gap
+                inside each one — without that contrast the four round buttons
+                read as one run of four rather than as two separate counts. The
+                pair tightens on a phone because the buttons are 44px tap
+                targets: at gap-6 the two counters overflowed their column. */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-6">
                 <Stepper
                   label="Adults"
                   icon={UserRound}
@@ -281,7 +283,7 @@ export function RsvpForm({
               <p
                 aria-live="polite"
                 className={cn(
-                  "text-center text-sm",
+                  "text-center text-meta",
                   overCapacity && "font-medium text-destructive",
                 )}
               >
@@ -294,7 +296,7 @@ export function RsvpForm({
 
               {companions.length > 0 && (
                 <div className="space-y-3">
-                  <p className="text-center font-sans text-xs leading-relaxed tracking-wide">
+                  <p className="text-center font-sans text-meta">
                     We&rsquo;d love a name for each of them, and anything they
                     can&rsquo;t eat &mdash; it helps us seat everyone and get
                     the food right.

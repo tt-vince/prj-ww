@@ -34,7 +34,7 @@ export async function Gifts() {
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="A little something" kicker="Gift guide" />
 
-        <p className="mx-auto mt-8 max-w-md text-sm leading-relaxed text-muted-foreground">
+        <p className="mx-auto mt-8 max-w-lg text-lead text-muted-foreground">
           Your presence is the only gift we’re hoping for. But if you’d like to
           give a little more, you can scan a code below with your banking app.
         </p>
@@ -47,7 +47,7 @@ export async function Gifts() {
                 className="rounded-md border border-ink bg-white p-2 [&>svg]:block"
                 dangerouslySetInnerHTML={{ __html: c.svg }}
               />
-              <p className="mt-4 font-sans text-lg text-ink">
+              <p className="mt-4 font-sans text-subhead text-ink">
                 {c.method}
               </p>
             </div>

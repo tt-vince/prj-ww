@@ -1,5 +1,5 @@
 /** Errors carry no hue in this document — wording and italics do the work. */
-export const errorText = "block text-xs italic text-destructive";
+export const errorText = "block text-meta italic text-destructive";
 
 /**
  * One disabled treatment for every button in the form: unfilled, with the

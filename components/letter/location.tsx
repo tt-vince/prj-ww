@@ -170,10 +170,10 @@ export function Location() {
                   )}
                 >
                   <CardHeader className="text-center">
-                    <CardTitle className="font-sans text-lg text-ink">
+                    <CardTitle className="font-sans text-ink">
                       {VENUE.name}
                     </CardTitle>
-                    <CardDescription className="font-sans text-xs tracking-wide">
+                    <CardDescription className="font-sans tracking-wide">
                       {VENUE.tag}
                     </CardDescription>
                   </CardHeader>
@@ -181,12 +181,12 @@ export function Location() {
                     {/* Same address row as the Hotels cards, centred: pin icon
                         and street line on one line, icon aligned to the first
                         line of wrapped text. */}
-                    <dl className="text-sm text-muted-foreground">
+                    <dl className="text-meta text-muted-foreground">
                       <div className="flex justify-center gap-2">
                         <dt className="pt-0.5">
                           <MapPin
                             aria-hidden
-                            className="size-3.5"
+                            className="size-4"
                             strokeWidth={1.5}
                           />
                           <span className="sr-only">Address</span>
@@ -215,7 +215,7 @@ export function Location() {
 
                     {/* Measure-capped so the centred line doesn't run the full
                         width of the widened card on desktop. */}
-                    <p className="mx-auto mt-5 max-w-prose text-sm leading-relaxed text-muted-foreground">
+                    <p className="mx-auto mt-5 max-w-prose text-body text-muted-foreground">
                       {VENUE.caption}
                     </p>
 

@@ -43,7 +43,7 @@ export function Stepper({
 }) {
   const step = cn(
     letterButton({ variant: "outline" }),
-    "size-9 shrink-0 justify-center rounded-full p-0",
+    "size-11 shrink-0 justify-center rounded-full p-0",
     disabledControl,
   );
 
@@ -56,7 +56,7 @@ export function Stepper({
         <Icon aria-hidden strokeWidth={1.5} className="size-3.5 shrink-0" />
         {label}
       </Label>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <button
           type="button"
           className={step}
@@ -69,7 +69,7 @@ export function Stepper({
         <output
           id={`${name}-value`}
           aria-live="polite"
-          className="min-w-8 flex-1 text-center font-sans text-xl tabular-nums"
+          className="min-w-8 flex-1 text-center font-sans text-heading tabular-nums"
         >
           {value}
         </output>

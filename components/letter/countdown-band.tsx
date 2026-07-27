@@ -52,7 +52,7 @@ export function CountdownBand() {
 
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-sans text-xl leading-tight text-ink sm:text-2xl">
+        <h2 className="font-sans text-subhead text-ink">
           counting down to the day
         </h2>
 
@@ -66,7 +66,7 @@ export function CountdownBand() {
           size="lg"
           className="mt-8 text-ink"
           srSuffix="until we say I do"
-          labelClassName="font-script text-[2.75rem] leading-tight text-ink sm:text-[3.125rem]"
+          labelClassName="font-script text-title text-ink"
           tickClassName="text-ink"
           label="until we say I do"
         />

@@ -93,7 +93,7 @@ async function RsvpDeadline({ searchParams }: { searchParams: SearchParams }) {
   const answered = guest.status !== "pending";
 
   return (
-    <p className="mt-6 text-center font-sans text-sm leading-relaxed tracking-wide text-white">
+    <p className="mt-6 text-center font-sans text-body text-white">
       To help us prepare everything with love and care, making sure the day is
       as unforgettable for you as it will be for us, we are hoping to{" "}
       {answered ? "finalize the plans" : "receive your response"} by{" "}
@@ -133,7 +133,7 @@ function RsvpBodyFallback() {
       className="py-10 text-center text-muted-foreground"
       aria-hidden
     >
-      <p className="font-sans text-lg">Loading your invitation…</p>
+      <p className="font-sans text-subhead">Loading your invitation…</p>
     </CardContent>
   );
 }
@@ -148,10 +148,10 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
   if (!guest) {
     return (
       <CardContent className="py-6 text-center">
-        <p className="font-sans text-xl text-foreground">
+        <p className="font-sans text-subhead text-foreground">
           Reply by your personal link
         </p>
-        <p className="mx-auto mt-3 max-w-[22rem] font-sans text-xs leading-relaxed tracking-wide">
+        <p className="mx-auto mt-3 max-w-[24rem] font-sans text-meta">
           This RSVP is by invitation. Please open the personal link we sent you
           to let us know if you can make it.
         </p>
@@ -186,10 +186,10 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
   return (
     <>
       <CardHeader className="text-center">
-        <CardTitle className="font-sans text-xl">
+        <CardTitle className="font-sans">
           {guest.name ? `Dear ${guest.name},` : "Kindly reply"}
         </CardTitle>
-        <CardDescription className="font-sans text-xs leading-relaxed tracking-wide">
+        <CardDescription className="font-sans">
           We&rsquo;d be honoured to have you celebrate with us.
         </CardDescription>
       </CardHeader>

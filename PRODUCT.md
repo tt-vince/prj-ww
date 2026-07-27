@@ -118,9 +118,40 @@ imported hi-fi Claude Design files and are settled.
 - **Section set and order are locked.** Hero, countdown band, our story, the day itself, attire
   guide, location, hotels, RSVP, gifts, FAQ.
 - **Copy is not locked** — all guest-facing content is draft and may be rewritten.
-- Type stack in use: DM Sans (`--font-sans`), Gilda Display (`--font-serif`/headings),
-  Parisienne (`--font-script`, couple's names), Playwrite US Modern (`--font-countdown`),
-  Beth Ellen (`--font-hand`, casual handwriting — loaded, not yet applied anywhere).
+- **Type stack: two faces, and only two.** `app/layout.tsx` loads Montserrat (`--font-sans`)
+  and Parisienne (`--font-script`) — nothing else. Earlier drafts of this file also listed
+  DM Sans, Gilda Display, Playwrite US Modern and Beth Ellen; DM Sans was the sans face until
+  2026-07-27, and the other three were never loaded at all. Adding a third face needs a role
+  only it can perform, and a `next/font` entry to go with it.
+  - `--font-sans` is global, so Montserrat is also the dashboard's face. `docs/rsvp-spec.md`
+    still describes /dashboard and /login as following an imported hi-fi design set in DM
+    Sans; that part of the import no longer holds.
+  - Montserrat is materially WIDER than DM Sans, and the countdown row is the tightest line
+    in the letter — four number+unit pairs across a 360px phone. `--text-figure`'s floor is
+    set by that row, not by taste: every 1px of figure costs about 5px of row width. Re-measure
+    it before changing the sans face again.
+- **The type scale is locked, and it is a role scale.** The nine roles in `app/globals.css`
+  (`micro`, `label`, `meta`, `body`, `lead`, `subhead`, `heading`, `entry`, `title`, `figure`)
+  are the letter's only sizes. Two of them — `entry` and `title` — are for Parisienne and are
+  sized far above the sans role of the same rank, because the script reads at roughly half its
+  nominal size; set a script line at a sans role and it comes out quieter than body copy. Each is one fluid `clamp()` between a 360px phone and a 1280px
+  desktop, so `text-body` alone covers both breakpoints — a role must never need an `sm:`
+  size beside it. Use a role name; do not reach for `text-sm`, `text-xs`, or a bracketed
+  pixel size. The floor is 16px for prose and 12px for anything at all, both measured on the
+  narrowest phone. Hierarchy still comes from size, face and weight only — never from tone.
+  - **A new role must be registered in `lib/utils.ts` as well as `app/globals.css.`**
+    tailwind-merge cannot infer that `text-title` is a size, so it files unknown `text-*`
+    names under *colour* — and `cn('text-title', 'text-ink')` then reads as a
+    colour-vs-colour conflict and silently DROPS the size. That is not theoretical: it is
+    what flattened every section heading, kicker and button on the first pass. `cn`
+    extends the `font-size` group with the role names to prevent it.
+  - The shadcn primitives are sized for the letter by unlayered `.letter-theme [data-slot=…]`
+    rules in the same file, because their own base classes are utilities that a call-site
+    class cannot reliably beat. Change the size there, not per component.
+  - Exceptions, both deliberate: the hero's couple names are sized against the lace frame
+    they sit inside rather than the scale, and the countdown row sizes its parts in `em`
+    against a single `text-figure` on the row, so the whole line scales from one knob and
+    cannot burst its column on a phone.
 - Florals: vines must sit on a component's real border (edge-anchored), never float near
   corners. No hand-rolled SVG floral path art — use real assets or minimal geometry.
 

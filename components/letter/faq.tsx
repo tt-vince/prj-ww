@@ -33,8 +33,8 @@ export function Faq() {
               key={f.q}
               className="rounded-xl bg-ink px-6 py-6 sm:px-8"
             >
-              <p className="font-sans text-lg text-white">{f.q}</p>
-              <p className="mt-2 text-sm leading-relaxed text-white">
+              <p className="font-sans text-subhead text-white">{f.q}</p>
+              <p className="mt-2 text-body text-white">
                 {f.a}
               </p>
             </div>

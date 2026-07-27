@@ -21,14 +21,14 @@ export function AttireGuide() {
           sizes="(max-width: 640px) 92vw, min(80vw, 56rem)"
         />
         <div className="mx-auto mt-8 max-w-md space-y-3">
-          <p className="font-sans text-lg leading-snug text-ink">
+          <p className="font-sans text-subhead text-ink">
             Semi-formal — garden party
           </p>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-body text-muted-foreground">
             We would love to see you in the colours above — wear one, or mix a
             few.
           </p>
-          <p className="text-sm leading-relaxed text-muted-foreground">
+          <p className="text-body text-muted-foreground">
             Please leave white and ivory for the couple.
           </p>
         </div>

@@ -104,13 +104,19 @@ export function OurStory() {
   return (
     <section className="relative z-10 -mt-48">
       <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
-        <div className="mx-auto max-w-[64rem]">
+        <div className="mx-auto max-w-[64rem] lg:max-w-[80rem]">
           <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 
           {/* Scrapbook thread. Camera charm hangs over the top; the spine runs
               down the centre on sm+, and on mobile the per-item connector
               segments join into one continuous centre thread. */}
-          <div className="relative mx-auto mt-24 max-w-[52rem] sm:mt-28">
+          {/* The scrapbook is two columns either side of the thread, so the
+              text column is only ever half of this minus the gutter. At the
+              phone-first 52rem that left ~35 characters a line on a desktop —
+              a wrapped, ragged column in the middle of an empty screen. It
+              widens twice on the way up so the memories read at a proper
+              measure; the polaroid keeps its own fixed width either way. */}
+          <div className="relative mx-auto mt-24 max-w-[52rem] sm:mt-28 lg:max-w-[64rem] xl:max-w-[72rem]">
             {/* Hand-drawn polaroid-camera charm, centred over the top of the thread. */}
             <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-24 -translate-x-1/2 -translate-y-[85%] sm:w-28" />
 
@@ -121,13 +127,13 @@ export function OurStory() {
               className="absolute top-0 bottom-[8rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white sm:block"
             />
 
-            <ol className="space-y-6 sm:space-y-0">
+            <ol className="space-y-10 sm:space-y-0">
               {MEMORIES.map((m, i) => {
                 const imageLeft = i % 2 === 0;
                 return (
                   <motion.li
                     key={m.date}
-                    className="relative flex flex-col items-center sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-16 sm:py-8"
+                    className="relative flex flex-col items-center sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-16 sm:py-12"
                     initial="hidden"
                     whileInView="show"
                     viewport={{ once: true, amount: 0.3 }}
@@ -161,10 +167,10 @@ export function OurStory() {
                           : 'sm:order-1 sm:pr-10 sm:text-right'
                       )}
                     >
-                      <p className="font-sans text-[11px] font-medium uppercase tracking-[0.22em] text-white">
+                      <p className="font-sans text-label font-medium uppercase tracking-[0.16em] text-white">
                         {m.date}
                       </p>
-                      <h3 className="relative mt-1 font-sans text-2xl leading-tight text-white sm:text-[2rem]">
+                      <h3 className="relative mt-1 font-script text-entry text-white">
                         {/* Connector from the centre spine to the title (sm+).
                             Width = text padding (pl/pr-10 = 40px) + half the
                             column gap (gap-x-16 = 64px). */}
@@ -177,9 +183,7 @@ export function OurStory() {
                         />
                         {m.title}
                       </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-white">
-                        {m.body}
-                      </p>
+                      <p className="mt-2 text-body text-white">{m.body}</p>
                     </motion.div>
                   </motion.li>
                 );
@@ -264,7 +268,7 @@ function Polaroid({
           </button>
         ) : (
           <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_10px)]">
-            <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-white">
+            <span className="font-mono text-micro uppercase tracking-[0.14em] text-white">
               photo · {caption.replace(/\s*♡$/, '')}
             </span>
           </div>
@@ -273,7 +277,7 @@ function Polaroid({
 
       {/* Handwritten note on the polaroid's white bottom border rather than
           over the photo — on the frame it stays legible whatever the photo. */}
-      <figcaption className="absolute inset-x-3 bottom-1.5 text-center font-script text-lg leading-tight text-ink">
+      <figcaption className="absolute inset-x-3 bottom-1 text-center font-script text-subhead leading-tight text-ink">
         {caption}
       </figcaption>
     </figure>
