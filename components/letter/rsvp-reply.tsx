@@ -73,8 +73,11 @@ export function RsvpReply({
   return (
     <div role="status" className="py-2">
       <div className="text-center">
+        {/* One heading for both answers: the reply itself already says which
+            one it was, and a different headline per status made the decline
+            read as the consolation version of the acceptance. */}
         <p className="font-script text-4xl leading-tight">
-          {going ? 'Thank you' : 'Thank you for telling us'}
+          Thank you for telling us
         </p>
         <p className="mx-auto mt-2 max-w-[24rem] font-countdown text-xs leading-relaxed tracking-wide">
           {going
