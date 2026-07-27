@@ -1,16 +1,16 @@
-import { Suspense } from 'react';
-import { getGuestByToken } from '@/lib/data';
-import { RSVP_DEADLINE_LABEL } from '@/lib/wedding';
-import { cn } from '@/lib/utils';
-import { RsvpForm } from '@/components/rsvp-form';
-import { RsvpReply } from '@/components/letter/rsvp-reply';
+import { Suspense } from "react";
+import { getGuestByToken } from "@/lib/data";
+import { RSVP_DEADLINE_LABEL } from "@/lib/wedding";
+import { cn } from "@/lib/utils";
+import { RsvpForm } from "@/components/rsvp-form";
+import { RsvpReply } from "@/components/letter/rsvp-reply";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from "@/components/ui/card";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -41,7 +41,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-white"
-        style={{ borderRadius: '0 0 50% 50% / 0 0 180px 180px' }}
+        style={{ borderRadius: "0 0 50% 50% / 0 0 180px 180px" }}
       />
       <div className="relative mx-auto max-w-[32rem]">
         <div className="text-center">
@@ -93,9 +93,20 @@ async function RsvpDeadline({ searchParams }: { searchParams: SearchParams }) {
   const guest = token ? await getGuestByToken(token) : undefined;
   if (!guest) return null;
 
+  // A guest who has already answered has nothing left to send, so asking for
+  // their response reads as though we lost it. They get the same date as the
+  // one we are working towards, plus the one thing we still need from them.
+  const answered = guest.status !== "pending";
+
   return (
     <p className="mt-6 text-center font-countdown text-sm leading-relaxed tracking-wide text-white">
-      To help us prepare everything with love and care, making sure the day is as unforgettable for you as it will be for us, we are hoping to receive your response by {RSVP_DEADLINE_LABEL}.
+      To help us prepare everything with love and care, making sure the day is
+      as unforgettable for you as it will be for us, we are hoping to{" "}
+      {answered ? "finalize the plans" : "receive your response"} by{" "}
+      {RSVP_DEADLINE_LABEL}.
+      {answered
+        ? " Please let us know if there are any changes beforehand."
+        : ""}
     </p>
   );
 }
@@ -106,16 +117,16 @@ function WeddingBells({ className }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('block aspect-[87.2656/77.7148] bg-white', className)}
+      className={cn("block aspect-[87.2656/77.7148] bg-white", className)}
       style={{
         maskImage: mask,
         WebkitMaskImage: mask,
-        maskRepeat: 'no-repeat',
-        WebkitMaskRepeat: 'no-repeat',
-        maskSize: 'contain',
-        WebkitMaskSize: 'contain',
-        maskPosition: 'center',
-        WebkitMaskPosition: 'center',
+        maskRepeat: "no-repeat",
+        WebkitMaskRepeat: "no-repeat",
+        maskSize: "contain",
+        WebkitMaskSize: "contain",
+        maskPosition: "center",
+        WebkitMaskPosition: "center",
       }}
     />
   );
@@ -124,7 +135,10 @@ function WeddingBells({ className }: { className?: string }) {
 /** Skeleton shown while the token-dependent body streams in. */
 function RsvpBodyFallback() {
   return (
-    <CardContent className="py-10 text-center text-muted-foreground" aria-hidden>
+    <CardContent
+      className="py-10 text-center text-muted-foreground"
+      aria-hidden
+    >
       <p className="font-heading text-lg">Loading your invitation…</p>
     </CardContent>
   );
@@ -154,7 +168,7 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
   // Already answered — don't offer to overwrite (mirrors submitRsvp's guard).
   // Their own reply is read back to them instead of a bare thank-you, so the
   // link stays useful: it is where they check what they told us.
-  if (guest.status !== 'pending') {
+  if (guest.status !== "pending") {
     return (
       <CardContent className="py-6">
         <RsvpReply
@@ -179,7 +193,7 @@ async function RsvpBody({ searchParams }: { searchParams: SearchParams }) {
     <>
       <CardHeader className="text-center">
         <CardTitle className="font-heading text-xl">
-          {guest.name ? `Dear ${guest.name},` : 'Kindly reply'}
+          {guest.name ? `Dear ${guest.name},` : "Kindly reply"}
         </CardTitle>
         <CardDescription className="font-countdown text-xs leading-relaxed tracking-wide">
           We&rsquo;d be honoured to have you celebrate with us.
