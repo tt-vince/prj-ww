@@ -168,14 +168,6 @@ export function RsvpForm({
     >
       <input type="hidden" name="token" value={token} />
 
-      {/* The key for the mark, before the first field that carries one. */}
-      <p className="mb-7 text-center font-sans text-meta">
-        <span aria-hidden className="text-[color:var(--mark-required)]">
-          &#42;
-        </span>{" "}
-        Required
-      </p>
-
       <Section title="Will you attend?" required>
         <div
           className="grid gap-2.5"
