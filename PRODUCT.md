@@ -66,10 +66,12 @@ imported hi-fi Claude Design files and are settled.
 
 ## Brand Commitments
 
-- **Colors are locked, and the home page is two colours only.** The guest letter
-  (`app/page.tsx` → `components/wedding-letter.tsx` → `components/letter/*`) uses **white
-  `#ffffff` and ink `#1E2A18`, and nothing else**. Both at FULL strength: no tints, no thinned
-  ink, no `ink/70`-style tiers. Whatever was green before is now exactly `#1E2A18`.
+- **Colors are locked: the home page is white + ink, with three named exceptions.** The guest
+  letter (`app/page.tsx` → `components/wedding-letter.tsx` → `components/letter/*`) uses **white
+  `#ffffff` and ink `#1E2A18`** for everything except the three cases listed under "Granted
+  exceptions" below — anything not on that list is one of the two colours at FULL strength: no
+  tints, no thinned ink, no `ink/70`-style tiers. Whatever was green before is now exactly
+  `#1E2A18`.
   Hierarchy comes from size, face and weight — never from tone. No greens (`#2C3F25`, `#556D47`, `#91A17C`), creams
   (`#f5efdd`, `#e6e8d0`), or blues (`#1f4453`, `#142a36`); those are gone from the letter.
   Shadows are ink-tinted (`rgba(30,42,24,…)`), not black.
@@ -79,21 +81,38 @@ imported hi-fi Claude Design files and are settled.
     subtree, so shadcn components used inside the letter need no per-component colour. Use the
     `text-ink` / `bg-ink` / `border-ink` utilities with opacity modifiers — don't reintroduce
     hex literals.
-  - Alpha survives only where it is physically a scrim or a shadow: the hero's overlay on the
-    lily photo, the frosted lace window, and box-shadows (ink-tinted). Text, rules, fills,
-    borders and icons are always full white or full ink.
+  - Alpha survives where it is physically a scrim or a shadow: the hero's overlay on the
+    lily photo, the frosted lace window, and box-shadows (ink-tinted). Otherwise text, rules,
+    fills, borders and icons are full white or full ink — the RSVP form's `ink/20` rules and
+    card frames are the single exception, granted below.
   - The one exception to ink-tinting is the hero photo scrim, which is neutral `bg-black/50`:
     ink-tinting it cast a green wash over the lily photograph, and a scrim's job is to darken
     the image, not to colour it.
   - Two-colour consequences to respect rather than work around: hover states invert
-    (`hover:bg-white hover:text-ink`) instead of tinting; rules and dividers are hairlines of
-    full ink on white, never a tinted groove; placeholder fills are hairline stripes of one
-    colour on the other, not a wash.
-  - `destructive` is ink too. Error states are carried by `role="alert"` / `aria-invalid` and
-    wording, never by hue.
+    (`hover:bg-white hover:text-ink`) instead of tinting; placeholder fills are hairline stripes
+    of one colour on the other, not a wash.
+  - **Granted exceptions — the complete list. Nothing else may be added without the couple's
+    say-so; "there is already an exception" is not an argument for a fourth.**
+    1. **The RSVP form's section rules are thinned ink (`ink/20`).** Approved 2026-07-27. Five
+       full-ink hairlines inside one small card read as heavier than the answers they separate.
+       Applies to the rules dividing the form's sections and the companion cards' frames
+       (`components/rsvp-form.tsx`, `components/letter/rsvp-reply.tsx`) — **not** to rules
+       anywhere else in the letter, which stay full ink on white.
+    2. **Required marks are red (`--mark-required: #a4322b`).** Approved 2026-07-27. A brick red
+       muted towards the ink's olive so it sits in the letter rather than shouting over it.
+    3. **Error states are that same red**, via `.letter-theme`'s `--destructive`, which now
+       points at `--mark-required` so shadcn's `aria-invalid:border-destructive` and
+       `text-destructive` mark the offending field. Approved 2026-07-27.
+
+    Both red cases are bound by the same rule: **red never carries meaning on its own.** A
+    required mark is `aria-hidden` beside a real `required` attribute plus visually hidden
+    "(required)" text; every error is also stated in words through `role="alert"`, and the
+    form's send button is disabled with its reasons spelled out. Remove the colour and the form
+    still tells the guest exactly what is wrong. `#a4322b` on white is 6.4:1, so it passes AA as
+    text in its own right.
   - **Exempt:** photographs (`/hero-lily.jpg`, `/beach-location.jpg`, the picsum stand-ins) and
     `public/attire-guide.png`, which is a multi-colour palette illustration and is the content.
-    Everything drawn in CSS or SVG obeys the two colours.
+    Everything else drawn in CSS or SVG obeys the two colours plus the granted exceptions above.
 - **The dashboard keeps "wisteria & fig."** The `:root` token set in `app/globals.css` is
   binding for `/dashboard` and `/login` and must not be retuned to match the letter.
 - **Section set and order are locked.** Hero, countdown band, our story, the day itself, attire
