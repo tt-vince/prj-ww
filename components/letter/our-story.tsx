@@ -1,7 +1,9 @@
 'use client';
 
-import { motion } from 'motion/react';
+import { useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { MORPH, PhotoLightbox, photoLayoutId } from '@/components/letter/photo-lightbox';
 import { COUPLE_NAMES } from '@/lib/wedding';
 import { SectionHeading } from '@/components/letter/section-heading';
 
@@ -93,6 +95,12 @@ const MEMORIES: Memory[] = [
 ];
 
 export function OurStory() {
+  // Polaroid tapped open in the shared lightbox (photo-lightbox.tsx): the
+  // photo flies out of its polaroid to the centre of the screen. Stand-ins are
+  // square 600x600 — revisit w/h if real files with other ratios land.
+  const [active, setActive] = useState<Memory | null>(null);
+  const reduce = !!useReducedMotion();
+
   return (
     <section className="relative z-10 -mt-48">
       <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-5 pt-28 pb-20 text-center sm:px-9 sm:pt-32 sm:pb-24">
@@ -139,7 +147,7 @@ export function OurStory() {
                         imageLeft ? 'sm:order-1' : 'sm:order-2'
                       )}
                     >
-                      <Polaroid memory={m} />
+                      <Polaroid memory={m} reduce={reduce} onOpen={() => setActive(m)} />
                     </motion.div>
 
                     {/* Text, hugging the spine. */}
@@ -201,12 +209,36 @@ export function OurStory() {
           </div>
         </div>
       </div>
+
+      <PhotoLightbox
+        photo={
+          active?.image
+            ? {
+                id: `story-${active.date}`,
+                src: active.image,
+                alt: active.title,
+                w: 600,
+                h: 600,
+              }
+            : null
+        }
+        reduce={reduce}
+        onClose={() => setActive(null)}
+      />
     </section>
   );
 }
 
 /** A single tilted polaroid: photo (or placeholder), handwritten note. */
-function Polaroid({ memory }: { memory: Memory }) {
+function Polaroid({
+  memory,
+  reduce,
+  onOpen,
+}: {
+  memory: Memory;
+  reduce: boolean;
+  onOpen: () => void;
+}) {
   const { image, caption, title, tilt } = memory;
   return (
     <figure
@@ -215,13 +247,21 @@ function Polaroid({ memory }: { memory: Memory }) {
     >
       <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_rgba(30,42,24,0.3)]">
         {image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={image}
-            alt={title}
-            className="size-full object-cover"
-            loading="lazy"
-          />
+          <button
+            type="button"
+            onClick={onOpen}
+            aria-label={`View photo: ${title}`}
+            className="block size-full cursor-zoom-in focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+          >
+            <motion.img
+              layoutId={reduce ? undefined : photoLayoutId(`story-${memory.date}`)}
+              transition={MORPH}
+              src={image}
+              alt={title}
+              className="size-full object-cover"
+              loading="lazy"
+            />
+          </button>
         ) : (
           <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_10px)]">
             <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-white">

@@ -1,0 +1,105 @@
+'use client';
+
+import { useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { MORPH, PhotoLightbox, photoLayoutId } from '@/components/letter/photo-lightbox';
+
+export type Shot = {
+  /** Alt text — also labels the striped placeholder when `image` is unset. */
+  alt: string;
+  /** Intrinsic pixel size. Landscape (`w > h`) is what earns a 2-column tile. */
+  w: number;
+  h: number;
+  image?: string;
+};
+
+/**
+ * Client half of the prenup section: the mosaic grid. Tapping a tile morphs
+ * the photo into the shared `PhotoLightbox` (see photo-lightbox.tsx for the
+ * fly-to-centre mechanics). Placeholder tiles (no `image`) are inert.
+ */
+export function PrenupMosaic({ shots, mobileCount }: { shots: Shot[]; mobileCount: number }) {
+  const [active, setActive] = useState<Shot | null>(null);
+  const reduce = !!useReducedMotion();
+
+  return (
+    <>
+      {/* `auto-rows-*` is the shared tile height; `dense` stops a 2-column tile
+          from leaving the column beside it empty. */}
+      <div className="mt-10 grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
+        {shots.map((shot, index) => (
+          <Tile
+            key={shot.alt}
+            shot={shot}
+            reduce={reduce}
+            // Past the mobile budget: shown on desktop, dropped on phones.
+            hiddenOnMobile={index >= mobileCount}
+            onOpen={() => setActive(shot)}
+          />
+        ))}
+      </div>
+
+      <PhotoLightbox
+        photo={
+          active?.image
+            ? {
+                id: `prenup-${active.alt}`,
+                src: active.image,
+                alt: active.alt,
+                w: active.w,
+                h: active.h,
+              }
+            : null
+        }
+        reduce={reduce}
+        onClose={() => setActive(null)}
+      />
+    </>
+  );
+}
+
+/** One photo. No frame, no rounding, no shadow — the image is the whole tile. */
+function Tile({
+  shot,
+  reduce,
+  hiddenOnMobile,
+  onOpen,
+}: {
+  shot: Shot;
+  reduce: boolean;
+  hiddenOnMobile: boolean;
+  onOpen: () => void;
+}) {
+  const span = shot.w > shot.h ? 'col-span-2' : 'col-span-1';
+  const hidden = hiddenOnMobile ? ' max-sm:hidden' : '';
+
+  if (!shot.image) {
+    return (
+      <div className={`relative overflow-hidden ${span}${hidden}`}>
+        <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#1e2a18,#1e2a18_1px,#ffffff_1px,#ffffff_10px)]">
+          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink">
+            photo · {shot.alt}
+          </span>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`View photo: ${shot.alt}`}
+      className={`relative cursor-zoom-in overflow-hidden focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-ink ${span}${hidden}`}
+    >
+      <motion.img
+        layoutId={reduce ? undefined : photoLayoutId(`prenup-${shot.alt}`)}
+        transition={MORPH}
+        src={shot.image}
+        alt={shot.alt}
+        className="size-full object-cover"
+        loading="lazy"
+      />
+    </button>
+  );
+}

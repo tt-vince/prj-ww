@@ -1,4 +1,5 @@
 import { SectionHeading } from '@/components/letter/section-heading';
+import { PrenupMosaic, type Shot } from '@/components/letter/prenup-gallery';
 
 /**
  * Prenup gallery — EDGE-TO-EDGE white section between Our Story and
@@ -17,8 +18,10 @@ import { SectionHeading } from '@/components/letter/section-heading';
  * tile is the SAME HEIGHT (a fixed `grid-auto-rows`); tiles differ only in
  * WIDTH, and landscape shots take two columns. 2 columns on phones, 4 from `sm`
  * up, 6px gutter. Because heights are uniform there is no masonry packing and
- * nothing needs measuring — the whole thing is static CSS, which is why this
- * file is a server component with no hooks.
+ * nothing needs measuring. This file stays a server component that does the
+ * slot-budget math; the grid itself lives in `prenup-gallery.tsx` (client),
+ * because tiles are clickable — a tap morphs the photo into a centered
+ * lightbox via motion's shared `layoutId`.
  *
  * The mosaic is capped at 2 rows on desktop and 3 on mobile, so it stays a band
  * in the letter rather than an endless wall. The cap is a budget of column
@@ -35,15 +38,6 @@ import { SectionHeading } from '@/components/letter/section-heading';
  * `next/image` becomes usable here; remote picsum URLs cannot go through it
  * because `next.config.ts` declares no `images.remotePatterns`.
  */
-
-type Shot = {
-  /** Alt text — also labels the striped placeholder when `image` is unset. */
-  alt: string;
-  /** Intrinsic pixel size. Landscape (`w > h`) is what earns a 2-column tile. */
-  w: number;
-  h: number;
-  image?: string;
-};
 
 // Slot costs run [1, 2, 1, 1, 1, 2]: the first five spend the mobile budget of
 // 6 exactly, and all six spend the desktop budget of 8 exactly — so both
@@ -92,23 +86,7 @@ export function Prenup() {
     <section id="prenup" className="relative z-0 -mt-48 bg-white pt-76">
       <Heading />
 
-      {/* `auto-rows-*` is the shared tile height; `dense` stops a 2-column tile
-          from leaving the column beside it empty. */}
-      <div className="mt-10 grid auto-rows-[15rem] grid-flow-row-dense grid-cols-2 gap-1.5 sm:auto-rows-[22rem] sm:grid-cols-4">
-        {VISIBLE.map((shot, index) => (
-          <Tile
-            key={shot.alt}
-            shot={shot}
-            className={[
-              slotCost(shot) === 2 ? 'col-span-2' : 'col-span-1',
-              // Past the mobile budget: shown on desktop, dropped on phones.
-              index >= MOBILE_COUNT ? 'max-sm:hidden' : '',
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          />
-        ))}
-      </div>
+      <PrenupMosaic shots={VISIBLE} mobileCount={MOBILE_COUNT} />
 
       {/* Full-bleed, no bottom padding: the border closes the section and the
           drawing's baseline meets DayItself's white. Same treatment as the
@@ -156,21 +134,3 @@ function Heading() {
   );
 }
 
-/** One photo. No frame, no rounding, no shadow — the image is the whole tile. */
-function Tile({ shot, className }: { shot: Shot; className: string }) {
-  const { image, alt } = shot;
-  return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {image ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={image} alt={alt} className="size-full object-cover" loading="lazy" />
-      ) : (
-        <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#1e2a18,#1e2a18_1px,#ffffff_1px,#ffffff_10px)]">
-          <span className="font-mono text-[9px] uppercase tracking-[0.14em] text-ink">
-            photo · {alt}
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
