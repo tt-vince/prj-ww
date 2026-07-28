@@ -326,22 +326,38 @@ function StackCard({
 }) {
   const reduce = useReducedMotion();
   const x = useMotionValue(0);
-  const opacity = useMotionValue(1);
+  const lift = useMotionValue(0);
   const dragRotate = useTransform(x, [-240, 240], reduce ? [0, 0] : [-14, 14]);
 
   /**
-   * Throw the card off the side, then drop it at the back of the deck. The
-   * card is faded out for the hand-off and faded back in from its new resting
-   * place, which hides the instant where `x` snaps back to 0.
+   * Throw the card off the side, then slide it back in *underneath* the deck.
+   *
+   * The two legs are split by `onDismiss()`: while the card is off-screen the
+   * deck re-orders, so this card's `z-index` drops to the back. The return leg
+   * then travels the same path in reverse with every other card drawn over it,
+   * which reads as the card tucking under the stack rather than vanishing. The
+   * outer element's spring is meanwhile settling into the new depth's peek and
+   * shrink, so the card arrives already sized for the bottom of the deck.
    */
   const throwAway = async (direction: number) => {
+    if (reduce) {
+      onDismiss();
+      return;
+    }
+
     await Promise.all([
-      animate(x, direction * 420, { duration: 0.25, ease: 'easeIn' }),
-      animate(opacity, 0, { duration: 0.25 }),
+      animate(x, direction * 460, { duration: 0.26, ease: [0.32, 0, 0.67, 0] }),
+      // A shallow dip on the way out, so the arc back in comes from below the
+      // deck's front edge rather than straight across it.
+      animate(lift, PEEK_ROOM * 0.5, { duration: 0.26, ease: 'easeOut' }),
     ]);
-    x.set(0);
+
     onDismiss();
-    animate(opacity, 1, { duration: 0.35, delay: 0.05 });
+
+    await Promise.all([
+      animate(x, 0, { duration: 0.46, ease: [0.33, 1, 0.68, 1] }),
+      animate(lift, 0, { duration: 0.46, ease: [0.33, 1, 0.68, 1] }),
+    ]);
   };
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
@@ -372,7 +388,7 @@ function StackCard({
           stretch && 'size-full',
           isFront ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
         )}
-        style={{ x, rotate: dragRotate, opacity }}
+        style={{ x, y: lift, rotate: dragRotate }}
         drag={isFront ? 'x' : false}
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.9}
