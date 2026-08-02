@@ -173,7 +173,7 @@ user_role   = 'superadmin' | 'admin' | 'viewer'
 user_status = 'pending' | 'active' | 'disabled'
 ```
 
-> **Exactly one superadmin.** A partial unique index `one_superadmin_idx ON users(role) WHERE role='superadmin'` guarantees at most one superadmin row can ever exist. Admins are **not** self-provisioned: sign-in only authenticates a user already present in `users` (matched by `google_sub`); an unknown Google account is denied, no row created. New admins — including the initial superadmin — are provisioned out-of-band via a manual DB insert. No in-app recovery if that account is lost — recovery is likewise a manual DB update.
+> **Exactly one superadmin.** A partial unique index `one_superadmin_idx ON users(role) WHERE role='superadmin'` guarantees at most one superadmin row can ever exist. Admins are **not** self-provisioned: sign-in only authenticates a user already present in `users` (matched by `google_sub`); an unknown Google account is denied, no row created. New admins are provisioned out-of-band via a manual DB insert. **Bootstrap exception:** while `users` is empty, the first Google account to sign in is auto-provisioned as the `superadmin` (active); this path closes the instant any row exists. No in-app recovery if that account is lost — recovery is likewise a manual DB update.
 
 > The `comments` table (proof-of-concept) remains in the DB but is **not** managed by Drizzle — left as-is.
 
@@ -257,7 +257,7 @@ guest **response** DTO (attendance-form input) is deferred with the form.
 | `components/letter/envelope-reveal.tsx` | Client scroll-driven envelope→letter reveal (pinned; see status note). Wine-red CSS envelope, landscape, fluid width `min(92vw, 140dvh)`, **four flaps meeting at the centre** (no seal, sharp corners). Starts centred, then **sinks** by `--env-drop` (half visible; quarter on ≥1024px) while the **top flap rotates open** (`rotateX`; z-index swapped so it stays visible behind the letter); the front flaps (`.env-front` bottom + `.env-face-*` sides, z-index 12) tuck the letter's base. Letter = page content, base-anchored in `.letter-clip` (overflow-hidden); content column = 80% of the letter on `sm+`, with a `24dvh` bottom tuck allowance. Motion: CSS scroll-driven keyframes on the compositor where supported, else eased `--pf`/`--pd`/`--pl` via rAF scroll listener; `.env-cue`; `prefers-reduced-motion` shows the letter statically. CSS in `globals.css` under "Envelope reveal". |
 | `lib/session.ts` | Pure `jose` encrypt/decrypt + cookie name/age (safe to import in `proxy.ts`). |
 | `lib/oauth.ts` | Google OAuth: PKCE/state/nonce, token exchange, id_token verify (JWKS). |
-| `lib/users.ts` | `updateUserOnLogin` — refresh an existing admin on login; returns `null` for unknown accounts (no self-sign-up). |
+| `lib/users.ts` | `updateUserOnLogin` — refresh an existing admin on login; returns `null` for unknown accounts, except it bootstraps the first-ever sign-in as `superadmin` while `users` is empty. |
 | `lib/dal.ts` | `getCurrentUser` / `requireUser` / `requireSuperadmin` (React `cache()` per request; user row via `lib/data.ts` `getUserById`, cached cross-request under tag `user:<id>`). |
 | `lib/data.ts` | Cached query layer — `'use cache'` functions (`getGuestsWithLabels`, `getAllLabels`, `getUsers`, `getUserById`, `getGuestByToken`) tagged for precise invalidation (see Caching section). |
 | `proxy.ts` | Optimistic redirect for `/dashboard/*` (replaces `middleware.ts`). |
@@ -328,7 +328,8 @@ Admins sign in with Google. There is **no shared password**, and **no self-sign-
 
 - Sign-in only authenticates a user that **already exists** in `users` (matched by Google `sub`).
   An unknown Google account is **denied** (`/login?error=denied`) — no row is created.
-- New admins — including the initial `superadmin` — are provisioned **out-of-band** via a manual DB
+- New admins are provisioned **out-of-band** via a manual DB insert; the sole exception is the
+  **bootstrap** — the first Google sign-in while `users` is empty becomes the `superadmin`. New admins — including any later `superadmin` — are otherwise provisioned via a manual DB
   insert. Exactly one superadmin, DB-enforced (`one_superadmin_idx`). No role-change UI.
 - A pre-existing `pending` admin still can't access the dashboard until the superadmin
   **activates** them from `/dashboard/users`.
@@ -463,7 +464,7 @@ integration, not a Claude MCP. `docx`/`pdf` skills considered and excluded.
 - **Labels:** admin-editable tag set (add / rename / delete), many per guest.
 - **One editable reply per guest** (future upsert). No `email` uniqueness.
 - **Admin access:** any **active** admin manages guests + labels (`requireUser`). Google-authenticated
-  `/dashboard`. **No self-sign-up** — admins (incl. the initial superadmin) are provisioned via manual
+  `/dashboard`. **No self-sign-up** (except the empty-table bootstrap that seeds the first superadmin) — admins are otherwise provisioned via manual
   DB insert; sign-in only authenticates existing users, and unknown accounts are denied. Exactly one
   superadmin, DB-enforced.
 - **Build order:** management side first (this build); the guest-facing RSVP form is deferred (§13).
