@@ -57,7 +57,9 @@ export async function GET(request: NextRequest) {
       maxAge: SESSION_MAX_AGE,
     });
     return res;
-  } catch {
+  } catch (err) {
+    // Surface the real cause in server logs; the user still sees a generic message.
+    console.error('[auth/callback/google] sign-in failed:', err);
     return redirectTo('/login?error=auth');
   }
 }
