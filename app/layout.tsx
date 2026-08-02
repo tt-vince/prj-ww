@@ -3,6 +3,7 @@ import {
   Montserrat,
   Parisienne,
 } from "next/font/google";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-dvh flex-col overflow-x-hidden">
         <Providers>{children}</Providers>
+        <SpeedInsights />
       </body>
     </html>
   );
