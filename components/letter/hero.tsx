@@ -73,7 +73,7 @@ export function Hero() {
           />
         </motion.div>
         {/* Dark overlay for text legibility (static). */}
-        <div className="absolute inset-0 bg-black/50" />
+        <div className="absolute inset-0 bg-black/65" />
       </div>
       {/* Sticky track: the section minus the dome's 12rem overlap. */}
       <div className="h-[calc(150svh-12rem)]">
