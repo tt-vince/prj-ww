@@ -195,9 +195,11 @@
   /* Couple-name script accent (sage) — dashboard only. */
   --script: #556D47;
 
-  /* Home-page ink. Declared at the root so `text-ink` resolves everywhere,
-     but only the guest letter (.letter-theme) is built on it. */
-  --ink: #1e2a18;
+  /* Home-page ink — the letter's ONE colour. Declared at the root so `text-ink`
+     resolves everywhere, but only the guest letter (.letter-theme) is built on
+     it: foreground, script, borders, Our Story + RSVP grounds, and the thinned
+     placeholder all derive from this single variable. */
+  --ink: #2a2d1a;
 
   /* Stat numbers, progress bars, status dots, and status pills (hi-fi). */
   --stat-going: #5f7a48;
@@ -220,9 +222,9 @@
   --pill-declined-fg: #b06a4f;
 }
 
-/* ── Home page theme: white + ink #1E2A18, and nothing else ──────────
+/* ── Home page theme: white + ink #2A2D1A, and nothing else ──────────
    The guest letter (app/page.tsx -> components/wedding-letter.tsx ->
-   components/letter/*) is a two-colour document: white paper, #1E2A18 ink.
+   components/letter/*) is a two-colour document: white paper, #2A2D1A ink.
    Both are used at FULL strength — no tints, no thinned ink: hierarchy comes
    from size, face and weight, not tone. Alpha survives only where it is
    physically a scrim or a shadow (the hero's overlay on the lily photo, the
@@ -244,7 +246,7 @@
   --secondary: #ffffff;
   --secondary-foreground: var(--ink);
   --muted: #ffffff;
-  /* No thinned ink: secondary text is the same #1E2A18 as primary text, and
+  /* No thinned ink: secondary text is the same #2A2D1A as primary text, and
      rank comes from size/face/weight instead of tone. */
   --muted-foreground: var(--ink);
   /* Hover/active surfaces invert rather than tint. */
@@ -297,7 +299,7 @@
   line-height: var(--text-meta--line-height);
 }
 /* The one place the letter thins its ink. Placeholders inherit
-   `--muted-foreground`, which this theme points at full-strength #1E2A18 — so
+   `--muted-foreground`, which this theme points at full-strength #2A2D1A — so
    a placeholder rendered identically to typed text, and the note field read as
    already answered. Everywhere else rank comes from size/face/weight, but a
    placeholder is not a quieter piece of content: it is the absence of content,
@@ -695,6 +697,23 @@
   border-radius: 50%;
   background: #191519;
   box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.6);
+}
+/* Play/pause glyph centred over the record. Sits outside the spinning button
+   so it stays upright; clicks fall through to the disc beneath. */
+.vinyl-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  color: #ffffff;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.55));
+}
+.vinyl-icon svg {
+  width: calc(var(--vinyl-size, min(64vw, 300px)) * 0.3);
+  height: auto;
 }
 
 @keyframes vinyl-spin {

@@ -12,19 +12,13 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
 
 /**
  * Hero + lily backdrop. The lily photo ends flush at the white CountdownBand
- * below it (no overlap). Our Story, further down, pulls up `-mt-48` into the
- * band's white bottom padding.
+ * below it (no overlap, no dome). Our Story, further down, pulls up `-mt-48`
+ * into the band's white bottom padding.
  *
  * The section is 150svh tall and the content is `sticky top-0` inside it, one
  * viewport high: the names stay centred on screen while the hero scrolls, then
- * unpin and travel up with the page. The photo fills the whole 150svh, so it
- * keeps going below the pinned content and the CountdownBand's white dome rises
- * into its last 12rem.
- *
- * The sticky track stops 12rem short of the section's bottom — exactly the
- * band's `-mt-48` bite. That hands the pin over the moment the dome's crown
- * reaches the bottom of the screen, so the two never overlap: without it the
- * dome slides up over the still-pinned names.
+ * unpin and travel up with the page. The photo fills the whole 150svh, and the
+ * pin releases exactly at the section's bottom, where the CountdownBand begins.
  *
  * Scroll-zoom: the lily photo lives in its own `motion.div` layer so it can
  * scale up, blur, and fade as the hero scrolls out of view (Motion example
@@ -75,8 +69,9 @@ export function Hero() {
         {/* Dark overlay for text legibility (static). */}
         <div className="absolute inset-0 bg-black/65" />
       </div>
-      {/* Sticky track: the section minus the dome's 12rem overlap. */}
-      <div className="h-[calc(150svh-12rem)]">
+      {/* Sticky track: full section height; the pin releases at its bottom,
+          flush with the CountdownBand. */}
+      <div className="h-[150svh]">
         <header className="sticky top-0 flex h-svh flex-col px-gutter text-center">
         {/* Two groups, one screen. The lace + line ride in a `flex-1` row so
             they sit centred in whatever space is left above the date, and the
@@ -96,7 +91,7 @@ export function Hero() {
           <motion.div
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="relative aspect-square w-[min(86vw,26rem,46svh)] -rotate-6 md:w-[min(86vw,33.8rem,46svh)]"
+            className="relative aspect-square w-[min(92vw,30rem,54svh)] -rotate-6 md:w-[min(92vw,39rem,54svh)]"
           >
             {/* Frosted glass filling the lace's open window. */}
             <div
@@ -122,21 +117,11 @@ export function Hero() {
               {/* Sized against the lace window rather than the type scale:
                   the names have to fit the frame they sit in, so they track
                   the frame's own breakpoint, not the document's. */}
-              <span className="text-6xl md:text-[4.875rem]">{NAME_A}</span>
-              <span className="text-2xl opacity-75 md:text-[1.95rem]">&amp;</span>
-              <span className="text-6xl md:text-[4.875rem]">{NAME_B}</span>
+              <span className="text-7xl md:text-[5.625rem]">{NAME_A}</span>
+              <span className="text-3xl opacity-75 md:text-[2.25rem]">&amp;</span>
+              <span className="text-7xl md:text-[5.625rem]">{NAME_B}</span>
             </h1>
           </motion.div>
-          <motion.p
-            variants={heroItem}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            // `-mr-` cancels the trailing letter-space the tracking adds after
-            // the final glyph: without it the line is both off-centre and 0.3em
-            // wider than its column, which clipped it on a 360px phone.
-            className="-mr-[0.3em] font-script text-[clamp(2rem,7svh,3rem)] tracking-[0.3em] text-white"
-          >
-            are getting married!
-          </motion.p>
           {/* <Countdown
             align="center"
             className="mt-10 text-white drop-shadow-[0_1px_10px_rgba(30,42,24,0.65)]"

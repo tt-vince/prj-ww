@@ -1,6 +1,7 @@
 'use client';
 
-import { useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { Pause, Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /** Placeholder loop synthesized locally (public/music/placeholder.wav). */
@@ -34,7 +35,6 @@ export function VinylPlayer({
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [playing, setPlaying] = useState(false);
-  const pathId = useId();
 
   const toggle = async () => {
     const audio = audioRef.current;
@@ -53,41 +53,11 @@ export function VinylPlayer({
     }
   };
 
-  const phrase = playing ? 'now playing our music' : 'click to play our music';
-
   return (
     <div
       className={cn('vinyl-ring', className)}
       style={{ '--vinyl-size': size } as React.CSSProperties}
     >
-      {/* Ring text, in the same script as "until we say I do" below. The path
-          is a circle of radius 46 starting at 9 o'clock and running clockwise,
-          so `startOffset: 25%` with a middle anchor centres the phrase over the
-          top of the record with slack on both sides — nothing runs past the
-          path's start, which is what clips curved text. */}
-      <svg
-        aria-hidden
-        viewBox="0 0 100 100"
-        className="pointer-events-none absolute inset-0 size-full"
-      >
-        <path
-          id={pathId}
-          fill="none"
-          d="M 50,50 m -46,0 a 46,46 0 1,1 92,0 a 46,46 0 1,1 -92,0"
-        />
-        <text
-          fill="currentColor"
-          fontSize="7"
-          letterSpacing="0.2"
-          textAnchor="middle"
-          className="font-sans"
-        >
-          <textPath href={`#${pathId}`} startOffset="25%">
-            {phrase}
-          </textPath>
-        </text>
-      </svg>
-
       <button
         type="button"
         className={cn('vinyl', playing && 'is-spinning')}
@@ -99,6 +69,12 @@ export function VinylPlayer({
         <span className="vinyl-label" aria-hidden />
         <span className="vinyl-hole" aria-hidden />
       </button>
+      {/* Play/pause glyph over the record's centre. Kept OUT of the spinning
+          button so it stays upright while the disc turns; pointer-events pass
+          through to the button beneath. */}
+      <span className="vinyl-icon" aria-hidden>
+        {playing ? <Pause fill="currentColor" /> : <Play fill="currentColor" />}
+      </span>
       <audio ref={audioRef} src={TRACK_SRC} loop preload="none" />
     </div>
   );

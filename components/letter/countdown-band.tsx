@@ -3,19 +3,13 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
-import { VinylPlayer } from '@/components/letter/vinyl-player';
 
 /**
- * Countdown band — white section between Hero and Our Story. It is a DOME at
- * both ends: its own white dome rises `-mt-48` (12rem) into the Hero's lily
- * photo (the Hero renders a 12rem strip of continued photo for it to sit in),
- * and Our Story's ink dome rises into its bottom padding.
+ * Countdown band — white section between Hero and Our Story. Its top is a flat
+ * seam flush against the bottom of the Hero's lily photo (no dome, no overlap).
+ * Its bottom is still a DOME: Our Story's ink dome rises into the bottom padding.
  *
- * Top: `border-radius: 50% 50% 0 0 / 180px 180px 0 0` — the apex touches the
- * element's top edge at centre and the shoulders fall away, so the lily photo
- * stays visible either side instead of ending on a hard horizontal seam.
- * Padding is `pt-28 sm:pt-32`, the same pair Our Story uses inside its dome, so
- * both domes seat their first line at the same depth under the curve.
+ * Top: `pt-28 sm:pt-32` seats the first line clear of the seam.
  *
  * Bottom: `pb-dome` gives Our Story room to rise into. Our Story keeps its own
  * `-mt-48` (12rem), so the ink dome overlaps only this white bottom padding,
@@ -38,7 +32,7 @@ export function CountdownBand() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative z-10 -mt-48 rounded-[50%_50%_0_0_/_180px_180px_0_0] bg-white px-gutter pt-28 pb-dome text-center sm:pt-32">
+    <section className="relative z-10 bg-white px-gutter pt-28 pb-dome text-center sm:pt-32">
       <motion.div
         className="flex flex-col items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
@@ -46,12 +40,6 @@ export function CountdownBand() {
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* The record sits in the dome's crown, above the count — the one
-            playable thing on the page, and the only round shape in a section
-            otherwise made of type. It is quiet until tapped: no autoplay,
-            no spin. Sized to stay inside the dome's curve on a phone. */}
-        <VinylPlayer className="mb-8" size="min(42vw, 10rem)" />
-
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
         <h2 className="font-sans text-subhead text-ink">
