@@ -30,7 +30,7 @@ export async function Gifts() {
   );
 
   return (
-    <section className="bg-white px-gutter py-section">
+    <section className="bg-paper px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="A little something" kicker="Gift guide" />
 

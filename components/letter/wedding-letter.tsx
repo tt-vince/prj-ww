@@ -27,7 +27,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  */
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <div className="letter-theme bg-white text-ink">
+    <div className="letter-theme bg-paper text-ink">
       <Hero />
       <CountdownBand />
       <OurStory />

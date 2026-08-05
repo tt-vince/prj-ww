@@ -10,7 +10,7 @@ import { SectionHeading } from '@/components/letter/section-heading';
  */
 export function AttireGuide() {
   return (
-    <section className="bg-white px-gutter py-section">
+    <section className="bg-paper px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="What to wear" kicker="Attire guide" />
         <Image

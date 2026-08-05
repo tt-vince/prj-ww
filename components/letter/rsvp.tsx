@@ -21,10 +21,11 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  *
  * A white dome opens the section: the paper of the Hotels section above carries
  * on into the ink as an arch, mirroring the white dome that opens the countdown
- * band and the ink dome that opens Our Story. Same curve as those two
- * (`180px`/12rem), inverted — the shoulders sit on the section's top edge and
- * the crown dips into the ink. `pt-dome` clears the deepest point of that
- * curve, so the heading never rides into it.
+ * band and the ink dome that opens Our Story. Same curve as those two, inverted
+ * — the shoulders sit on the section's top edge and the crown dips into the
+ * ink. Deep 12rem (`h-48`, `180px`) on mobile; the shallow ~4rem hero curve on
+ * `sm`+ (`sm:h-16`, `sm:rounded` 3rem). `pt-dome` clears the deepest point (it
+ * shrinks with the dome on `sm`+), so the heading never rides into it.
  *
  * `-mt-section` makes the arch OVERLAP Hotels' bottom padding instead of
  * hanging below it, which is why the section carries `z-10`. Without it Hotels
@@ -55,8 +56,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
           ink. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-48 bg-white"
-        style={{ borderRadius: "0 0 50% 50% / 0 0 180px 180px" }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-48 rounded-[0_0_50%_50%_/_0_0_180px_180px] bg-paper sm:h-16 sm:rounded-[0_0_50%_50%_/_0_0_3rem_3rem]"
       />
       {/* `max-w-2xl` (42rem), the same measure the FAQ cards use — the two are
           the only carded sections in the letter, so a 32rem reply card under a
@@ -110,7 +110,7 @@ async function RsvpDeadline({ searchParams }: { searchParams: SearchParams }) {
   const answered = guest.status !== "pending";
 
   return (
-    <p className="mt-6 text-center font-sans text-body text-white">
+    <p className="mt-6 text-center font-sans text-body text-paper">
       To help us prepare everything with love and care, making sure the day is
       as unforgettable for you as it will be for us, we are hoping to{" "}
       {answered ? "finalize the plans" : "receive your response"} by{" "}
@@ -128,7 +128,7 @@ function WeddingBells({ className }: { className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn("block aspect-[87.2656/77.7148] bg-white", className)}
+      className={cn("block aspect-[87.2656/77.7148] bg-paper", className)}
       style={{
         maskImage: mask,
         WebkitMaskImage: mask,

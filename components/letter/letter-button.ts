@@ -22,8 +22,8 @@ export const letterButton = cva(
   {
     variants: {
       variant: {
-        solid: 'bg-ink text-white hover:bg-white hover:text-ink',
-        outline: 'bg-transparent text-ink hover:bg-ink hover:text-white',
+        solid: 'bg-ink text-paper hover:bg-paper hover:text-ink',
+        outline: 'bg-transparent text-ink hover:bg-ink hover:text-paper',
       },
     },
     defaultVariants: {

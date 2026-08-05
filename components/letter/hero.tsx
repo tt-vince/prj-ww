@@ -68,6 +68,15 @@ export function Hero() {
         </motion.div>
         {/* Dark overlay for text legibility (static). */}
         <div className="absolute inset-0 bg-black/65" />
+        {/* Fade the photo's bottom to solid black so the CountdownBand's
+            reversed dome (bg-black) reads as this photo spilling down into it —
+            same colour, so the seam between the two disappears. Black, not ink:
+            the overlay stays neutral with no green cast. Static (outside the
+            zoom layer) so it stays pinned to the section's bottom edge. */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-b from-transparent to-black"
+        />
       </div>
       {/* Sticky track: full section height; the pin releases at its bottom,
           flush with the CountdownBand. */}
@@ -113,7 +122,7 @@ export function Hero() {
               />
             </div>
             {/* Names centered in the window, stacked to fit the square. */}
-            <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]">
+            <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-paper drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]">
               {/* Sized against the lace window rather than the type scale:
                   the names have to fit the frame they sit in, so they track
                   the frame's own breakpoint, not the document's. */}
@@ -143,7 +152,7 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-sans text-subhead uppercase leading-none tracking-[0.16em] text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]"
+            className="font-sans text-subhead uppercase leading-none tracking-[0.16em] text-paper drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]"
           >
             {WEDDING_DAY_LABEL}
           </motion.p>
@@ -151,7 +160,7 @@ export function Hero() {
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <WeekStrip className="mt-5 text-white drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]" />
+            <WeekStrip className="mt-5 text-paper drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]" />
           </motion.div>
         </motion.div>
         </header>

@@ -60,7 +60,7 @@ export function DayItself() {
     // `px-gutter` on BOTH sides: this section used to carry `pr-5` alone, so on
     // a phone it had no left gutter at all — the centred heading sat 10px off
     // centre and a long one would have run into the screen edge.
-    <section className="relative z-0 bg-white px-gutter pb-section">
+    <section className="relative z-0 bg-paper px-gutter pb-section">
       <div className="mx-auto max-w-[56rem] text-center lg:max-w-[76rem]">
         <SectionHeading
           title="The day itself"

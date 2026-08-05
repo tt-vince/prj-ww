@@ -24,7 +24,7 @@ const FAQS = [
 
 export function Faq() {
   return (
-    <section className="bg-white px-gutter py-section">
+    <section className="bg-paper px-gutter py-section">
       <div className="mx-auto max-w-[56rem] text-center">
         <SectionHeading title="Good to know" kicker="FAQ" />
 
@@ -40,8 +40,8 @@ export function Faq() {
               className="gap-0 rounded-xl bg-ink px-2 py-8 ring-0 sm:px-6"
             >
               <CardContent>
-                <p className="font-sans text-subhead text-white">{f.q}</p>
-                <p className="mt-2 text-body text-white">
+                <p className="font-sans text-subhead text-paper">{f.q}</p>
+                <p className="mt-2 text-body text-paper">
                   {f.a}
                 </p>
               </CardContent>

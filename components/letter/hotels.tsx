@@ -74,7 +74,7 @@ function Stars({ value }: { value: number }) {
 
 export function Hotels() {
   return (
-    <section className="bg-white py-section">
+    <section className="bg-paper py-section">
       <div className="mx-auto max-w-[56rem] px-gutter text-center lg:max-w-[64rem]">
         <SectionHeading
           title="Where you can stay"
@@ -88,7 +88,7 @@ export function Hotels() {
           {HOTELS.map((h) => (
             <Card
               key={h.name}
-              className="flex flex-col border-2 border-ink px-2 py-8 shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)] ring-0 sm:px-6"
+              className="flex flex-col border-2 border-ink bg-white px-2 py-8 shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)] ring-0 sm:px-6"
             >
               <CardHeader>
                 <CardTitle className="font-sans text-ink">{h.name}</CardTitle>

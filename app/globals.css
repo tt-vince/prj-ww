@@ -7,8 +7,10 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  /* Guest letter ink — the only non-white colour on the home page. */
+  /* Guest letter ink — the deeper of the letter's two colours. */
   --color-ink: var(--ink);
+  /* Guest letter paper — the letter's light colour (cream). */
+  --color-paper: var(--paper);
   /* Section-heading script colour (sage on white; re-pointed to ink inside
      .letter-theme — see that block). */
   --color-script: var(--script);
@@ -153,8 +155,23 @@
      itself — so the padding that clears one is that 12rem plus exactly one
      `section` of breathing room. Naming it keeps the three places that need it
      in step: they used to be 18rem, 19rem and 14rem, which left 32px of air
-     under the RSVP arch against 112px under Our Story's dome. */
+     under the RSVP arch against 112px under Our Story's dome.
+
+     Mobile domes are 12rem deep; on `sm`+ every dome is the shallower ~4rem
+     hero curve (see countdown-band.tsx), so this clearance shrinks to match in
+     the media query below. The `-mt` overlaps in our-story/prenup carry their
+     own `sm:` overrides to the same 4rem. */
   --spacing-dome: calc(12rem + var(--spacing-section));
+}
+
+/* Wider screens: shallow the domes to the hero's ~4rem curve. Overriding the
+   token here retunes every dome-clearance utility (countdown `pb-dome`, prenup
+   & rsvp `pt-dome`) in one place; the matching `-mt` overlaps are overridden at
+   their call sites. Mobile keeps the deep 12rem dome. */
+@media (min-width: 640px) {
+  :root {
+    --spacing-dome: calc(4rem + var(--spacing-section));
+  }
 }
 
 /* Light “wisteria & fig” palette — hi-fi Wedding RSVP Dashboard design (Montserrat / Parisienne). */
@@ -201,6 +218,11 @@
      placeholder all derive from this single variable. */
   --ink: #2a2d1a;
 
+  /* Home-page paper — the letter's light colour, counterpart to --ink. Every
+     white surface, card and on-ink text on the guest letter derives from this
+     one variable (the Our Story photo border is the sole hard-white exception). */
+  --paper: #efe9dc;
+
   /* Stat numbers, progress bars, status dots, and status pills (hi-fi). */
   --stat-going: #5f7a48;
   --stat-going-bar: #7a9a5c;
@@ -222,9 +244,9 @@
   --pill-declined-fg: #b06a4f;
 }
 
-/* ── Home page theme: white + ink #2A2D1A, and nothing else ──────────
+/* ── Home page theme: cream #EFE9DC + ink #2A2D1A, and nothing else ───
    The guest letter (app/page.tsx -> components/wedding-letter.tsx ->
-   components/letter/*) is a two-colour document: white paper, #2A2D1A ink.
+   components/letter/*) is a two-colour document: cream #EFE9DC paper, #2A2D1A ink.
    Both are used at FULL strength — no tints, no thinned ink: hierarchy comes
    from size, face and weight, not tone. Alpha survives only where it is
    physically a scrim or a shadow (the hero's overlay on the lily photo, the
@@ -235,23 +257,23 @@
    /login. `@theme inline` is what makes this work — utilities emit
    `var(--token)`, so a scoped redefinition wins at use site. */
 .letter-theme {
-  --background: #ffffff;
+  --background: var(--paper);
   --foreground: var(--ink);
-  --card: #ffffff;
+  --card: var(--paper);
   --card-foreground: var(--ink);
-  --popover: #ffffff;
+  --popover: var(--paper);
   --popover-foreground: var(--ink);
   --primary: var(--ink);
-  --primary-foreground: #ffffff;
-  --secondary: #ffffff;
+  --primary-foreground: var(--paper);
+  --secondary: var(--paper);
   --secondary-foreground: var(--ink);
-  --muted: #ffffff;
+  --muted: var(--paper);
   /* No thinned ink: secondary text is the same #2A2D1A as primary text, and
      rank comes from size/face/weight instead of tone. */
   --muted-foreground: var(--ink);
   /* Hover/active surfaces invert rather than tint. */
   --accent: var(--ink);
-  --accent-foreground: #ffffff;
+  --accent-foreground: var(--paper);
   /* The one hue outside white + ink, and only for the RSVP form's required marks
      and error states: a brick red muted towards the ink's olive so it sits in the
      letter rather than shouting over it. It never carries meaning on its own —
@@ -306,7 +328,7 @@
    and only tone can say so inside a field. */
 .letter-theme [data-slot="input"]::placeholder,
 .letter-theme [data-slot="textarea"]::placeholder {
-  color: color-mix(in srgb, var(--ink) 45%, #ffffff);
+  color: color-mix(in srgb, var(--ink) 45%, var(--paper));
 }
 .letter-theme [data-slot="input"] {
   height: auto;
@@ -733,9 +755,9 @@
   }
 }
 
-/* Guest-letter variant. The letter is a strict two-colour system — white paper
-   and ink #1E2A18 — so the record is pressed in ink rather than warm black, the
-   label is paper rather than ivory, and the shadow is tinted with ink instead of
+/* Guest-letter variant. The letter is a strict two-colour system — cream paper
+   #EFE9DC and ink #2A2D1A — so the record is pressed in ink rather than warm black,
+   the label is paper rather than ivory, and the shadow is tinted with ink instead of
    the dashboard's wisteria. */
 .letter-theme .vinyl {
   background:
@@ -765,7 +787,7 @@
     inset 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 .letter-theme .vinyl-label {
-  background: #ffffff;
+  background: var(--paper);
   box-shadow:
     0 0 0 1px rgba(30, 42, 24, 0.35),
     inset 0 0 0 1px rgba(30, 42, 24, 0.08);

@@ -17,8 +17,11 @@ const rowTransition = { duration: 1.1, ease: 'easeOut' } as const;
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
 /**
- * Our story — EDGE-TO-EDGE green dome (kept: its `-mt-48` pulls up into the
- * Hero's lily backdrop, and DayItself slides up behind it at z-0). Inside the
+ * Our story — EDGE-TO-EDGE green dome. Its top dome rises into the section
+ * above and its bottom dome into the one below via a matching `-mt` overlap:
+ * a deep 12rem (`-mt-48`, `180px` radius) on mobile, and the shallow ~4rem
+ * hero curve on `sm`+ (`sm:-mt-16`, `sm:rounded` 3rem). DayItself slides up
+ * behind it at z-0. Inside the
  * dome the timeline is a SCRAPBOOK (imported design "Wedding Timeline" 4a/5a),
  * recoloured into the letter's two-colour system — an ink #1E2A18 dome with
  * white paper and white thread on it:
@@ -102,8 +105,8 @@ export function OurStory() {
   const reduce = !!useReducedMotion();
 
   return (
-    <section className="relative z-10 -mt-48">
-      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-gutter pt-28 pb-section text-center sm:pt-32">
+    <section className="relative z-10 -mt-48 sm:-mt-16">
+      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-gutter pt-28 pb-section text-center sm:rounded-[50%_50%_50%_50%_/_3rem_3rem_3rem_3rem] sm:pt-32">
         <div className="mx-auto max-w-[64rem] lg:max-w-[80rem]">
           <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 
@@ -131,7 +134,7 @@ export function OurStory() {
                 drawn by each item's own connector segment instead. */}
             <span
               aria-hidden
-              className="absolute top-0 bottom-[8rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-white sm:block"
+              className="absolute top-0 bottom-[8rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-paper sm:block"
             />
 
             {/* No mobile `space-y`: each item opens with its own thread
@@ -157,7 +160,7 @@ export function OurStory() {
                         above and below the line. */}
                     <span
                       aria-hidden
-                      className="my-6 h-16 w-[2px] rounded-full bg-white sm:hidden"
+                      className="my-6 h-16 w-[2px] rounded-full bg-paper sm:hidden"
                     />
 
                     {/* Polaroid. */}
@@ -195,10 +198,10 @@ export function OurStory() {
                           : 'sm:order-1 sm:pr-10 sm:text-right'
                       )}
                     >
-                      <p className="font-sans text-label font-medium uppercase tracking-[0.16em] text-white">
+                      <p className="font-sans text-label font-medium uppercase tracking-[0.16em] text-paper">
                         {m.date}
                       </p>
-                      <h3 className="relative mt-1 font-script text-entry text-white">
+                      <h3 className="relative mt-1 font-script text-entry text-paper">
                         {/* Connector from the centre spine to the title (sm+).
                             The run from the spine to this text box is 4.5rem —
                             text padding (pl/pr-10 = 40px) plus half the column
@@ -211,13 +214,13 @@ export function OurStory() {
                         <span
                           aria-hidden
                           className={cn(
-                            'absolute top-[0.55em] hidden h-[3px] w-16 rounded-full bg-white sm:block',
+                            'absolute top-[0.55em] hidden h-[3px] w-16 rounded-full bg-paper sm:block',
                             imageLeft ? 'sm:-left-[4.5rem]' : 'sm:-right-[4.5rem]'
                           )}
                         />
                         {m.title}
                       </h3>
-                      <p className="mt-2 text-body text-white">{m.body}</p>
+                      <p className="mt-2 text-body text-paper">{m.body}</p>
                     </motion.div>
                   </motion.li>
                 );
@@ -237,7 +240,7 @@ export function OurStory() {
             >
               <span
                 aria-hidden
-                className="my-6 h-16 w-[2px] rounded-full bg-white sm:hidden"
+                className="my-6 h-16 w-[2px] rounded-full bg-paper sm:hidden"
               />
               <InkCharm
                 src="/icons/hand_drawn/illustrations/wedding-rings-linework.svg"

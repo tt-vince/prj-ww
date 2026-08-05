@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 const TONES = {
   script: { title: 'text-script', kicker: 'text-ink' },
   ink: { title: 'text-ink', kicker: 'text-ink' },
-  white: { title: 'text-white', kicker: 'text-white' },
+  white: { title: 'text-paper', kicker: 'text-paper' },
 } as const;
 
 export function SectionHeading({
