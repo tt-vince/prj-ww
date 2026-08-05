@@ -33,8 +33,10 @@ import { CountdownBand } from '@/components/letter/countdown-band';
  * running the full length of the Hero and the countdown.
  *
  * The photo is one layer for the whole opening, so it covers a taller box than
- * the Hero alone: `object-cover` scales it to that height and
- * `object-[50%_top]` keeps the crop anchored at the top, where the lilies are.
+ * the Hero alone: `object-cover` scales it to that height and the crop is
+ * anchored at the photo's BOTTOM edge, so what the crop loses is taken off the
+ * top. The zoom's `transformOrigin` matches, otherwise scaling would drift the
+ * anchored edge back off-frame.
  *
  * `overflow-hidden` sits on the backdrop's own wrapper, never on an ancestor of
  * the Hero: an `overflow-hidden` ancestor makes a `sticky` element stick inside
@@ -71,7 +73,7 @@ export function OpeningBackdrop() {
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute inset-0"
-          style={{ scale, filter, transformOrigin: '50% 30%' }}
+          style={{ scale, filter, transformOrigin: '50% 100%' }}
         >
           {/* next/image (static import): responsive srcset, preload as the LCP
               image, and an inline blur-up placeholder while it streams in. */}
@@ -82,7 +84,7 @@ export function OpeningBackdrop() {
             priority
             placeholder="blur"
             sizes="100vw"
-            className="object-cover object-[50%_top]"
+            className="object-cover object-[50%_bottom]"
           />
         </motion.div>
         <motion.div className="absolute inset-0" style={{ backgroundColor: overlay }} />
