@@ -65,7 +65,12 @@ export function OpeningBackdrop() {
   return (
     <div ref={ref} className="relative bg-ink">
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="sticky top-0 h-svh overflow-hidden">
+        {/* `lvh`, the LARGEST viewport height: the pinned box has to keep
+            covering the screen when a mobile browser retracts its chrome. At
+            `svh` it would be short by exactly that chrome's height and leave an
+            uncovered strip along the bottom; `dvh` would cover but resize the
+            photo mid-scroll. `lvh` overflows a little and is clipped instead. */}
+        <div className="sticky top-0 h-lvh overflow-hidden">
         <motion.div
           className="absolute inset-0"
           style={{ scale, filter, transformOrigin: '50% 50%' }}

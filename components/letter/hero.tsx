@@ -14,10 +14,16 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  * `OpeningBackdrop`, which wraps this section and the CountdownBand so the green
  * arrives gradually across both. See opening-backdrop.tsx.
  *
- * The section is 150svh tall and the content is `sticky top-0` inside it, one
- * viewport high: the names stay centred on screen while the hero scrolls, then
- * unpin and travel up with the page. The pin releases at the section's bottom,
- * where the CountdownBand begins — the backdrop simply carries on behind it.
+ * The section is exactly ONE viewport tall (`100dvh`), so it holds the screen
+ * once and then scrolls away with the page. It used to be 150svh with the
+ * content `sticky top-0` inside it, which pinned the names for half a viewport
+ * of scrolling; at one viewport there is no travel left for a pin to use, so the
+ * sticky track is gone and this is a plain full-height header.
+ *
+ * `dvh`, not `svh`: the section is meant to fill what the reader can actually
+ * see. The trade-off is that `dvh` tracks the mobile browser's retracting UI, so
+ * the hero's height changes as that chrome hides — the two flex rows below
+ * absorb it, but it is a live resize rather than a fixed box.
  */
 export function Hero() {
   // Hero content reveals on mount (above the fold), staggered top to bottom.
@@ -27,11 +33,8 @@ export function Hero() {
   };
 
   return (
-    <div className="relative h-[150svh]">
-      {/* Sticky track: full section height; the pin releases at its bottom,
-          flush with the CountdownBand. */}
-      <div className="h-[150svh]">
-        <header className="sticky top-0 flex h-svh flex-col px-gutter text-center">
+    <div className="relative h-dvh">
+        <header className="flex h-full flex-col px-gutter text-center">
         {/* Two groups, one screen. The lace + line ride in a `flex-1` row so
             they sit centred in whatever space is left above the date, and the
             date block is a `shrink-0` row pinned to the bottom. Because they are
@@ -114,7 +117,6 @@ export function Hero() {
           </motion.div>
         </motion.div>
         </header>
-      </div>
     </div>
   );
 }
