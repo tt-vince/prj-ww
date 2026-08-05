@@ -29,7 +29,7 @@ import { Countdown } from '@/components/countdown';
  * title plus a number plus a label was three things saying one thing, which is
  * what made the block read as a stat readout rather than a letter.
  *
- * Colour is the letter's two-colour system inverted: paper type on ink #2A2D1A,
+ * Colour is the letter's two-colour system inverted: paper type on ink #779381,
  * both at full strength. Nothing here is tinted — the count reads loudest because it
  * is the largest, not because everything around it was faded. Rank is carried by
  * size, face and weight only.

@@ -15,7 +15,7 @@ import { CountdownBand } from '@/components/letter/countdown-band';
  * green has to arrive gradually across BOTH sections: with the photo confined to
  * the Hero, the countdown band was already flat ink the moment it appeared, and
  * the transition was over before the reader got to it. So the photo spans the
- * whole opening, and the overlay drives from a dark scrim to solid ink #2A2D1A
+ * whole opening, and the overlay drives from a dark scrim to solid ink #779381
  * over the full scroll of it. The countdown text therefore sits on a
  * still-greening photo, and only Our Story is completely green.
  *
@@ -62,9 +62,9 @@ export function OpeningBackdrop() {
     [0, 0.45, 0.85, 1],
     [
       'rgba(0, 0, 0, 0.65)',
-      'rgba(34, 37, 21, 0.86)',
-      'rgba(42, 45, 26, 0.97)',
-      'rgb(42, 45, 26)',
+      'rgba(58, 84, 70, 0.86)',
+      'rgba(119, 147, 129, 0.97)',
+      'rgb(119, 147, 129)',
     ]
   );
 
