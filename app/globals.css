@@ -216,7 +216,7 @@
      resolves everywhere, but only the guest letter (.letter-theme) is built on
      it: foreground, script, borders, Our Story + RSVP grounds, and the thinned
      placeholder all derive from this single variable. */
-  --ink: #779381;
+  --ink: #0a110e;
 
   /* Home-page paper — the letter's light colour, counterpart to --ink. Every
      white surface, card and on-ink text on the guest letter derives from this
@@ -244,9 +244,9 @@
   --pill-declined-fg: #b06a4f;
 }
 
-/* ── Home page theme: cream #EFE9DC + green #779381, and nothing else ───
+/* ── Home page theme: cream #EFE9DC + green #0A110E, and nothing else ───
    The guest letter (app/page.tsx -> components/wedding-letter.tsx ->
-   components/letter/*) is a two-colour document: cream #EFE9DC paper, #779381 ink.
+   components/letter/*) is a two-colour document: cream #EFE9DC paper, #0A110E ink.
    Both are used at FULL strength — no tints, no thinned ink: hierarchy comes
    from size, face and weight, not tone. Alpha survives only where it is
    physically a scrim or a shadow (the hero's overlay on the lily photo, the
@@ -268,7 +268,7 @@
   --secondary: var(--paper);
   --secondary-foreground: var(--ink);
   --muted: var(--paper);
-  /* No thinned ink: secondary text is the same #779381 as primary text, and
+  /* No thinned ink: secondary text is the same #0A110E as primary text, and
      rank comes from size/face/weight instead of tone. */
   --muted-foreground: var(--ink);
   /* Hover/active surfaces invert rather than tint. */
@@ -321,7 +321,7 @@
   line-height: var(--text-meta--line-height);
 }
 /* The one place the letter thins its ink. Placeholders inherit
-   `--muted-foreground`, which this theme points at full-strength #779381 — so
+   `--muted-foreground`, which this theme points at full-strength #0A110E — so
    a placeholder rendered identically to typed text, and the note field read as
    already answered. Everywhere else rank comes from size/face/weight, but a
    placeholder is not a quieter piece of content: it is the absence of content,
@@ -756,7 +756,7 @@
 }
 
 /* Guest-letter variant. The letter is a strict two-colour system — cream paper
-   #EFE9DC and ink #779381 — so the record is pressed in ink rather than warm black,
+   #EFE9DC and ink #0A110E — so the record is pressed in ink rather than warm black,
    the label is paper rather than ivory, and the shadow is tinted with ink instead of
    the dashboard's wisteria. */
 .letter-theme .vinyl {
