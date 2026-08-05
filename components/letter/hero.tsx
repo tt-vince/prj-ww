@@ -11,9 +11,11 @@ import { COUPLE_NAMES, WEDDING_DAY_LABEL } from '@/lib/wedding';
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
 /**
- * Hero + lily backdrop. The lily photo ends flush at the white CountdownBand
- * below it (no overlap). Our Story, further down, pulls up `-mt-48` into the
- * band's white bottom padding.
+ * Hero + lily backdrop, and the top of ONE continuous background shared with
+ * the countdown band and Our Story: the wrapper in wedding-letter.tsx is painted
+ * ink, this photo sits on it, and the overlay below drives from a dark scrim to
+ * solid ink as the hero scrolls — so scrolling out of the hero lands on Our
+ * Story's green with no seam and no white band in between.
  *
  * The section is 150svh tall and the content is `sticky top-0` inside it, one
  * viewport high: the names stay centred on screen while the hero scrolls, then
@@ -45,6 +47,13 @@ export function Hero() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const blurPx = useTransform(scrollYProgress, [0, 1], [0, 8]);
   const filter = useMotionTemplate`blur(${blurPx}px)`;
+  // Scrim -> ink: the hero's photo dissolves into the letter's green so the
+  // hero, the countdown band and Our Story are one continuous background.
+  const overlay = useTransform(
+    scrollYProgress,
+    [0, 0.55, 1],
+    ['rgba(0, 0, 0, 0.65)', 'rgba(24, 34, 20, 0.82)', 'rgb(30, 42, 24)']
+  );
 
   // Hero content reveals on mount (above the fold), staggered top to bottom.
   const heroItem = {
@@ -72,8 +81,15 @@ export function Hero() {
             className="object-cover object-[50%_top]"
           />
         </motion.div>
-        {/* Dark overlay for text legibility (static). */}
-        <div className="absolute inset-0 bg-black/65" />
+        {/* Overlay: text legibility at the top of the scroll, and the handover
+            to Our Story's green at the bottom. It drives from a dark scrim to
+            SOLID ink #1E2A18 across the hero's scroll, so the photo is gone by
+            the time the pin releases and what remains is the same ink the
+            wrapper (wedding-letter.tsx) paints behind the countdown band and
+            Our Story continues. The range ends at progress 1 — the hero's
+            bottom edge reaches the bottom of the screen — so the photo's own
+            bottom edge is never visible against the ink below it. */}
+        <motion.div className="absolute inset-0" style={{ backgroundColor: overlay }} />
       </div>
       {/* Sticky track: the section minus the dome's 12rem overlap. */}
       <div className="h-[calc(150svh-12rem)]">

@@ -24,6 +24,12 @@ export const letterButton = cva(
       variant: {
         solid: 'bg-ink text-white hover:bg-white hover:text-ink',
         outline: 'bg-transparent text-ink hover:bg-ink hover:text-white',
+        /* Same outline button, inverted for the sections painted ink (the
+           countdown band, which sits on the shared Hero -> Our Story
+           background). The border colour has to move with the text: on ink an
+           ink border is invisible. */
+        outlineOnInk:
+          'border-white bg-transparent text-white hover:bg-white hover:text-ink focus-visible:outline-white',
       },
     },
     defaultVariants: {

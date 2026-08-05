@@ -28,8 +28,18 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="letter-theme bg-white text-ink">
-      <Hero />
-      <CountdownBand />
+      {/* Hero + CountdownBand share ONE background with Our Story: this
+          wrapper is painted ink, the Hero's lily photo sits on top of it, and
+          the Hero's overlay drives from a dark scrim to solid ink as it
+          scrolls (see hero.tsx). By the time the pin releases the wrapper's
+          own ink is all that is left, so the countdown band reads as the same
+          surface Our Story continues. The wrapper deliberately stops before
+          Our Story: Our Story keeps its own `bg-ink` so its rounded BOTTOM
+          dome still curves against the white Prenup section below. */}
+      <div className="relative bg-ink">
+        <Hero />
+        <CountdownBand />
+      </div>
       <OurStory />
       <Prenup />
       <DayItself />

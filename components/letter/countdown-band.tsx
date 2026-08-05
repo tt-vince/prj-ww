@@ -6,16 +6,17 @@ import { Countdown } from '@/components/countdown';
 import { VinylPlayer } from '@/components/letter/vinyl-player';
 
 /**
- * Countdown band — white section between Hero and Our Story. It is a DOME at
- * both ends: its own white dome rises `-mt-48` (12rem) into the Hero's lily
- * photo (the Hero renders a 12rem strip of continued photo for it to sit in),
- * and Our Story's ink dome rises into its bottom padding.
+ * Countdown band — the middle of ONE continuous ink background that runs Hero →
+ * Countdown → Our Story. It paints nothing itself: the wrapper in
+ * wedding-letter.tsx is `bg-ink`, the Hero's photo sits on that wrapper and
+ * fades into the same ink as it scrolls, and Our Story carries it on. There is
+ * no white dome here any more — the band used to be a white section between two
+ * photos, and a hard colour change in the middle of the countdown is exactly
+ * what the shared background exists to remove. Type is therefore WHITE on ink,
+ * the same inversion Our Story uses.
  *
- * Top: `border-radius: 50% 50% 0 0 / 180px 180px 0 0` — the apex touches the
- * element's top edge at centre and the shoulders fall away, so the lily photo
- * stays visible either side instead of ending on a hard horizontal seam.
- * Padding is `pt-28 sm:pt-32`, the same pair Our Story uses inside its dome, so
- * both domes seat their first line at the same depth under the curve.
+ * `-mt-48` (12rem) is kept: the Hero's sticky track is sized against that bite
+ * (`h-[calc(150svh-12rem)]`), so it still governs where the pin hands over.
  *
  * Bottom: `pb-dome` gives Our Story room to rise into. Our Story keeps its own
  * `-mt-48` (12rem), so the ink dome overlaps only this white bottom padding,
@@ -29,8 +30,8 @@ import { VinylPlayer } from '@/components/letter/vinyl-player';
  * title plus a number plus a label was three things saying one thing, which is
  * what made the block read as a stat readout rather than a letter.
  *
- * Colour is the letter's two-colour system: white paper and ink #1E2A18, both
- * at full strength. Nothing here is tinted — the count reads loudest because it
+ * Colour is the letter's two-colour system inverted: white type on ink #1E2A18,
+ * both at full strength. Nothing here is tinted — the count reads loudest because it
  * is the largest, not because everything around it was faded. Rank is carried by
  * size, face and weight only.
  */
@@ -38,7 +39,7 @@ export function CountdownBand() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative z-10 -mt-48 rounded-[50%_50%_0_0_/_180px_180px_0_0] bg-white px-gutter pt-28 pb-dome text-center sm:pt-32">
+    <section className="letter-on-ink relative z-10 -mt-48 px-gutter pt-28 pb-dome text-center sm:pt-32">
       <motion.div
         className="flex flex-col items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
@@ -54,7 +55,7 @@ export function CountdownBand() {
 
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-sans text-subhead text-ink">
+        <h2 className="font-sans text-subhead text-white">
           counting down to the day
         </h2>
 
@@ -66,17 +67,17 @@ export function CountdownBand() {
         <Countdown
           align="center"
           size="lg"
-          className="mt-8 text-ink"
+          className="mt-8 text-white"
           srSuffix="until we say I do"
-          labelClassName="font-script text-title text-ink"
-          tickClassName="text-ink"
+          labelClassName="font-script text-title text-white"
+          tickClassName="text-white"
           label="until we say I do"
         />
 
         {/* The one action in the band: put the date somewhere it won't be
             forgotten. Outlined rather than filled so the day count stays the
             loudest thing on the section. */}
-        <AddToCalendar className="mt-12" />
+        <AddToCalendar className="mt-12" variant="outlineOnInk" />
       </motion.div>
     </section>
   );
