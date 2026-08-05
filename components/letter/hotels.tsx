@@ -88,7 +88,7 @@ export function Hotels() {
           {HOTELS.map((h) => (
             <Card
               key={h.name}
-              className="flex flex-col border-2 border-ink bg-white px-2 py-8 shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)] ring-0 sm:px-6"
+              className="flex flex-col border-2 border-ink bg-white px-2 py-8 shadow-[0_20px_44px_-26px_color-mix(in_srgb,var(--ink)_45%,transparent)] ring-0 sm:px-6"
             >
               <CardHeader>
                 <CardTitle className="font-sans text-ink">{h.name}</CardTitle>

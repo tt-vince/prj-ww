@@ -16,7 +16,7 @@ import {
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
 /**
- * RSVP — the closing section (after Location). Solid ink (#1E2A18, matching Our
+ * RSVP — the closing section (after Location). Solid ink (`--ink`, matching Our
  * Story) sits behind a single white Card holding the reply form.
  *
  * A white dome opens the section: the paper of the Hotels section above carries
@@ -68,7 +68,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
             shows through the gap and the card reads as mounted on the section
             rather than dropped on it. `outline-offset` leaves the gap
             transparent, so it picks up the ink behind on its own. */}
-        <Card className="mt-heading rounded-xl px-2 py-8 shadow-[0_28px_60px_-30px_rgba(30,42,24,0.55)] outline-2 outline-offset-2 outline-white sm:px-6">
+        <Card className="mt-heading rounded-xl px-2 py-8 shadow-[0_28px_60px_-30px_color-mix(in_srgb,var(--ink)_55%,transparent)] outline-2 outline-offset-2 outline-white sm:px-6">
           <Suspense fallback={<RsvpBodyFallback />}>
             <RsvpBody searchParams={searchParams} />
           </Suspense>

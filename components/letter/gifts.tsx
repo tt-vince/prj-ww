@@ -24,6 +24,9 @@ export async function Gifts() {
         width: 176,
         margin: 1,
         errorCorrectionLevel: 'M',
+        // Deliberately NOT var(--ink): a QR code is machine-read, and scanners
+        // want a near-black/white pair. The letter's green is too light to
+        // guarantee a decode, so this one mark keeps a fixed dark value.
         color: { dark: '#1e2a18', light: '#ffffff' },
       }),
     })),

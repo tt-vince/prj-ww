@@ -23,7 +23,7 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  * hero curve on `sm`+ (`sm:-mt-16`, `sm:rounded` 3rem). DayItself slides up
  * behind it at z-0. Inside the
  * dome the timeline is a SCRAPBOOK (imported design "Wedding Timeline" 4a/5a),
- * recoloured into the letter's two-colour system — an ink #1E2A18 dome with
+ * recoloured into the letter's two-colour system — an `--ink` dome with
  * white paper and white thread on it:
  *
  *   • a hand-drawn camera charm hangs over the top of a centre thread;
@@ -283,10 +283,10 @@ function Polaroid({
   const { image, caption, title, tilt } = memory;
   return (
     <figure
-      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-white p-3 pb-9 shadow-[0_14px_28px_-6px_rgba(30,42,24,0.5),0_2px_5px_rgba(30,42,24,0.3)] sm:w-64"
+      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-white p-3 pb-9 shadow-[0_14px_28px_-6px_color-mix(in_srgb,var(--ink)_50%,transparent),0_2px_5px_color-mix(in_srgb,var(--ink)_30%,transparent)] sm:w-64"
       style={{ transform: `rotate(${tilt}deg)` }}
     >
-      <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_rgba(30,42,24,0.3)]">
+      <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_color-mix(in_srgb,var(--ink)_30%,transparent)]">
         {image ? (
           <button
             type="button"

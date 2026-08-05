@@ -99,7 +99,7 @@ const THROW_THRESHOLD = 160;
 /** Shared silhouette: the photos are bare images, but they sit in the deck
     with the same corner radius and drop shadow as the venue card. */
 const CARD_SHELL =
-  'rounded-xl shadow-[0_20px_44px_-26px_rgba(30,42,24,0.45)]';
+  'rounded-xl shadow-[0_20px_44px_-26px_color-mix(in_srgb,var(--ink)_45%,transparent)]';
 
 /** The two chevrons flanking the dots — bare glyphs, no button chrome. The
     padding is hit area only, so the tap target clears 24px on touch. */

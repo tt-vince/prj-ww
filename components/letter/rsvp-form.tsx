@@ -27,7 +27,7 @@ const initial: RsvpState = { ok: false };
  * couple's way of reaching the guest back, not part of the message.
  *
  * Styling is the guest letter's: shadcn tokens for every field (so the
- * `.letter-theme` scope in app/globals.css paints it in white + #1E2A18 with no
+ * `.letter-theme` scope in app/globals.css paints it in paper + `--ink` with no
  * colour of its own) and the shared `letterButton` for every button, since this
  * form only ever renders inside that letter.
  *

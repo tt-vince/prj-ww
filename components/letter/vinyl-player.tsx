@@ -19,7 +19,7 @@ const TRACK_SRC = '/music/placeholder.wav';
  *
  * Styling lives in app/globals.css (`.vinyl-ring` / `.vinyl`): grooved wax, a
  * paper label, and the same drop shadow as `.env-back`. Inside `.letter-theme`
- * the record is re-pressed in ink #1E2A18 to keep the letter's two colours.
+ * the record is re-pressed in `--ink` to keep the letter's two colours.
  * The component brings no outer spacing of its own — callers place it with
  * `className`, and `size` sets the disc's width (`--vinyl-size`).
  *

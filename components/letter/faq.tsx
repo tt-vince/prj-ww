@@ -4,7 +4,7 @@ import { SectionHeading } from '@/components/letter/section-heading';
 /**
  * FAQ — white section after Gifts (last in the letter). Same header pattern as
  * the other sections (SectionHeading), then a stack of
- * question/answer items, each in its own solid ink card (#1E2A18 — the same ink
+ * question/answer items, each in its own solid ink card (`--ink` — the same ink
  * as the Rsvp section background). Placeholder copy — edit freely.
  */
 const FAQS = [

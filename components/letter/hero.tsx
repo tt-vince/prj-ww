@@ -60,7 +60,7 @@ export function Hero() {
             {/* The lace frame. */}
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 drop-shadow-[0_8px_30px_rgba(30,42,24,0.55)]"
+              className="pointer-events-none absolute inset-0 drop-shadow-[0_8px_30px_color-mix(in_srgb,var(--ink)_55%,transparent)]"
             >
               <Image
                 src={lacePng}
@@ -72,7 +72,7 @@ export function Hero() {
               />
             </div>
             {/* Names centered in the window, stacked to fit the square. */}
-            <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-paper drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]">
+            <h1 className="absolute inset-[22%] font-weight-bold flex flex-col items-center justify-center gap-0.5 font-script leading-none text-paper drop-shadow-[0_2px_14px_color-mix(in_srgb,var(--ink)_75%,transparent)]">
               {/* Sized against the lace window rather than the type scale:
                   the names have to fit the frame they sit in, so they track
                   the frame's own breakpoint, not the document's. */}
@@ -83,7 +83,7 @@ export function Hero() {
           </motion.div>
           {/* <Countdown
             align="center"
-            className="mt-10 text-white drop-shadow-[0_1px_10px_rgba(30,42,24,0.65)]"
+            className="mt-10 text-white drop-shadow-[0_1px_10px_color-mix(in_srgb,var(--ink)_65%,transparent)]"
           /> */}
         </motion.div>
 
@@ -102,7 +102,7 @@ export function Hero() {
           <motion.p
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-sans text-subhead uppercase leading-none tracking-[0.16em] text-paper drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]"
+            className="font-sans text-subhead uppercase leading-none tracking-[0.16em] text-paper drop-shadow-[0_2px_14px_color-mix(in_srgb,var(--ink)_75%,transparent)]"
           >
             {WEDDING_DAY_LABEL}
           </motion.p>
@@ -110,7 +110,7 @@ export function Hero() {
             variants={heroItem}
             transition={{ duration: 0.8, ease: 'easeOut' }}
           >
-            <WeekStrip className="mt-5 text-paper drop-shadow-[0_2px_14px_rgba(30,42,24,0.75)]" />
+            <WeekStrip className="mt-5 text-paper drop-shadow-[0_2px_14px_color-mix(in_srgb,var(--ink)_75%,transparent)]" />
           </motion.div>
         </motion.div>
         </header>

@@ -79,7 +79,7 @@ function Tile({
   if (!shot.image) {
     return (
       <div className={`relative overflow-hidden ${span}${hidden}`}>
-        <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#1e2a18,#1e2a18_1px,#ffffff_1px,#ffffff_10px)]">
+        <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,var(--ink),var(--ink)_1px,#ffffff_1px,#ffffff_10px)]">
           <span className="font-mono text-micro uppercase tracking-[0.14em] text-ink">
             photo · {shot.alt}
           </span>

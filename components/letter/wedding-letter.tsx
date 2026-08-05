@@ -21,7 +21,7 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
  * longer wraps this content but is kept for reuse.
  *
  * `letter-theme` (app/globals.css) scopes the home page to its two-colour
- * system — white paper, #1E2A18 ink — by re-pointing the shadcn tokens for this
+ * system — `--paper` cream, `--ink` green — by re-pointing the shadcn tokens for this
  * subtree only. The dashboard keeps the wisteria & fig palette.
  */
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {

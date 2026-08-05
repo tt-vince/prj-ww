@@ -782,15 +782,15 @@
     ),
     var(--ink);
   box-shadow:
-    0 30px 58px -30px rgba(30, 42, 24, 0.4),
-    0 10px 22px -14px rgba(30, 42, 24, 0.22),
+    0 30px 58px -30px color-mix(in srgb, var(--ink) 40%, transparent),
+    0 10px 22px -14px color-mix(in srgb, var(--ink) 22%, transparent),
     inset 0 0 0 1px rgba(0, 0, 0, 0.35);
 }
 .letter-theme .vinyl-label {
   background: var(--paper);
   box-shadow:
-    0 0 0 1px rgba(30, 42, 24, 0.35),
-    inset 0 0 0 1px rgba(30, 42, 24, 0.08);
+    0 0 0 1px color-mix(in srgb, var(--ink) 35%, transparent),
+    inset 0 0 0 1px color-mix(in srgb, var(--ink) 8%, transparent);
 }
 .letter-theme .vinyl-hole {
   background: var(--ink);
