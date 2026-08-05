@@ -3,7 +3,10 @@
 import { CalendarPlus, ChevronDown } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { letterButton } from '@/components/letter/letter-button';
+import {
+  letterButton,
+  type LetterButtonVariants,
+} from '@/components/letter/letter-button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -97,11 +100,18 @@ function downloadIcs() {
   URL.revokeObjectURL(url);
 }
 
-export function AddToCalendar({ className }: { className?: string }) {
+export function AddToCalendar({
+  className,
+  variant = 'outline',
+}: {
+  className?: string;
+  /** `outlineOnInk` for the ink-painted countdown band; see letter-button.ts. */
+  variant?: LetterButtonVariants['variant'];
+}) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
-        className={cn(letterButton({ variant: 'outline' }), className)}
+        className={cn(letterButton({ variant }), className)}
       >
         <CalendarPlus aria-hidden strokeWidth={1.5} />
         Add to calendar

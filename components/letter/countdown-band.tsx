@@ -5,18 +5,17 @@ import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
 
 /**
- * Countdown band — white section between Hero and Our Story. Its top is a
- * REVERSED DOME: the Hero's dark field extends down INTO this white section as
- * a shallow black arch, the mirror of Our Story's white-into-ink dome below.
- * The arch is edge-to-edge, deepest at centre, tapering to the seam at both
- * sides, so the dark photo above reads as spilling over the top. Black (not
- * ink) so the overlay carries no green cast.
- * Its bottom is still a DOME too: Our Story's ink dome rises into the bottom
- * padding.
+ * Countdown band — the middle of ONE continuous ink background that runs Hero →
+ * Countdown → Our Story. It paints nothing itself: the wrapper in
+ * wedding-letter.tsx is `bg-ink`, the Hero's photo sits on that wrapper and
+ * fades into the same ink as it scrolls, and Our Story carries it on. Type is
+ * therefore PAPER on ink, the same inversion Our Story uses.
  *
- * Top: `pt-44 sm:pt-28` seats the first line clear of the arch's deepest point.
- * The arch is shallower on wider screens — a 7.5rem ellipse dome on mobile, a
- * low 4rem soft curve from `sm` up — so the desktop padding is the smaller.
+ * Neither the old white dome nor the reversed black arch that replaced it
+ * survives: both existed to disguise a hard colour change in the middle of the
+ * countdown, and the shared ink field removes the colour change itself. The top
+ * is a plain flush seam at the Hero's bottom edge, where the pin releases, and
+ * `pt-28 sm:pt-32` seats the first line clear of it.
  *
  * Bottom: `pb-dome` gives Our Story room to rise into. Our Story keeps its own
  * `-mt-48` (12rem), so the ink dome overlaps only this white bottom padding,
@@ -30,8 +29,8 @@ import { Countdown } from '@/components/countdown';
  * title plus a number plus a label was three things saying one thing, which is
  * what made the block read as a stat readout rather than a letter.
  *
- * Colour is the letter's two-colour system: white paper and ink #1E2A18, both
- * at full strength. Nothing here is tinted — the count reads loudest because it
+ * Colour is the letter's two-colour system inverted: paper type on ink #2A2D1A,
+ * both at full strength. Nothing here is tinted — the count reads loudest because it
  * is the largest, not because everything around it was faded. Rank is carried by
  * size, face and weight only.
  */
@@ -39,29 +38,7 @@ export function CountdownBand() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="relative z-10 bg-paper px-gutter pt-44 pb-dome text-center sm:pt-28">
-      {/* Reversed dome: a black arch hanging from the very top of the band so
-          the Hero's dark field reads as spilling down into this section.
-          `top-0` + `-mt-px` overlaps the seam 1px so no hairline shows; z-10
-          (with the section's relative) keeps it over the white paper but under
-          the countdown text (which clears it via the section's `pt`).
-
-          - Mobile: a CSS ellipse arch (bottom corners rounded full-height), the
-            deep dome that already reads well on a narrow screen.
-          - sm+: a soft, low continuous curve. Horizontal radius stays 50% so
-            the two bottom corners meet at the centre (one unbroken curve, no
-            flat middle), but the vertical radius (3rem) is LESS than the height
-            (4rem) so the edges keep ~1rem of body and round off instead of
-            tapering to a sharp point the way a full-height ellipse does when
-            stretched wide. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -mt-px z-10 h-[7.5rem] rounded-[0_0_50%_50%_/_0_0_7.5rem_7.5rem] bg-black sm:hidden"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 -mt-px z-10 hidden h-[4rem] rounded-[0_0_50%_50%_/_0_0_3rem_3rem] bg-black sm:block"
-      />
+    <section className="letter-on-ink relative z-10 px-gutter pt-28 pb-dome text-center sm:pt-32">
       <motion.div
         className="flex flex-col items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}
@@ -71,7 +48,7 @@ export function CountdownBand() {
       >
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-sans text-subhead text-ink">
+        <h2 className="font-sans text-subhead text-paper">
           counting down to the day
         </h2>
 
@@ -83,17 +60,17 @@ export function CountdownBand() {
         <Countdown
           align="center"
           size="lg"
-          className="mt-8 text-ink"
+          className="mt-8 text-paper"
           srSuffix="until we say I do"
-          labelClassName="font-script text-title text-ink"
-          tickClassName="text-ink"
+          labelClassName="font-script text-title text-paper"
+          tickClassName="text-paper"
           label="until we say I do"
         />
 
         {/* The one action in the band: put the date somewhere it won't be
             forgotten. Outlined rather than filled so the day count stays the
             loudest thing on the section. */}
-        <AddToCalendar className="mt-12" />
+        <AddToCalendar className="mt-12" variant="outlineOnInk" />
       </motion.div>
     </section>
   );
