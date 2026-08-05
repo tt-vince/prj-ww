@@ -17,14 +17,20 @@ const rowTransition = { duration: 1.1, ease: 'easeOut' } as const;
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
 /**
- * Our story — EDGE-TO-EDGE green dome. Its top dome rises into the section
- * above and its bottom dome into the one below via a matching `-mt` overlap:
- * a deep 12rem (`-mt-48`, `180px` radius) on mobile, and the shallow ~4rem
- * hero curve on `sm`+ (`sm:-mt-16`, `sm:rounded` 3rem). DayItself slides up
- * behind it at z-0. Inside the
- * dome the timeline is a SCRAPBOOK (imported design "Wedding Timeline" 4a/5a),
- * recoloured into the letter's two-colour system — an `--ink` dome with
- * white paper and white thread on it:
+ * Our story — the last of the three sections drawn on the shared opening
+ * backdrop (components/letter/opening-backdrop.tsx), which renders it and paints
+ * behind it. It has NO background and no dome of its own:
+ *
+ * The dome is gone deliberately. It existed to soften the join between this
+ * section's ink and the paper sections on either side of it; with the backdrop's
+ * photo showing through and greening away to ink across this section, there is
+ * no colour edge left for a curve to disguise — the dome only cut a visible arc
+ * out of a continuous field. Its `-mt` overlaps went with it (and Prenup's
+ * matching `-mt-48`/`pt-dome`, which existed to slide under the bottom dome).
+ *
+ * The timeline itself is a SCRAPBOOK (imported design "Wedding Timeline" 4a/5a),
+ * recoloured into the letter's palette — paper type and paper thread on the
+ * backdrop's ink:
  *
  *   • a hand-drawn camera charm hangs over the top of a centre thread;
  *   • each memory is a tilted white polaroid with a handwritten caption;
@@ -105,8 +111,8 @@ export function OurStory() {
   const reduce = !!useReducedMotion();
 
   return (
-    <section className="relative z-10 -mt-48 sm:-mt-16">
-      <div className="rounded-[50%_50%_50%_50%_/_180px_180px_180px_180px] bg-ink px-gutter pt-28 pb-section text-center sm:rounded-[50%_50%_50%_50%_/_3rem_3rem_3rem_3rem] sm:pt-32">
+    <section className="relative z-10">
+      <div className="px-gutter pt-section pb-section text-center">
         <div className="mx-auto max-w-[64rem] lg:max-w-[80rem]">
           <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 

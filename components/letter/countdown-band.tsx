@@ -17,11 +17,9 @@ import { Countdown } from '@/components/countdown';
  * is a plain flush seam at the Hero's bottom edge, where the pin releases, and
  * `pt-28 sm:pt-32` seats the first line clear of it.
  *
- * Bottom: `pb-dome` gives Our Story room to rise into. Our Story keeps its own
- * `-mt-48` (12rem), so the ink dome overlaps only this white bottom padding,
- * never the countdown text. `pb-dome` (app/globals.css) is that 12rem plus one
- * `section` of breathing room, so what stays visible below the count is exactly
- * one section's worth — the same gap Prenup and RSVP leave on their domes.
+ * Bottom: a plain `pb-section`. It used to be `pb-dome`, reserving 12rem for Our
+ * Story's dome to rise into; Our Story has no dome and no overlap now, so the
+ * band just leaves one section of space like any other.
  *
  * The section speaks one sentence, and the number is a word in it: the day
  * count is the display element and the script line finishes the thought. There
@@ -38,7 +36,7 @@ export function CountdownBand() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <section className="letter-on-ink relative z-10 px-gutter pt-28 pb-dome text-center sm:pt-32">
+    <section className="letter-on-ink relative z-10 px-gutter pt-28 pb-section text-center sm:pt-32">
       <motion.div
         className="flex flex-col items-center"
         initial={reduceMotion ? false : { opacity: 0, y: 20 }}

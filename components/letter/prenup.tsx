@@ -2,18 +2,15 @@ import { SectionHeading } from '@/components/letter/section-heading';
 import { PrenupMosaic, type Shot } from '@/components/letter/prenup-gallery';
 
 /**
- * Prenup gallery — EDGE-TO-EDGE white section between Our Story and
- * DayItself. It carries the overlap that DayItself used to: `-mt-48` pulls it
- * up BEHIND Our Story's bottom dome (z-0 under its z-10) and `pt-dome` clears
- * the dome again before any content. DayItself follows as a plain white
- * section, so the seam between them is invisible.
+ * Prenup gallery — EDGE-TO-EDGE paper section between Our Story and DayItself,
+ * and the first paper ground after the opening's ink. DayItself follows as
+ * another plain paper section, so the seam between them is invisible.
  *
- * `pt-dome` is the shared dome clearance from app/globals.css — the dome bite
- * plus one `section` of breathing room. It used to be a hand-tuned `pt-76`,
- * which drifted out of step with the two other places that clear a dome; the
- * token keeps all three honest — and shrinks with the dome on `sm`+, where the
- * bite is the shallow ~4rem hero curve (so the `-mt` overlap is `sm:-mt-16`).
- * On mobile both stay the deep 12rem.
+ * It used to pull itself up `-mt-48` BEHIND Our Story's bottom dome and clear
+ * the curve again with `pt-dome`. Our Story has no dome now (see our-story.tsx),
+ * so both are gone: a plain `pt-section` and ordinary flow. Leaving the overlap
+ * in place would have slid this paper section up under a section that no longer
+ * paints a background — the paper would have shown straight through.
  *
  * Layout: a photo mosaic — bare images, no frame, no rounding, no shadow, no
  * caption, and no horizontal padding, so it runs to both screen edges. Every
@@ -85,7 +82,7 @@ const VISIBLE = SHOTS.slice(0, Math.max(MOBILE_COUNT, DESKTOP_COUNT));
 
 export function Prenup() {
   return (
-    <section id="prenup" className="relative z-0 -mt-48 bg-paper pt-dome sm:-mt-16">
+    <section id="prenup" className="relative z-0 bg-paper pt-section">
       <Heading />
 
       <PrenupMosaic shots={VISIBLE} mobileCount={MOBILE_COUNT} />

@@ -1,5 +1,4 @@
 import { OpeningBackdrop } from '@/components/letter/opening-backdrop';
-import { OurStory } from '@/components/letter/our-story';
 import { Prenup } from '@/components/letter/prenup';
 import { DayItself } from '@/components/letter/day-itself';
 import { AttireGuide } from '@/components/letter/attire-guide';
@@ -28,15 +27,11 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="letter-theme bg-paper text-ink">
-      {/* Hero + CountdownBand, on one background that arrives at Our Story's
-          green: the lily photo spans both and its overlay drives from a dark
-          scrim to solid ink across the whole opening, so the countdown still
-          sits on a greening photo and only Our Story is completely green (see
-          opening-backdrop.tsx). It stops before Our Story on purpose: Our Story
-          keeps its own `bg-ink`, so its rounded BOTTOM dome still curves against
-          the paper Prenup section below. */}
+      {/* Hero, CountdownBand and OurStory share one background and are composed
+          inside it: the lily photo is pinned behind all three and an ink layer
+          fades in over it, reaching flat green as Our Story ends (see
+          opening-backdrop.tsx). Prenup below is the first paper ground again. */}
       <OpeningBackdrop />
-      <OurStory />
       <Prenup />
       <DayItself />
       <AttireGuide />
