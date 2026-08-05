@@ -1,9 +1,7 @@
 'use client';
 
-import { useRef } from 'react';
 import Image from 'next/image';
-import { motion, useScroll, useTransform, useMotionTemplate } from 'motion/react';
-import heroLily from '@/public/hero-lily.jpg';
+import { motion } from 'motion/react';
 import lacePng from '@/public/lace.png';
 import { WeekStrip } from '@/components/letter/week-strip';
 import { COUPLE_NAMES, WEDDING_DAY_LABEL } from '@/lib/wedding';
@@ -11,46 +9,17 @@ import { COUPLE_NAMES, WEDDING_DAY_LABEL } from '@/lib/wedding';
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
 /**
- * Hero + lily backdrop, and the top of ONE continuous background shared with
- * the countdown band and Our Story: the wrapper in wedding-letter.tsx is painted
- * ink, this photo sits on it, and the overlay below drives from a dark scrim to
- * solid ink as the hero scrolls — so scrolling out of the hero lands on Our
- * Story's green with no seam and no paper band in between. The photo ends flush
- * at the section's bottom, where the band begins: with both sides ink by then,
- * that seam has nothing to show.
+ * Hero type — the names, the line, the date. It paints NO background of its
+ * own: the lily photo, its scroll-zoom and the scrim-to-green overlay belong to
+ * `OpeningBackdrop`, which wraps this section and the CountdownBand so the green
+ * arrives gradually across both. See opening-backdrop.tsx.
  *
  * The section is 150svh tall and the content is `sticky top-0` inside it, one
  * viewport high: the names stay centred on screen while the hero scrolls, then
- * unpin and travel up with the page. The photo fills the whole 150svh, and the
- * pin releases exactly at the section's bottom, where the CountdownBand begins.
- *
- * Scroll-zoom: the lily photo lives in its own `motion.div` layer so it can
- * scale up, blur, and fade as the hero scrolls out of view (Motion example
- * `react-scroll-zoom-hero`). The overlay + text sit above it, unscaled. The
- * offset ends at `end end` so the zoom finishes exactly as the pin releases.
- *
- * The photo layer is clipped by its OWN wrapper rather than by the section:
- * `overflow-hidden` on an ancestor of a sticky element makes it stick inside a
- * box that never scrolls, which kills the pin.
+ * unpin and travel up with the page. The pin releases at the section's bottom,
+ * where the CountdownBand begins — the backdrop simply carries on behind it.
  */
 export function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  // 0 while hero pinned at top -> 1 once fully scrolled past.
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ['start start', 'end end'],
-  });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
-  const blurPx = useTransform(scrollYProgress, [0, 1], [0, 8]);
-  const filter = useMotionTemplate`blur(${blurPx}px)`;
-  // Scrim -> ink: the hero's photo dissolves into the letter's green so the
-  // hero, the countdown band and Our Story are one continuous background.
-  const overlay = useTransform(
-    scrollYProgress,
-    [0, 0.55, 1],
-    ['rgba(0, 0, 0, 0.65)', 'rgba(34, 37, 21, 0.82)', 'rgb(42, 45, 26)']
-  );
-
   // Hero content reveals on mount (above the fold), staggered top to bottom.
   const heroItem = {
     hidden: { opacity: 0, y: 20 },
@@ -58,37 +27,7 @@ export function Hero() {
   };
 
   return (
-    <div ref={ref} className="relative h-[150svh]">
-      {/* Full-bleed lily photo, zoom/blur/fade on scroll, clipped here. */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute inset-0"
-          style={{ scale, filter, transformOrigin: '50% 30%' }}
-        >
-          {/* next/image (static import): responsive srcset, preload as the LCP
-              image, and an inline blur-up placeholder while it streams in. */}
-          <Image
-            src={heroLily}
-            alt=""
-            fill
-            priority
-            placeholder="blur"
-            sizes="100vw"
-            className="object-cover object-[50%_top]"
-          />
-        </motion.div>
-        {/* Overlay: text legibility at the top of the scroll, and the handover
-            to Our Story's green at the bottom. It drives from a dark scrim to
-            SOLID ink #2A2D1A across the hero's scroll, so the photo is gone by
-            the time the pin releases and what remains is the same ink the
-            wrapper (wedding-letter.tsx) paints behind the countdown band and
-            Our Story continues. The range ends at progress 1 — the pin release,
-            flush with the band — so the photo's own bottom edge is never visible
-            against the ink below it. This replaced the old fade-to-black plus
-            the band's reversed black arch: with one shared ink field there is no
-            longer a light section for a dark arch to spill into. */}
-        <motion.div className="absolute inset-0" style={{ backgroundColor: overlay }} />
-      </div>
+    <div className="relative h-[150svh]">
       {/* Sticky track: full section height; the pin releases at its bottom,
           flush with the CountdownBand. */}
       <div className="h-[150svh]">

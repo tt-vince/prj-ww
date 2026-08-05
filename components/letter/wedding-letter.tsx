@@ -1,5 +1,4 @@
-import { Hero } from '@/components/letter/hero';
-import { CountdownBand } from '@/components/letter/countdown-band';
+import { OpeningBackdrop } from '@/components/letter/opening-backdrop';
 import { OurStory } from '@/components/letter/our-story';
 import { Prenup } from '@/components/letter/prenup';
 import { DayItself } from '@/components/letter/day-itself';
@@ -28,18 +27,14 @@ type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) {
   return (
     <div className="letter-theme bg-paper text-ink">
-      {/* Hero + CountdownBand share ONE background with Our Story: this
-          wrapper is painted ink, the Hero's lily photo sits on top of it, and
-          the Hero's overlay drives from a dark scrim to solid ink as it
-          scrolls (see hero.tsx). By the time the pin releases the wrapper's
-          own ink is all that is left, so the countdown band reads as the same
-          surface Our Story continues. The wrapper deliberately stops before
-          Our Story: Our Story keeps its own `bg-ink` so its rounded BOTTOM
-          dome still curves against the paper Prenup section below. */}
-      <div className="relative bg-ink">
-        <Hero />
-        <CountdownBand />
-      </div>
+      {/* Hero + CountdownBand, on one background that arrives at Our Story's
+          green: the lily photo spans both and its overlay drives from a dark
+          scrim to solid ink across the whole opening, so the countdown still
+          sits on a greening photo and only Our Story is completely green (see
+          opening-backdrop.tsx). It stops before Our Story on purpose: Our Story
+          keeps its own `bg-ink`, so its rounded BOTTOM dome still curves against
+          the paper Prenup section below. */}
+      <OpeningBackdrop />
       <OurStory />
       <Prenup />
       <DayItself />
