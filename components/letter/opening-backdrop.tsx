@@ -25,12 +25,21 @@ import { OurStory } from '@/components/letter/our-story';
  * photo stopped dead at its top edge, so the transition was over before the
  * section it was transitioning to.
  *
- * The backdrop is `sticky top-0 h-svh`, i.e. viewport-sized and pinned, with
- * `-mb-[100svh]` cancelling the flow height it would otherwise add. That keeps
- * the photo framed to the screen (an `absolute inset-0` layer over three
- * sections would be scaled to a box several viewports tall and cropped to a
- * sliver) and keeps it in place behind all three sections as they scroll over
- * it. Everything after it is `relative`, so it paints above.
+ * The backdrop is a viewport-sized `sticky top-0 h-svh` box nested inside an
+ * `absolute inset-0` layer. Both parts matter:
+ *
+ *   - sticky + `h-svh` keeps the photo framed to the SCREEN. A single
+ *     `absolute inset-0` photo spanning three sections would be scaled to a box
+ *     several viewports tall and cropped to a sliver.
+ *   - the `absolute` parent takes it out of flow, so it contributes no height and
+ *     cannot perturb the wrapper that `useScroll` measures. An earlier version
+ *     put the sticky box directly in flow and cancelled its height with
+ *     `-mb-[100svh]`; that made the measured progress collapse back to 0 over the
+ *     last ~7% of the range, and the photo snapped back to full strength just as
+ *     Our Story ended. Verified: ink opacity ran 0 -> 0.97 and then fell to 0.75
+ *     and 0 across the final screens.
+ *
+ * Everything after it is `relative`, so it paints above.
  *
  * `overflow-hidden` sits on the backdrop's own box, never on an ancestor of the
  * Hero: an `overflow-hidden` ancestor makes a `sticky` element stick inside a
@@ -48,19 +57,15 @@ export function OpeningBackdrop() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const blurPx = useTransform(scrollYProgress, [0, 1], [0, 8]);
   const filter = useMotionTemplate`blur(${blurPx}px)`;
-  // One ink layer, fading in. `opacity` is composited on the GPU, so this does
-  // not repaint a full-viewport box on every scroll frame the way interpolating
-  // a `backgroundColor` did. It lands at 0.96 rather than 1 so the last sliver
-  // of the section is unambiguously flat, with no residual photo texture under
-  // the closing lines.
+  // Ink fading in over the photo. Reaches 1 at 0.96 rather than 1 so the last
+  // sliver of the section is unambiguously flat, with no residual photo texture
+  // under the closing lines.
   const inkIn = useTransform(scrollYProgress, [0, 0.96], [0, 1]);
 
   return (
     <div ref={ref} className="relative bg-ink">
-      <div
-        aria-hidden
-        className="pointer-events-none sticky top-0 -mb-[100svh] h-svh overflow-hidden"
-      >
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="sticky top-0 h-svh overflow-hidden">
         <motion.div
           className="absolute inset-0"
           style={{ scale, filter, transformOrigin: '50% 50%' }}
@@ -78,15 +83,29 @@ export function OpeningBackdrop() {
           />
         </motion.div>
         {/* Constant scrim: the hero's type sits on the photo from the first
-            frame, so its legibility cannot depend on the scroll position. */}
+            frame, so its legibility cannot depend on scroll position. */}
         <div className="absolute inset-0 bg-black/55" />
-        {/* The ink, coming up over the photo. `willChange` keeps this on its own
-            compositor layer for the whole scroll instead of being promoted and
-            dropped repeatedly. */}
+        {/* The ink, coming up over the photo — driven through a CSS CUSTOM
+            PROPERTY, not through `opacity` directly.
+
+            A plain `opacity` motion value is handed to the browser as a native
+            scroll-driven animation. Outside that animation's range the browser
+            stops applying it and the element snaps back to its base inline
+            style, which is why the photo came back at full strength exactly as
+            Our Story ended: computed opacity climbed to 0.97, then fell to 0.75
+            and to 0 across the last screens while the inline style still read
+            `opacity:0`. Moving the fade to the same element as the blur did not
+            help — opacity is accelerated on its own regardless of its
+            neighbours.
+
+            A custom property has no accelerated equivalent, so Motion writes it
+            from JS on every frame and the value holds past the end of the range.
+            `opacity: var(--ink-in)` still animates on the compositor. */}
         <motion.div
-          className="absolute inset-0 bg-ink"
-          style={{ opacity: inkIn, willChange: 'opacity' }}
+          className="absolute inset-0 bg-ink opacity-[var(--ink-in)]"
+          style={{ '--ink-in': inkIn } as React.CSSProperties}
         />
+        </div>
       </div>
       <Hero />
       <CountdownBand />
