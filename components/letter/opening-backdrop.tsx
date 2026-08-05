@@ -19,10 +19,18 @@ import { CountdownBand } from '@/components/letter/countdown-band';
  * over the full scroll of it. The countdown text therefore sits on a
  * still-greening photo, and only Our Story is completely green.
  *
- * The overlay reaches solid ink at 0.94 rather than 1: Our Story pulls up into
- * this wrapper's last stretch (`-mt-48`, `sm:-mt-16`), so the field has to be
- * fully green slightly before the wrapper ends or its opaque dome would cover a
- * still-transitioning background and put a visible step at the join.
+ * The range ends at `['end', '75%']` — the opening's bottom edge a quarter of the
+ * way up the screen, i.e. with Our Story a quarter visible. That is where the
+ * background is finally, completely green.
+ *
+ * The last leg of the ramp is deliberately almost flat. Our Story is opaque
+ * `bg-ink` and pulls up into this wrapper (`-mt-48`, `sm:-mt-16`), so it starts
+ * covering the backdrop well before the range ends; if the overlay were still
+ * visibly lighter at that moment, the dome's curve would show as a hard tonal
+ * edge against the field above it. So the overlay is at ink-minus-nothing (0.97
+ * alpha) by 0.85 and merely settles onto solid ink across the rest — a step too
+ * small to see at the join, with the visible part of the transition still
+ * running the full length of the Hero and the countdown.
  *
  * The photo is one layer for the whole opening, so it covers a taller box than
  * the Hero alone: `object-cover` scales it to that height and
@@ -35,11 +43,11 @@ import { CountdownBand } from '@/components/letter/countdown-band';
  */
 export function OpeningBackdrop() {
   const ref = useRef<HTMLDivElement>(null);
-  // 0 at the top of the Hero -> 1 when the opening's bottom meets the viewport
-  // bottom, i.e. where Our Story takes over.
+  // 0 at the top of the Hero -> 1 once the opening's bottom edge has risen to
+  // 75% of the viewport, i.e. once Our Story is a quarter visible.
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ['start start', 'end end'],
+    offset: ['start start', 'end 75%'],
   });
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const blurPx = useTransform(scrollYProgress, [0, 1], [0, 8]);
@@ -49,8 +57,13 @@ export function OpeningBackdrop() {
   // on the way through.
   const overlay = useTransform(
     scrollYProgress,
-    [0, 0.5, 0.94],
-    ['rgba(0, 0, 0, 0.65)', 'rgba(34, 37, 21, 0.86)', 'rgb(42, 45, 26)']
+    [0, 0.45, 0.85, 1],
+    [
+      'rgba(0, 0, 0, 0.65)',
+      'rgba(34, 37, 21, 0.86)',
+      'rgba(42, 45, 26, 0.97)',
+      'rgb(42, 45, 26)',
+    ]
   );
 
   return (
