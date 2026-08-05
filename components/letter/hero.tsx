@@ -55,7 +55,7 @@ export function Hero() {
             {/* Frosted glass filling the lace's open window. */}
             <div
               aria-hidden
-              className="absolute inset-[23%] rounded-sm bg-white/[0.07] backdrop-blur-[3px]"
+              className="absolute inset-[23%] rounded-sm bg-paper/[0.07] backdrop-blur-[3px]"
             />
             {/* The lace frame. */}
             <div
@@ -83,7 +83,7 @@ export function Hero() {
           </motion.div>
           {/* <Countdown
             align="center"
-            className="mt-10 text-white drop-shadow-[0_1px_10px_color-mix(in_srgb,var(--ink)_65%,transparent)]"
+            className="mt-10 text-paper drop-shadow-[0_1px_10px_color-mix(in_srgb,var(--ink)_65%,transparent)]"
           /> */}
         </motion.div>
 

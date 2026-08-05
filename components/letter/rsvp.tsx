@@ -68,7 +68,7 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
             shows through the gap and the card reads as mounted on the section
             rather than dropped on it. `outline-offset` leaves the gap
             transparent, so it picks up the ink behind on its own. */}
-        <Card className="mt-heading rounded-xl px-2 py-8 shadow-[0_28px_60px_-30px_color-mix(in_srgb,var(--ink)_55%,transparent)] outline-2 outline-offset-2 outline-white sm:px-6">
+        <Card className="mt-heading rounded-xl px-2 py-8 shadow-[0_28px_60px_-30px_color-mix(in_srgb,var(--ink)_55%,transparent)] outline-2 outline-offset-2 outline-paper sm:px-6">
           <Suspense fallback={<RsvpBodyFallback />}>
             <RsvpBody searchParams={searchParams} />
           </Suspense>

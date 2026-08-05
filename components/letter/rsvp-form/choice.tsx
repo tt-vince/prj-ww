@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
  * letter's offset ink outline, the same one `letterButton` uses.
  */
 const choiceRow =
-  "flex cursor-pointer items-center gap-3 rounded-xl border border-input leading-snug transition-colors accent-[color:var(--primary)] has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:accent-white has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring";
+  "flex cursor-pointer items-center gap-3 rounded-xl border border-input leading-snug transition-colors accent-[color:var(--primary)] has-[:checked]:border-primary has-[:checked]:bg-primary has-[:checked]:text-primary-foreground has-[:checked]:accent-paper has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring";
 
 /**
  * A radio or checkbox drawn as an ink row (see `choiceRow`). `size="lg"` is the

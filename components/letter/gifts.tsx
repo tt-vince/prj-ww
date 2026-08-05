@@ -48,6 +48,9 @@ export async function Gifts() {
             <div key={c.method} className="flex flex-col items-center">
               <div
                 className="rounded-md border border-ink bg-white p-2 [&>svg]:block"
+                /* Hard white, matching the QR's own `light` value: the code is
+                   machine-read and its quiet zone has to be the same tone as
+                   its background, so this square opts out of --paper. */
                 dangerouslySetInnerHTML={{ __html: c.svg }}
               />
               <p className="mt-4 font-sans text-subhead text-ink">

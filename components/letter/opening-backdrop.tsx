@@ -54,15 +54,15 @@ export function OpeningBackdrop() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 1.15]);
   const blurPx = useTransform(scrollYProgress, [0, 1], [0, 8]);
   const filter = useMotionTemplate`blur(${blurPx}px)`;
-  // Scrim -> ink. The middle stop is a green-tinted scrim rather than a straight
-  // mix of the two ends, so the photo greens as it darkens instead of going grey
-  // on the way through.
+  // Scrim -> ink, by way of the palette's botanical green. A straight mix of the
+  // two ends passes through grey; routing the middle stop through #2A4A3B means
+  // the photo visibly GREENS as it darkens, which is the point of the effect.
   const overlay = useTransform(
     scrollYProgress,
     [0, 0.45, 0.85, 1],
     [
       'rgba(0, 0, 0, 0.65)',
-      'rgba(12, 24, 18, 0.86)',
+      'rgba(42, 74, 59, 0.86)',
       'rgba(10, 17, 14, 0.97)',
       'rgb(10, 17, 14)',
     ]

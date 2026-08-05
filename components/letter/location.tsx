@@ -166,7 +166,7 @@ export function Location() {
                   inert={front !== 'venue'}
                   className={cn(
                     CARD_SHELL,
-                    'flex flex-col border-2 border-ink bg-white px-2 py-8 ring-0 sm:px-6',
+                    'flex flex-col border-2 border-ink bg-paper px-2 py-8 ring-0 sm:px-6',
                   )}
                 >
                   <CardHeader className="text-center">

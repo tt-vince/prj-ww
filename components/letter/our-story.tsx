@@ -283,7 +283,7 @@ function Polaroid({
   const { image, caption, title, tilt } = memory;
   return (
     <figure
-      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-white p-3 pb-9 shadow-[0_14px_28px_-6px_color-mix(in_srgb,var(--ink)_50%,transparent),0_2px_5px_color-mix(in_srgb,var(--ink)_30%,transparent)] sm:w-64"
+      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-paper p-3 pb-9 shadow-[0_14px_28px_-6px_color-mix(in_srgb,var(--ink)_50%,transparent),0_2px_5px_color-mix(in_srgb,var(--ink)_30%,transparent)] sm:w-64"
       style={{ transform: `rotate(${tilt}deg)` }}
     >
       <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_color-mix(in_srgb,var(--ink)_30%,transparent)]">
@@ -292,7 +292,7 @@ function Polaroid({
             type="button"
             onClick={onOpen}
             aria-label={`View photo: ${title}`}
-            className="block size-full cursor-zoom-in focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white"
+            className="block size-full cursor-zoom-in focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-lichen"
           >
             <motion.img
               layoutId={reduce ? undefined : photoLayoutId(`story-${memory.date}`)}
@@ -304,8 +304,8 @@ function Polaroid({
             />
           </button>
         ) : (
-          <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,#ffffff,#ffffff_1px,transparent_1px,transparent_10px)]">
-            <span className="font-mono text-micro uppercase tracking-[0.14em] text-white">
+          <div className="flex size-full items-center justify-center bg-[repeating-linear-gradient(45deg,var(--paper),var(--paper)_1px,transparent_1px,transparent_10px)]">
+            <span className="font-mono text-micro uppercase tracking-[0.14em] text-paper">
               photo · {caption.replace(/\s*♡$/, '')}
             </span>
           </div>
@@ -322,7 +322,7 @@ function Polaroid({
 }
 
 /**
- * A hand-drawn asset painted white. These ship as solid dark ink, so they are
+ * A hand-drawn asset painted in the light base. These ship as solid dark ink, so they are
  * drawn through a CSS mask to recolour them against the ink dome. The caller
  * supplies the aspect ratio (from the asset's viewBox) and the width.
  */
@@ -331,7 +331,7 @@ function InkCharm({ src, className }: { src: string; className?: string }) {
   return (
     <span
       aria-hidden
-      className={cn('block bg-white', className)}
+      className={cn('block bg-paper', className)}
       style={{
         maskImage: mask,
         WebkitMaskImage: mask,

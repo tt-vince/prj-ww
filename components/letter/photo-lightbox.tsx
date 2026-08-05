@@ -136,7 +136,7 @@ function Overlay({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1, transition: { duration: 0.2, delay: reduce ? 0 : 0.3 } }}
           exit={{ opacity: 0, transition: { duration: 0.15 } }}
-          className="absolute top-3 right-3 flex size-9 cursor-pointer items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60"
+          className="absolute top-3 right-3 flex size-9 cursor-pointer items-center justify-center rounded-full bg-black/40 text-paper backdrop-blur-sm transition-colors hover:bg-black/60"
         >
           <X className="size-5" strokeWidth={2.25} />
         </motion.button>

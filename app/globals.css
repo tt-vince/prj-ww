@@ -9,8 +9,12 @@
   --color-foreground: var(--foreground);
   /* Guest letter ink — the deeper of the letter's two colours. */
   --color-ink: var(--ink);
-  /* Guest letter paper — the letter's light colour (cream). */
+  /* Guest letter paper — the letter's light base. */
   --color-paper: var(--paper);
+  /* The letter's two accents, one per ground: botanical on light sections,
+     lichen on the ink ones. Links and buttons only — never body text. */
+  --color-botanical: var(--botanical);
+  --color-lichen: var(--lichen);
   /* Section-heading script colour (sage on white; re-pointed to ink inside
      .letter-theme — see that block). */
   --color-script: var(--script);
@@ -218,10 +222,17 @@
      placeholder all derive from this single variable. */
   --ink: #0a110e;
 
-  /* Home-page paper — the letter's light colour, counterpart to --ink. Every
-     white surface, card and on-ink text on the guest letter derives from this
+  /* Home-page paper — Misty White, the light base and counterpart to --ink.
+     Every light surface, card and on-ink text on the guest letter derives from this
      one variable (the Our Story photo border is the sole hard-white exception). */
-  --paper: #efe9dc;
+  --paper: #f4f6f4;
+
+  /* Light Accent — links and buttons in the LIGHT sections. Dark enough to
+     carry paper-coloured text on a filled control (about 8:1 on --paper). */
+  --botanical: #2a4a3b;
+  /* Dark Accent — the same job on the INK sections, where botanical would
+     disappear into the ground (about 7:1 on --ink). */
+  --lichen: #84a98c;
 
   /* Stat numbers, progress bars, status dots, and status pills (hi-fi). */
   --stat-going: #5f7a48;
@@ -244,10 +255,21 @@
   --pill-declined-fg: #b06a4f;
 }
 
-/* ── Home page theme: cream #EFE9DC + green #0A110E, and nothing else ───
+/* ── Home page theme: a four-role palette ───────────────────────────
    The guest letter (app/page.tsx -> components/wedding-letter.tsx ->
-   components/letter/*) is a two-colour document: cream #EFE9DC paper, #0A110E ink.
-   Both are used at FULL strength — no tints, no thinned ink: hierarchy comes
+   components/letter/*) is built from four values, and nothing else:
+
+     --ink       Deep Shadow    #0A110E   dark grounds; body text on light ones
+     --paper     Misty White    #F4F6F4   light grounds; body text on dark ones
+     --botanical Botanical Green #2A4A3B  links & buttons on LIGHT sections
+     --lichen    Lichen Sage    #84A98C   links & buttons on DARK sections
+
+   The two bases carry ALL body text; the two accents are reserved for controls,
+   so a green in this document always means "you can act on this". Each accent
+   belongs to one ground and is unreadable on the other, which is why there are
+   two rather than one.
+
+   All four are used at FULL strength — no tints, no thinned ink: hierarchy comes
    from size, face and weight, not tone. Alpha survives only where it is
    physically a scrim or a shadow (the hero's overlay on the lily photo, the
    frosted lace window, box-shadows). This block re-points the shadcn tokens for that subtree only, so
@@ -263,7 +285,9 @@
   --card-foreground: var(--ink);
   --popover: var(--paper);
   --popover-foreground: var(--ink);
-  --primary: var(--ink);
+  /* Controls, not text: `--primary` is what shadcn fills buttons and checked
+     states with, so it takes the light-section accent rather than the ink. */
+  --primary: var(--botanical);
   --primary-foreground: var(--paper);
   --secondary: var(--paper);
   --secondary-foreground: var(--ink);
@@ -271,8 +295,8 @@
   /* No thinned ink: secondary text is the same #0A110E as primary text, and
      rank comes from size/face/weight instead of tone. */
   --muted-foreground: var(--ink);
-  /* Hover/active surfaces invert rather than tint. */
-  --accent: var(--ink);
+  /* Hover/active surfaces take the accent rather than a tint of the ground. */
+  --accent: var(--botanical);
   --accent-foreground: var(--paper);
   /* The one hue outside white + ink, and only for the RSVP form's required marks
      and error states: a brick red muted towards the ink's olive so it sits in the
@@ -283,10 +307,14 @@
   /* Pointed at that red so shadcn's built-in `aria-invalid:border-destructive`
      and `text-destructive` mark the offending field without per-field colour. */
   --destructive: var(--mark-required);
+  /* Rules and section edges are structure, so they stay ink; a field's border
+     and the focus ring belong to the control, so they take the accent. */
   --border: var(--ink);
-  --input: var(--ink);
-  --ring: var(--ink);
-  --script: var(--ink);
+  --input: var(--botanical);
+  --ring: var(--botanical);
+  /* Section headlines are set in the accent on light grounds — the script face
+     carries so little ink that full --ink over-weights it. */
+  --script: var(--botanical);
 }
 
 /* Letter-scoped sizing for the shadcn primitives. Their own base classes are
@@ -755,8 +783,8 @@
   }
 }
 
-/* Guest-letter variant. The letter is a strict two-colour system — cream paper
-   #EFE9DC and ink #0A110E — so the record is pressed in ink rather than warm black,
+/* Guest-letter variant. The letter's bases are Misty White #F4F6F4 paper and
+   Deep Shadow #0A110E ink — so the record is pressed in ink rather than warm black,
    the label is paper rather than ivory, and the shadow is tinted with ink instead of
    the dashboard's wisteria. */
 .letter-theme .vinyl {
