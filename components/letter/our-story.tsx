@@ -7,12 +7,9 @@ import { MORPH, PhotoLightbox, photoLayoutId } from '@/components/letter/photo-l
 import { COUPLE_NAMES } from '@/lib/wedding';
 import { SectionHeading } from '@/components/letter/section-heading';
 
-// Both slots (photo + text) share this variant so a row reveals as one unit.
-const rowItem = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0 },
-};
-const rowTransition = { duration: 1.1, ease: 'easeOut' } as const;
+// Scroll reveals (row fade-up, vine draw-on, closing rings) were removed for
+// now — the section renders fully drawn. Re-add via motion's whileInView if it
+// comes back; the surrounding sections still animate.
 
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
@@ -34,10 +31,20 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  *
  *   • a hand-drawn camera charm hangs over the top of a centre thread;
  *   • each memory is a tilted white polaroid with a handwritten caption;
- *   • desktop (sm+) = design 4a: continuous centre spine, rows alternate
- *     left/right, text hugs the spine;
+ *   • desktop (sm+): a serpentine VINE replaces the old straight centre spine.
+ *     It weaves right→left→right down the section, and each memory sits on ONE
+ *     side only (polaroid + text together), alternating with the vine's bulge —
+ *     so the eye follows the curve from memory to memory instead of ping-ponging
+ *     across a rigid two-column grid;
  *   • mobile = design 5a: a single centred column, camera on top, polaroids
- *     strung straight down the thread.
+ *     strung straight down the thread (the vine is desktop-only — at phone
+ *     width a curve wide enough to read leaves no room for the polaroid).
+ *
+ * The vine is a stretched SVG: its viewBox is `0 0 100 (N*100+70)` in abstract
+ * units and it is drawn with `preserveAspectRatio="none"`, so one vertical unit
+ * per row-hundred maps onto whatever height the rows actually take. Row `i`'s
+ * lobe therefore always lands beside row `i`, at any viewport width or text
+ * length. Keep VINE_SIDE and the row's `imageLeft` in sync if either changes.
  *
  * Photos are real-image slots (`image`): drop a file in and it replaces the
  * striped placeholder; until then the placeholder shows.
@@ -136,12 +143,6 @@ export function OurStory() {
             {/* Hand-drawn polaroid-camera charm, centred over the top of the thread. */}
             <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-24 -translate-x-1/2 -translate-y-[85%] sm:w-28" />
 
-            {/* Continuous centre spine (sm+ only). On mobile the thread is
-                drawn by each item's own connector segment instead. */}
-            <span
-              aria-hidden
-              className="absolute top-0 bottom-[8rem] left-1/2 hidden w-[3px] -translate-x-1/2 rounded-full bg-paper sm:block"
-            />
 
             {/* No mobile `space-y`: each item opens with its own thread
                 segment, and a list gap ABOVE that segment made the thread sit
@@ -149,16 +150,30 @@ export function OurStory() {
                 polaroid — one continuous line with visibly unequal ends. The
                 segment's own `my-6` is the whole gap now, so it is symmetric by
                 construction. */}
-            <ol className="sm:space-y-0">
+            {/* The vine is absolutely positioned over this wrapper, so the
+                wrapper must bound exactly the rows it threads — hence the ol
+                sits in its own relative box rather than the section's.
+                `--row-h` is the fixed sm+ row height the vine's 100-unit lobes
+                are mapped onto. It must clear the tallest memory (polaroid
+                16rem + date + title + body ≈ 36rem) DIVIDED BY `VINE_DWELL` —
+                anything taller than the held run pokes out into the crossings
+                and the vine is drawn over the text. */}
+            <div className="relative sm:[--row-h:44rem]">
+              <Vine rows={MEMORIES.length} />
+              {/* Pixel counterpart of VINE_LEAD (sm+ only — on a phone the
+                  charm sits on its own thread segment already). */}
+              <div aria-hidden className="hidden sm:block sm:h-[calc(var(--row-h)*0.2)]" />
+              <ol className="relative sm:space-y-0">
               {MEMORIES.map((m, i) => {
-                const imageLeft = i % 2 === 0;
+                // One-sided rows: the whole memory (polaroid + text) sits on
+                // the side the vine bulges toward for this row.
+                const onRight = VINE_SIDE(i) === 'right';
                 return (
-                  <motion.li
+                  <li
                     key={m.date}
-                    className="relative flex flex-col items-center sm:grid sm:grid-cols-2 sm:items-center sm:gap-x-16 sm:py-12"
-                    initial="hidden"
-                    whileInView="show"
-                    viewport={{ once: true, amount: 0.3 }}
+                    className={cn(
+                      'relative flex flex-col items-center sm:h-[var(--row-h)] sm:justify-center sm:items-start'
+                    )}
                   >
                     {/* Mobile-only thread segment joining items into one thread.
                         `my-6` is the only vertical gap between memories on a
@@ -169,81 +184,63 @@ export function OurStory() {
                       className="my-6 h-16 w-[2px] rounded-full bg-paper sm:hidden"
                     />
 
-                    {/* Polaroid. */}
-                    <motion.div
-                      variants={rowItem}
-                      transition={rowTransition}
-                      // Centred on mobile (single column); on sm+ the polaroid
-                      // hugs the centre spine rather than floating in the
-                      // middle of its half — same treatment the illustrations
-                      // get against the rail in DayItself. Its inner padding
-                      // matches the text column's (`sm:pl-10`/`sm:pr-10`), so
-                      // both halves stand off the spine by the same 4.5rem and
-                      // the row reads as one balanced pair.
+                    {/* One-sided memory: polaroid and text stacked together in
+                        a single half-width block. There is no connector rule
+                        any more — the vine itself curves into the block, so a
+                        straight tick off it would only fight the curve.
+                        `sm:w-[46%]` leaves the middle of the section clear for
+                        the vine's swing between the two sides. */}
+                    <div
                       className={cn(
-                        'flex justify-center',
-                        imageLeft
-                          ? 'sm:order-1 sm:justify-end sm:pr-10'
-                          : 'sm:order-2 sm:justify-start sm:pl-10'
+                        'flex flex-col items-center sm:w-[42%]',
+                        // Nest the memory INSIDE the bay: right rows span
+                        // 58-100%, left rows 0-42%, while this row's vine is
+                        // held at the opposite 28 / 72. The sweep only reaches
+                        // this far across close to the row boundaries, above
+                        // and below the block — so the memory keeps its bay
+                        // without the vine having to run dead straight beside
+                        // it. Pulling it in to the centre line instead is what
+                        // forced the squared-off dwell.
+                        onRight ? 'sm:ml-[58%] sm:items-start' : 'sm:mr-[58%] sm:items-end'
                       )}
                     >
                       <Polaroid memory={m} reduce={reduce} onOpen={() => setActive(m)} />
-                    </motion.div>
 
-                    {/* Text, hugging the spine. */}
-                    <motion.div
-                      variants={rowItem}
-                      transition={rowTransition}
-                      className={cn(
-                        // `mt-6` on a phone: at `mt-2` the caption sat close
-                        // enough to the polaroid's own bottom border to read as
-                        // part of the print rather than as the memory's text.
-                        'mt-6 max-w-sm px-2 text-center sm:mt-0 sm:max-w-none',
-                        imageLeft
-                          ? 'sm:order-2 sm:pl-10 sm:text-left'
-                          : 'sm:order-1 sm:pr-10 sm:text-right'
-                      )}
-                    >
-                      <p className="font-sans text-label font-medium uppercase tracking-[0.16em] text-paper">
-                        {m.date}
-                      </p>
-                      <h3 className="relative mt-1 font-script text-entry text-paper">
-                        {/* Connector from the centre spine to the title (sm+).
-                            The run from the spine to this text box is 4.5rem —
-                            text padding (pl/pr-10 = 40px) plus half the column
-                            gap (gap-x-16 = 64px) — so the line is drawn 0.5rem
-                            SHORT of it. Full length made the script capital
-                            touch the rule; DayItself gets the same breathing
-                            room from the `md:pl-2` on its description instead.
-                            Offset stays at the full 4.5rem so the line still
-                            starts on the spine. */}
-                        <span
-                          aria-hidden
-                          className={cn(
-                            'absolute top-[0.55em] hidden h-[3px] w-16 rounded-full bg-paper sm:block',
-                            imageLeft ? 'sm:-left-[4.5rem]' : 'sm:-right-[4.5rem]'
-                          )}
-                        />
-                        {m.title}
-                      </h3>
-                      <p className="mt-2 text-body text-paper">{m.body}</p>
-                    </motion.div>
-                  </motion.li>
+                      {/* `mt-6`: at `mt-2` the date sat close enough to the
+                          polaroid's own bottom border to read as part of the
+                          print rather than as the memory's text. */}
+                      <div
+                        className={cn(
+                          // Flush edge faces the vine, ragged edge faces the
+                          // empty outer margin — so the text reads as sitting
+                          // against the curve.
+                          'mt-6 max-w-sm px-2 text-center',
+                          onRight ? 'sm:text-left' : 'sm:text-right'
+                        )}
+                      >
+                        <p className="font-sans text-label font-medium uppercase tracking-[0.16em] text-paper">
+                          {m.date}
+                        </p>
+                        <h3 className="mt-1 font-script text-entry text-paper">{m.title}</h3>
+                        <p className="mt-2 text-body text-paper">{m.body}</p>
+                      </div>
+                    </div>
+                  </li>
                 );
               })}
-            </ol>
+              </ol>
+              {/* Pixel counterpart of the vine's VINE_TAIL units (0.2 of a
+                  row). Without it the wrapper is `rows` rows tall while the
+                  viewBox is taller, so every lobe is squeezed short of its row
+                  and the crossings drift up into the memories. */}
+              <div aria-hidden className="hidden sm:block sm:h-[calc(var(--row-h)*0.2)]" />
+            </div>
 
             {/* The thread ends at a pair of hand-drawn wedding rings — same
                 idea as the getaway car closing the rail in `DayItself`. On
                 mobile a thread segment carries down to it (the sm+ spine stops
                 just above the drawing). */}
-            <motion.div
-              className="relative flex flex-col items-center"
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.4 }}
-              transition={{ duration: 0.7, ease: 'easeOut' }}
-            >
+            <div className="relative flex flex-col items-center">
               <span
                 aria-hidden
                 className="my-6 h-16 w-[2px] rounded-full bg-paper sm:hidden"
@@ -252,7 +249,7 @@ export function OurStory() {
                 src="/icons/hand_drawn/illustrations/wedding-rings-linework.svg"
                 className="aspect-[211.1815/126.2234] w-44 sm:mt-8 sm:w-52"
               />
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
@@ -273,6 +270,134 @@ export function OurStory() {
         onClose={() => setActive(null)}
       />
     </section>
+  );
+}
+
+/**
+ * Which side of the section row `i` lives on. Row 0 goes right, matching the
+ * imported design; flip the parity here and the vine follows automatically.
+ */
+const VINE_SIDE = (i: number) => (i % 2 === 0 ? 'right' : 'left');
+
+/**
+ * Horizontal reach of a lobe, in the vine's 0–100 viewBox units.
+ *
+ * The vine bulges AWAY from its row's content: the curve swings out to the
+ * empty half and the memory sits in the pocket it leaves behind, the way the
+ * reference design nests its text inside each bend. (Bulging toward the content
+ * instead puts the line under the text and wastes the open half.)
+ */
+const VINE_X = { right: 72, left: 28 } as const;
+const VINE_OPPOSITE = { right: 'left', left: 'right' } as const;
+
+/**
+ * How much of a row the vine spends parked at its lobe, as a fraction of the
+ * row — the rest is the sweep across to the next lobe.
+ *
+ * Zero — a pure sine, one smooth swing per row, which is what the reference
+ * design draws. Any real dwell shows up as a dead straight run with rounded
+ * ends (0.86 read as a squared-off bracket, 0.5 still left ~350px of straight),
+ * so clearance for the memory comes entirely from pushing it outboard rather
+ * than from parking the vine beside it. It is kept as a knob because the bay
+ * height is sensitive to it, but expect to leave it at 0.
+ *
+ * Why a sine clears the text: the swing between lobes is symmetric, so the
+ * curve reaches the memory's edge (x 58/42) at ~0.32 of the way between two
+ * lobes — about 18 units ABOVE the row's top edge and below its bottom, while
+ * the memory itself spans only the middle ~82 units of the row. Widen the block
+ * past 42%, or grow a memory past `--row-h`, and that margin is what goes.
+ */
+const VINE_DWELL = 0;
+/** Abstract units per row — one lobe per row. */
+const VINE_ROW = 100;
+/**
+ * Straight lead-in above the first lobe (0.2 of a row), so the vine drops out
+ * of the camera charm before it starts swinging and the first memory is not
+ * crowded up against the drawing. Done in the path rather than as a margin on
+ * the charm: the charm is absolutely positioned (a margin moves nothing) and
+ * spacing the whole wrapper down would take the charm with it. The row stack
+ * carries the matching pixel spacer — keep the two in step.
+ */
+const VINE_LEAD = 20;
+/**
+ * Tail below the last lobe, where the vine returns to centre for the rings.
+ * The row stack carries a matching spacer (0.2 of a row) so viewBox units and
+ * pixels stay 1:1 — keep the two in step if this changes.
+ *
+ * It stays round on a short tail because the run starts at the last lobe, in
+ * the MIDDLE of the final row: the curve gets half a row plus the tail to
+ * travel its 22 units back to centre. It also never reaches x 58/42, so it
+ * cannot clip the last memory however short it gets.
+ */
+const VINE_TAIL = 20;
+
+/**
+ * The serpentine vine threading the memories (sm+ only).
+ *
+ * Drawn in abstract units and stretched with `preserveAspectRatio="none"`: the
+ * viewBox is 100 wide by `rows * VINE_ROW + VINE_TAIL` tall, and the element is
+ * sized to the row stack, so lobe `i` always sits beside row `i` whatever the
+ * real pixel height. Non-uniform scaling does distort the curve — that is fine
+ * for a free-flowing vine, but it is also why the stroke uses
+ * `vector-effect="non-scaling-stroke"`: without it the line would render
+ * thinner horizontally than vertically.
+ *
+ * Control points sit directly above/below their nodes (half the vertical run),
+ * giving every node a vertical tangent — that is what makes consecutive lobes
+ * join as one continuous S rather than a chain of visible kinks.
+ */
+function Vine({ rows }: { rows: number }) {
+  const height = VINE_LEAD + rows * VINE_ROW + VINE_TAIL;
+
+  // Start centred under the camera charm; each row contributes a held lobe
+  // (two nodes at the same x), then the path returns to centre for the rings.
+  const pad = (VINE_ROW * (1 - VINE_DWELL)) / 2;
+  const nodes: Array<[number, number]> = [
+    [50, 0],
+    ...Array.from({ length: rows }, (_, i) => {
+      const x = VINE_X[VINE_OPPOSITE[VINE_SIDE(i)]];
+      const y0 = VINE_LEAD + i * VINE_ROW;
+      return [
+        [x, y0 + pad],
+        [x, y0 + VINE_ROW - pad],
+      ] as Array<[number, number]>;
+    }).flat(),
+    [50, height],
+  ];
+
+  const d = nodes
+    .map(([x, y], i) => {
+      if (i === 0) return `M ${x} ${y}`;
+      const [px, py] = nodes[i - 1];
+      // Same x = a held lobe (VINE_DWELL > 0): a straight run, no bend. At
+      // dwell 0 the two lobe nodes coincide and this contributes nothing.
+      if (px === x) return py === y ? '' : `L ${x} ${y}`;
+      // Vertical tangents at both ends, so held runs and crossings meet
+      // without a kink.
+      const bend = (y - py) / 2;
+      return `C ${px} ${py + bend} ${x} ${y - bend} ${x} ${y}`;
+    })
+    .join(' ');
+
+  return (
+    <svg
+      aria-hidden
+      viewBox={`0 0 100 ${height}`}
+      preserveAspectRatio="none"
+      className="pointer-events-none absolute inset-0 hidden size-full overflow-visible sm:block"
+    >
+      {/* Drawn statically. A `pathLength` draw-on was tried and removed: the
+          vine spans several viewports, so a scroll-triggered draw left the
+          curve visibly half-finished above and below the fold. */}
+      <path
+        d={d}
+        fill="none"
+        stroke="var(--paper)"
+        strokeWidth={3}
+        strokeLinecap="round"
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
   );
 }
 
