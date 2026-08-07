@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { MORPH, PhotoLightbox, photoLayoutId } from '@/components/letter/photo-lightbox';
 import { COUPLE_NAMES } from '@/lib/wedding';
 import { SectionHeading } from '@/components/letter/section-heading';
+import { Dome } from '@/components/letter/dome';
 
 // Scroll reveals: the memories fade up ONCE and stay (re-fading a memory the
 // reader has already read makes scrolling back up feel broken), while the vine
@@ -19,14 +20,15 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
 /**
  * Our story — the last of the three sections drawn on the shared opening
  * backdrop (components/letter/opening-backdrop.tsx), which renders it and paints
- * behind it. It has NO background and no dome of its own:
+ * behind it. It paints no background of its own — but it does draw a dome at
+ * the TOP.
  *
- * The dome is gone deliberately. It existed to soften the join between this
- * section's ink and the paper sections on either side of it; with the backdrop's
- * photo showing through and greening away to ink across this section, there is
- * no colour edge left for a curve to disguise — the dome only cut a visible arc
- * out of a continuous field. Its `-mt` overlaps went with it (and Prenup's
- * matching `-mt-48`/`pt-dome`, which existed to slide under the bottom dome).
+ * The top dome is back because the countdown band above is paper again, so
+ * there IS a colour edge here to disguise: paper meeting the backdrop's ink in
+ * a hard horizontal line. The dome is that edge as a curve, filled with the
+ * countdown's own paper (see the markup below). Only the TOP dome returns — the
+ * bottom of the section still fades into flat ink and hands over to Prenup with
+ * no curve, so Prenup keeps its plain `pt-section` and no `-mt-48`.
  *
  * The timeline itself is a SCRAPBOOK (imported design "Wedding Timeline" 4a/5a),
  * recoloured into the letter's palette — paper type and paper thread on the
@@ -122,7 +124,24 @@ export function OurStory() {
 
   return (
     <section className="relative z-10">
-      <div className="px-gutter pt-section pb-section text-center">
+      {/* The dome opening the section: the backdrop's ink rises as an arch into
+          the countdown band's paper. Shared `Dome` (components/letter/dome.tsx)
+          so this seam and the one opening RSVP are the same curve; `up` because
+          this arch points INTO the paper above, where RSVP's hangs down.
+
+          NO `-mt` bite here, unlike the RSVP arch. The countdown's bottom
+          padding is paper and so is this band, so pulling the section up into
+          it hid the whole dome inside a ground of its own colour — at `sm` the
+          arch is 4rem and the bite was a full `section` (4.5–7rem), so nothing
+          was drawn at all. The arch has to START where the paper ends.
+
+          Clearance below is `pt-section` on mobile, only rising to `pt-dome` on
+          `sm`+. `pt-dome` reserves the arch's full depth, which is what RSVP's
+          SOLID arch needs — but this one is a hole, so the heading sits under
+          open ink at the crown and 12rem of mobile clearance was reserving room
+          against a curve that is not there. */}
+      <Dome direction="up" className="bg-paper" />
+      <div className="relative px-gutter pt-section pb-section text-center sm:pt-dome">
         <div className="mx-auto max-w-[64rem] lg:max-w-[80rem]">
           <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 

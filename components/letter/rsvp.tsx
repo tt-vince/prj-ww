@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { RsvpForm } from "@/components/letter/rsvp-form";
 import { RsvpReply } from "@/components/letter/rsvp-reply";
 import { SectionHeading } from "@/components/letter/section-heading";
+import { Dome } from "@/components/letter/dome";
 import {
   Card,
   CardContent,
@@ -53,11 +54,9 @@ export function Rsvp({ searchParams }: { searchParams: SearchParams }) {
     <section className="relative z-10 -mt-section overflow-hidden bg-ink px-gutter pt-dome pb-section">
       {/* The white dome. Full-bleed and flush with the top edge, so it reads as
           the paper above flowing down rather than as a shape floating on the
-          ink. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-48 rounded-[0_0_50%_50%_/_0_0_180px_180px] bg-paper sm:h-16 sm:rounded-[0_0_50%_50%_/_0_0_3rem_3rem]"
-      />
+          ink. Shared `Dome` (components/letter/dome.tsx) — same curve as the one
+          opening Our Story. */}
+      <Dome direction="down" className="bg-paper" />
       {/* `max-w-2xl` (42rem), the same measure the FAQ cards use — the two are
           the only carded sections in the letter, so a 32rem reply card under a
           42rem FAQ card read as two different systems. */}
