@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { cn } from '@/lib/utils';
 import { MORPH, PhotoLightbox, photoLayoutId } from '@/components/letter/photo-lightbox';
 import { COUPLE_NAMES } from '@/lib/wedding';
 import { SectionHeading } from '@/components/letter/section-heading';
 
-// Scroll reveals (row fade-up, vine draw-on, closing rings) were removed for
-// now — the section renders fully drawn. Re-add via motion's whileInView if it
-// comes back; the surrounding sections still animate.
+// Scroll reveals: the memories fade up ONCE and stay (re-fading a memory the
+// reader has already read makes scrolling back up feel broken), while the vine
+// florals fade both ways every time they cross the viewport, so the stem reads
+// as coming into leaf as you travel down it. The vine stroke itself and the
+// charms are still drawn statically — a draw-on over a curve several viewports
+// tall only ever shows as half-finished.
 
 const [NAME_A, NAME_B] = COUPLE_NAMES;
 
@@ -160,6 +163,7 @@ export function OurStory() {
                 and the vine is drawn over the text. */}
             <div className="relative sm:[--row-h:44rem]">
               <Vine rows={MEMORIES.length} />
+              <VineFlorals rows={MEMORIES.length} />
               {/* Pixel counterpart of VINE_LEAD (sm+ only — on a phone the
                   charm sits on its own thread segment already). */}
               <div aria-hidden className="hidden sm:block sm:h-[calc(var(--row-h)*0.2)]" />
@@ -190,7 +194,11 @@ export function OurStory() {
                         straight tick off it would only fight the curve.
                         `sm:w-[46%]` leaves the middle of the section clear for
                         the vine's swing between the two sides. */}
-                    <div
+                    <motion.div
+                      initial={reduce ? undefined : { opacity: 0, y: 24 }}
+                      whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
+                      viewport={{ once: true, amount: 0.2 }}
+                      transition={{ duration: 0.7, ease: 'easeOut' }}
                       className={cn(
                         'flex flex-col items-center sm:w-[42%]',
                         // Nest the memory INSIDE the bay: right rows span
@@ -224,7 +232,7 @@ export function OurStory() {
                         <h3 className="mt-1 font-script text-entry text-paper">{m.title}</h3>
                         <p className="mt-2 text-body text-paper">{m.body}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   </li>
                 );
               })}
@@ -331,6 +339,33 @@ const VINE_LEAD = 20;
  */
 const VINE_TAIL = 20;
 
+/** Total height of the vine's viewBox, in abstract units. */
+const vineHeight = (rows: number) => VINE_LEAD + rows * VINE_ROW + VINE_TAIL;
+
+/**
+ * The vine's nodes, in viewBox units. Start centred under the camera charm;
+ * each row contributes a held lobe (two nodes at the same x, coincident at
+ * dwell 0), then the path returns to centre for the rings.
+ *
+ * Shared by the drawn path and by VineFlorals, so the drawings sit on the same
+ * curve the stroke follows.
+ */
+function vineNodes(rows: number): Array<[number, number]> {
+  const pad = (VINE_ROW * (1 - VINE_DWELL)) / 2;
+  return [
+    [50, 0],
+    ...Array.from({ length: rows }, (_, i) => {
+      const x = VINE_X[VINE_OPPOSITE[VINE_SIDE(i)]];
+      const y0 = VINE_LEAD + i * VINE_ROW;
+      return [
+        [x, y0 + pad],
+        [x, y0 + VINE_ROW - pad],
+      ] as Array<[number, number]>;
+    }).flat(),
+    [50, vineHeight(rows)],
+  ];
+}
+
 /**
  * The serpentine vine threading the memories (sm+ only).
  *
@@ -347,23 +382,8 @@ const VINE_TAIL = 20;
  * join as one continuous S rather than a chain of visible kinks.
  */
 function Vine({ rows }: { rows: number }) {
-  const height = VINE_LEAD + rows * VINE_ROW + VINE_TAIL;
-
-  // Start centred under the camera charm; each row contributes a held lobe
-  // (two nodes at the same x), then the path returns to centre for the rings.
-  const pad = (VINE_ROW * (1 - VINE_DWELL)) / 2;
-  const nodes: Array<[number, number]> = [
-    [50, 0],
-    ...Array.from({ length: rows }, (_, i) => {
-      const x = VINE_X[VINE_OPPOSITE[VINE_SIDE(i)]];
-      const y0 = VINE_LEAD + i * VINE_ROW;
-      return [
-        [x, y0 + pad],
-        [x, y0 + VINE_ROW - pad],
-      ] as Array<[number, number]>;
-    }).flat(),
-    [50, height],
-  ];
+  const height = vineHeight(rows);
+  const nodes = vineNodes(rows);
 
   const d = nodes
     .map(([x, y], i) => {
@@ -398,6 +418,324 @@ function Vine({ rows }: { rows: number }) {
         vectorEffect="non-scaling-stroke"
       />
     </svg>
+  );
+}
+
+/**
+ * A drawing that grows off the vine.
+ *
+ * Two per-asset facts decide how it sits on the curve, and both are measured
+ * off the artwork rather than guessed:
+ *
+ *  • `stem` — the point where the plant is cut, as a FRACTION of the asset's
+ *    own box: `{x: 0, y: 0}` is its top-left corner, `{x: 1, y: 1}` the
+ *    bottom-right. That point is what gets pinned to the vine. Pick it with
+ *    `tools/stem-picker.html`: open the file, click the stem end on each
+ *    drawing, and it prints the pair to paste in here.
+ *  • `bearing` — which way the drawing grows in its own artwork, in degrees
+ *    clockwise from straight up. The rose stands upright (0); the leaves point
+ *    left out of their stalk (-90).
+ *
+ * Getting these wrong is what made the first passes look impaled or
+ * upside-down: a centred drawing puts the vine through the middle of the
+ * flower, and a wrong bearing aims it back into the line.
+ */
+type Sprig = {
+  src: string;
+  /** Aspect of the asset's (tightened) viewBox. */
+  aspect: string;
+  /** Where the stem is cut, as fractions of the asset's box (0–1). */
+  stem: { x: number; y: number };
+  /** Growth direction in the artwork, degrees clockwise from up. */
+  bearing: number;
+};
+
+const BLOOM: Sprig = {
+  src: '/florals/rose-bloom.svg',
+  aspect: 'aspect-[180/210]',
+  stem: { x: 0.4, y: 0.65 },
+  bearing: 9,
+};
+const LEAF_L: Sprig = {
+  src: '/florals/leaf-large.svg',
+  aspect: 'aspect-[117/84]',
+  stem: { x: 0.96, y: 0.28 },
+  bearing: -113,
+};
+const LEAF_S: Sprig = {
+  src: '/florals/leaf-small.svg',
+  aspect: 'aspect-[92/87]',
+  stem: { x: 0.21, y: 0.97 },
+  bearing: 17,
+};
+
+/**
+ * What grows where, walking DOWN the vine: bloom, leaf, leaf, bloom, leaf …
+ *
+ * Two leaves between blooms rather than a strict bloom/leaf alternation — a
+ * real stem carries more foliage than flower, and a 1:1 cycle at this spacing
+ * read as a string of beads. `w` also steps around so no two neighbours are the
+ * same size.
+ *
+ * `lift` is how far the drawing swings toward the top of the page, measured
+ * from the vine's own PERPENDICULAR at that point: 0 sticks straight out of
+ * the stem, 90 lies back along it. It is side-agnostic — VineFlorals works out
+ * the rotation from the local tangent, the sprig's `bearing`, and which margin
+ * the row grows into.
+ */
+const SPRIG_CYCLE: Array<{ sprig: Sprig; w: string; lift: number }> = [
+  { sprig: BLOOM, w: 'w-14 lg:w-[4.5rem]', lift: 38 },
+  { sprig: LEAF_L, w: 'w-12 lg:w-16', lift: 22 },
+  { sprig: LEAF_S, w: 'w-9 lg:w-11', lift: 8 },
+  { sprig: BLOOM, w: 'w-11 lg:w-14', lift: 22 },
+  { sprig: LEAF_S, w: 'w-10 lg:w-12', lift: 34 },
+  { sprig: LEAF_L, w: 'w-11 lg:w-14', lift: 4 },
+];
+
+/** How many drawings grow on the vine, per memory. */
+const SPRIGS_PER_ROW = 3;
+
+/**
+ * Rough px-per-unit ratio between the vine's two axes, used ONLY to measure
+ * arc length for spacing.
+ *
+ * The viewBox is 100 units wide however wide the section renders, and 100 units
+ * tall per row — so a unit of x is worth more pixels than a unit of y (about
+ * 11.5px against 7px at the section's full width). Measuring length in raw
+ * units would treat the diagonal crossings as shorter than they draw and bunch
+ * the sprigs there.
+ *
+ * A constant rather than the measured box on purpose: spacing must be identical
+ * on the server and on first paint, or every sprig jumps once the
+ * ResizeObserver reports. The ratio barely moves across breakpoints, and being
+ * a few percent out only shifts a sprig along the stem.
+ */
+const VINE_UNIT_ASPECT = 1.6;
+
+/** Steps per segment when flattening the curve to measure it. */
+const VINE_FLATTEN_STEPS = 48;
+
+/** Cubic Bezier component at `t`. */
+const bez = (a: number, b: number, c: number, d: number, t: number) => {
+  const u = 1 - t;
+  return u * u * u * a + 3 * u * u * t * b + 3 * u * t * t * c + t * t * t * d;
+};
+
+/**
+ * Tangent of one vine segment at `t`, in viewBox units.
+ *
+ * Closed form rather than sampled, because the vine's control points are
+ * always `(px, py + h/2)` and `(nx, ny - h/2)` — substituting those into the
+ * derivative of a cubic collapses most of it away. It is zero horizontally at
+ * both ends, which is the vertical tangent the lobes are built on.
+ */
+const vineTangent = (px: number, py: number, nx: number, ny: number, t: number) => {
+  const h = ny - py;
+  return {
+    dx: 6 * (1 - t) * t * (nx - px),
+    dy: 1.5 * h * ((1 - t) * (1 - t) + t * t),
+  };
+};
+
+/**
+ * Which way a sprig planted on a tangent of `(dx, dy)` should point, in degrees
+ * clockwise from straight up — the same convention as `Sprig.bearing`.
+ *
+ * Take the vine's normal on the `outward` side, then swing it `lift` degrees
+ * toward the top of the page. `box` is the layer's rendered size, used to turn
+ * the viewBox-unit tangent into a screen-space one; without it (before the
+ * first measure) fall back to a flat sideways fan.
+ */
+function sprigHeading(
+  dx: number,
+  dy: number,
+  outward: number,
+  lift: number,
+  box: { w: number; h: number } | null,
+  heightUnits: number
+) {
+  if (!box) return outward * (90 - lift);
+
+  // Units are 0–100 across the box and 0–heightUnits down it.
+  const tx = dx * (box.w / 100);
+  const ty = dy * (box.h / heightUnits);
+
+  // Normal to a tangent running DOWN the page: (-ty, tx) points left,
+  // (ty, -tx) points right.
+  const nx = outward > 0 ? ty : -ty;
+  const ny = outward > 0 ? -tx : tx;
+
+  // Rotate the normal toward the top of the page by `lift`. Screen y grows
+  // downward, so lifting is anticlockwise on the right and clockwise on the
+  // left — that is the `-outward`.
+  const a = (-outward * lift * Math.PI) / 180;
+  const vx = nx * Math.cos(a) - ny * Math.sin(a);
+  const vy = nx * Math.sin(a) + ny * Math.cos(a);
+
+  return (Math.atan2(vx, -vy) * 180) / Math.PI;
+}
+
+/**
+ * Brush-ink florals growing off the vine (sm+ only, like the vine itself).
+ *
+ * Every sprig is planted ON the curve and grows AWAY from it: the point comes
+ * from evaluating the same cubics the vine's `d` is built from, and the
+ * drawing hangs off that point by its stem edge (see `Sprig`), tilted outward
+ * from the line.
+ *
+ * There are `SPRIGS_PER_ROW` per memory, spread at one fixed interval from the
+ * top of the vine to the bottom — the run is measured along the curve, so the
+ * gaps stay even through the crossings instead of stretching where the stem
+ * rakes sideways. The count scales with MEMORIES, so adding a memory adds
+ * foliage rather than thinning what is there.
+ *
+ * Two things are deliberate:
+ *
+ *  • They are DOM siblings of the vine, not children of its <svg>. The vine is
+ *    stretched with `preserveAspectRatio="none"`, so anything inside it
+ *    inherits that non-uniform scale and a bloom would render squashed.
+ *    Positioning in percent against the same box keeps them on the curve while
+ *    they stay round.
+ *  • Growth direction is decided by the ROW a sprig falls in, not by which
+ *    side of centre it happens to sit on: every sprig in a row grows toward
+ *    that row's empty margin (the side the vine bulges to). Using the local
+ *    `x < 50` instead puts the sprigs either side of a crossing in opposite
+ *    directions, and the ones on the memory's side grow into the text.
+ *  • Each one fans off the vine's PERPENDICULAR where it is planted, not off
+ *    a fixed sideways axis. On the near-vertical runs beside a memory that is
+ *    much the same thing, but through a crossing the stem is raking across the
+ *    section at 45° and a fixed axis leaves the sprigs lying at odd angles to
+ *    it — some folded back along the line, some standing off it.
+ *
+ * The normal has to be computed in RENDERED PIXELS, not viewBox units. The
+ * vine is stretched with `preserveAspectRatio="none"` and its rows are far
+ * taller than the section is wide, so a slope of 1:1 in units draws as
+ * something far steeper on screen; perpendicular-in-units is visibly not
+ * perpendicular-on-screen. Hence the ResizeObserver: the box's real size is
+ * what converts the tangent before the angle is taken. Until it has measured
+ * (first paint, SSR) sprigs fall back to the flat sideways axis.
+ *
+ * The anchor span is what carries the rotation, with its origin at the curve
+ * point (`transform-origin: 0 0`), so tilting swings the drawing about where it
+ * joins the vine instead of sliding it off the line.
+ */
+function VineFlorals({ rows }: { rows: number }) {
+  const height = vineHeight(rows);
+  const nodes = vineNodes(rows);
+  const reduce = !!useReducedMotion();
+
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [box, setBox] = useState<{ w: number; h: number } | null>(null);
+
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height: h } = entry.contentRect;
+      setBox({ w: width, h });
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  // Flatten the whole vine to a polyline, carrying the running length, so the
+  // sprigs can be spaced along the CURVE rather than down the page. Spacing by
+  // y instead spreads them out through the diagonal crossings, where the stem
+  // covers far more ground per unit of height.
+  const walk: Array<{ x: number; y: number; dx: number; dy: number; at: number }> = [];
+  let run = 0;
+  for (let i = 1; i < nodes.length; i++) {
+    const [px, py] = nodes[i - 1];
+    const [nx, ny] = nodes[i];
+    if (px === nx && py === ny) continue; // coincident lobe pair at dwell 0
+    // Same control points as the drawn path: vertical tangents at both ends.
+    const bend = (ny - py) / 2;
+    for (let s = 0; s <= VINE_FLATTEN_STEPS; s++) {
+      const t = s / VINE_FLATTEN_STEPS;
+      const x = bez(px, px, nx, nx, t);
+      const y = bez(py, py + bend, ny - bend, ny, t);
+      const last = walk[walk.length - 1];
+      if (last) {
+        run += Math.hypot((x - last.x) * VINE_UNIT_ASPECT, y - last.y);
+      }
+      walk.push({ x, y, ...vineTangent(px, py, nx, ny, t), at: run });
+    }
+  }
+
+  // Keep the ends clear: the camera charm sits over the top of the vine and
+  // the wedding rings under its tail, and a sprig there collides with the
+  // drawing rather than reading as part of the stem.
+  const usable = walk.filter((p) => p.y > VINE_LEAD * 2 && p.y < height - VINE_TAIL * 2);
+
+  // Then step along that clear stretch at a fixed interval. Half an interval of
+  // padding at each end keeps the first and last sprig off the boundary
+  // instead of sitting right on it.
+  const count = rows * SPRIGS_PER_ROW;
+  const from = usable[0]?.at ?? 0;
+  const span = (usable[usable.length - 1]?.at ?? 0) - from;
+  const step = span / count;
+
+  let cursor = 0;
+  const planted = Array.from({ length: count }, (_, i) => {
+    const target = from + step * (i + 0.5);
+    while (cursor < usable.length - 1 && usable[cursor + 1].at < target) cursor++;
+    return usable[cursor];
+  }).filter(Boolean);
+
+  return (
+    <div
+      ref={boxRef}
+      aria-hidden
+      className="pointer-events-none absolute inset-0 z-10 hidden sm:block"
+    >
+      {planted.map(({ x, y, dx, dy }, i) => {
+        const { sprig, w, lift } = SPRIG_CYCLE[i % SPRIG_CYCLE.length];
+        const row = Math.min(rows - 1, Math.max(0, Math.floor((y - VINE_LEAD) / VINE_ROW)));
+        const outward = VINE_OPPOSITE[VINE_SIDE(row)] === 'left' ? -1 : 1;
+        // Mirror everything that grows right, so a leaf's stalk keeps facing
+        // the vine instead of pointing away from it.
+        const mirrored = outward > 0;
+
+        // Where we want it to point, in the same degrees-clockwise-from-up as
+        // `bearing`, and how far the artwork has to turn to get there.
+        // Mirroring negates the artwork's own bearing.
+        const heading = sprigHeading(dx, dy, outward, lift, box, height);
+        const angle = heading - (mirrored ? -sprig.bearing : sprig.bearing);
+
+        // Put the stem point itself on the anchor. After a horizontal mirror
+        // the stem sits at `1 - x` of the box, so the shift flips with it.
+        const stemX = mirrored ? 1 - sprig.stem.x : sprig.stem.x;
+
+        return (
+          // Unlike the memories these fade BOTH ways (`once: false`), so a
+          // sprig scrolled past and come back to lights up again. Only opacity
+          // is animated — the transform is placement, and handing it to motion
+          // would fight the rotation set here.
+          <motion.span
+            key={`${x}-${y}`}
+            className="absolute"
+            initial={reduce ? undefined : { opacity: 0 }}
+            whileInView={reduce ? undefined : { opacity: 1 }}
+            viewport={{ once: false, margin: '-9% 0px -9% 0px' }}
+            transition={{ duration: 1.1, ease: 'easeOut' }}
+            style={{
+              left: `${x}%`,
+              top: `${(y / height) * 100}%`,
+              transform: `rotate(${angle}deg)`,
+              transformOrigin: '0 0',
+            }}
+          >
+            <InkCharm
+              src={sprig.src}
+              className={cn('absolute', sprig.aspect, w)}
+              style={{
+                transform: `translate(${-stemX * 100}%, ${-sprig.stem.y * 100}%)${mirrored ? ' scaleX(-1)' : ''}`,
+              }}
+            />
+          </motion.span>
+        );
+      })}
+    </div>
   );
 }
 
@@ -457,7 +795,16 @@ function Polaroid({
  * drawn through a CSS mask to recolour them against the ink dome. The caller
  * supplies the aspect ratio (from the asset's viewBox) and the width.
  */
-function InkCharm({ src, className }: { src: string; className?: string }) {
+function InkCharm({
+  src,
+  className,
+  style,
+}: {
+  src: string;
+  className?: string;
+  /** Merged after the mask properties — for placement (see VineFlorals). */
+  style?: CSSProperties;
+}) {
   const mask = `url('${src}')`;
   return (
     <span
@@ -472,6 +819,7 @@ function InkCharm({ src, className }: { src: string; className?: string }) {
         WebkitMaskSize: 'contain',
         maskPosition: 'center',
         WebkitMaskPosition: 'center',
+        ...style,
       }}
     />
   );

@@ -3,7 +3,6 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
-import { HeartLocket } from '@/components/letter/heart-locket';
 
 /**
  * Countdown band — the middle of ONE continuous ink background that runs Hero →
@@ -28,6 +27,10 @@ import { HeartLocket } from '@/components/letter/heart-locket';
  * title plus a number plus a label was three things saying one thing, which is
  * what made the block read as a stat readout rather than a letter.
  *
+ * It also carries no charm. An open heart locket used to hang over the top of
+ * the band, the counterpart to Our Story's camera; it is gone, leaving the
+ * count as the only thing in the band that draws the eye.
+ *
  * Colour is the letter's two-colour system inverted: paper type on ink #0A110E,
  * both at full strength. Nothing here is tinted — the count reads loudest because it
  * is the largest, not because everything around it was faded. Rank is carried by
@@ -45,23 +48,11 @@ export function CountdownBand() {
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
-        {/* Open heart locket with the couple's photos, hanging over the top of
-            the band — the same charm role the camera plays in Our Story, but
-            inlined (not masked) so the photos keep their colour while the
-            strokes take the paper tone. Stand-in shots from picsum.photos,
-            seeded like Our Story's — swap for real files under /public/ when
-            they land. */}
-        <HeartLocket
-          left="https://picsum.photos/seed/ww-locket-a/300/300"
-          right="https://picsum.photos/seed/ww-locket-b/300/300"
-          className="w-56 text-paper sm:w-72"
-        />
-
         {/* Quiet intro line — deliberately smaller than the count, so the
-            section has one loud thing in it and not three. */}
-        <h2 className="mt-8 font-sans text-subhead text-paper">
-          counting down to the day
-        </h2>
+            section has one loud thing in it and not three. No top margin: this
+            is the band's first element now that the locket charm is gone, and
+            the section's own `pt-28 sm:pt-32` is the whole gap. */}
+        <h2 className="font-sans text-subhead text-paper">counting down to the day</h2>
 
         {/* The row and the script line are one sentence: `Countdown` renders
             the four-unit serif line, then this script label completes it. The

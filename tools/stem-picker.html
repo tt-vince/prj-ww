@@ -1,0 +1,127 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Floral stem picker</title>
+<!--
+  Dev tool, not part of the site. Open it straight off disk:
+
+      open tools/stem-picker.html
+
+  Click the point on each drawing where its stem is cut - the spot that should
+  touch the vine in Our Story. It prints the value to paste into that asset's
+  `stem` in components/letter/our-story.tsx.
+
+  Drag the bearing dial under a drawing to set which way it grows (degrees
+  clockwise from straight up), which is the other half of the same entry.
+-->
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 24px; background: #14160f; color: #ece7dc;
+    font: 13px/1.5 ui-sans-serif, system-ui, sans-serif;
+  }
+  h1 { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+  p.hint { margin: 0 0 24px; opacity: .65; }
+  .grid { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start; }
+  .card { background: #1d2016; border: 1px solid #333829; border-radius: 6px; padding: 12px; }
+  .stage { position: relative; width: 220px; cursor: crosshair; }
+  .stage img { display: block; width: 100%; height: auto; }
+  /* The art ships as near-black ink; invert it so it reads on the dark card,
+     the same way the site masks it to paper. */
+  .stage img { filter: invert(1); }
+  .dot {
+    position: absolute; width: 11px; height: 11px; margin: -6px 0 0 -6px;
+    border-radius: 50%; background: #d34; box-shadow: 0 0 0 2px #14160f;
+    pointer-events: none;
+  }
+  .aim {
+    position: absolute; height: 2px; width: 62px; background: #d34;
+    transform-origin: 0 50%; pointer-events: none; opacity: .9;
+  }
+  .row { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  code { background: #0d0f09; padding: 6px 8px; border-radius: 4px; display: block;
+         margin-top: 10px; font: 12px/1.5 ui-monospace, monospace; white-space: pre; }
+  input[type=range] { flex: 1; }
+  button { background: #333829; color: inherit; border: 1px solid #4a5139;
+           border-radius: 4px; padding: 4px 8px; cursor: pointer; font: inherit; }
+</style>
+
+<h1>Floral stem picker</h1>
+<p class="hint">
+  Click where the stem is cut. Drag <em>bearing</em> to say which way the drawing grows
+  (0&deg; = up, &minus;90&deg; = left). Paste the printed block into the matching
+  <code style="display:inline;margin:0;padding:1px 4px">Sprig</code> in
+  <code style="display:inline;margin:0;padding:1px 4px">components/letter/our-story.tsx</code>.
+</p>
+
+<div class="grid" id="grid"></div>
+
+<script>
+  // name -> current guess, so the tool opens showing what the site uses today.
+  const ASSETS = [
+    { name: 'BLOOM',  file: 'rose-bloom.svg', stem: { x: 0.40, y: 0.65 }, bearing: 9 },
+    { name: 'LEAF_L', file: 'leaf-large.svg', stem: { x: 0.96, y: 0.28 }, bearing: -113 },
+    { name: 'LEAF_S', file: 'leaf-small.svg', stem: { x: 0.21, y: 0.97 }, bearing: 17 },
+  ];
+
+  const grid = document.getElementById('grid');
+
+  for (const asset of ASSETS) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.innerHTML = `
+      <div class="stage">
+        <img src="../public/florals/${asset.file}" alt="">
+        <div class="aim"></div>
+        <div class="dot"></div>
+      </div>
+      <div class="row">
+        <span>bearing</span>
+        <input type="range" min="-180" max="180" step="1" value="${asset.bearing}">
+        <span class="deg">${asset.bearing}&deg;</span>
+      </div>
+      <code></code>
+      <div class="row"><button>Copy</button><span class="file">${asset.file}</span></div>
+    `;
+    grid.appendChild(card);
+
+    const stage = card.querySelector('.stage');
+    const dot = card.querySelector('.dot');
+    const aim = card.querySelector('.aim');
+    const out = card.querySelector('code');
+    const range = card.querySelector('input');
+    const deg = card.querySelector('.deg');
+
+    const draw = () => {
+      dot.style.left = `${asset.stem.x * 100}%`;
+      dot.style.top = `${asset.stem.y * 100}%`;
+      aim.style.left = `${asset.stem.x * 100}%`;
+      aim.style.top = `${asset.stem.y * 100}%`;
+      // Dial is clockwise from up; CSS rotate is clockwise from +x.
+      aim.style.transform = `rotate(${asset.bearing - 90}deg)`;
+      deg.textContent = `${asset.bearing}°`;
+      out.textContent =
+        `stem: { x: ${asset.stem.x.toFixed(2)}, y: ${asset.stem.y.toFixed(2)} },\n` +
+        `bearing: ${asset.bearing},`;
+    };
+
+    stage.addEventListener('click', (e) => {
+      const r = stage.getBoundingClientRect();
+      asset.stem = {
+        x: Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)),
+        y: Math.min(1, Math.max(0, (e.clientY - r.top) / r.height)),
+      };
+      draw();
+    });
+
+    range.addEventListener('input', () => {
+      asset.bearing = Number(range.value);
+      draw();
+    });
+
+    card.querySelector('button').addEventListener('click', () => {
+      navigator.clipboard?.writeText(out.textContent);
+    });
+
+    draw();
+  }
+</script>
