@@ -34,16 +34,17 @@ const [NAME_A, NAME_B] = COUPLE_NAMES;
  * recoloured into the letter's palette — paper type and paper thread on the
  * backdrop's ink:
  *
- *   • a hand-drawn camera charm hangs over the top of a centre thread;
+ *   • a hand-drawn camera charm hangs over the top of the vine;
  *   • each memory is a tilted white polaroid with a handwritten caption;
- *   • desktop (sm+): a serpentine VINE replaces the old straight centre spine.
- *     It weaves right→left→right down the section, and each memory sits on ONE
- *     side only (polaroid + text together), alternating with the vine's bulge —
- *     so the eye follows the curve from memory to memory instead of ping-ponging
- *     across a rigid two-column grid;
- *   • mobile = design 5a: a single centred column, camera on top, polaroids
- *     strung straight down the thread (the vine is desktop-only — at phone
- *     width a curve wide enough to read leaves no room for the polaroid).
+ *   • a serpentine VINE runs where the old straight centre spine did. It weaves
+ *     right→left→right down the section, and each memory sits on ONE side only
+ *     (polaroid + text together), alternating with the vine's bulge — so the eye
+ *     follows the curve from memory to memory instead of ping-ponging across a
+ *     rigid two-column grid;
+ *   • the same layout on mobile, at mobile proportions: the vine swings out
+ *     further (`VINE_REACH`) and the memory block takes 62% instead of 42%, so
+ *     the alternation still reads at phone width. That costs polaroid size —
+ *     the print is 52vw there against a fixed 16rem on desktop.
  *
  * The vine is a stretched SVG: its viewBox is `0 0 100 (N*100+70)` in abstract
  * units and it is drawn with `preserveAspectRatio="none"`, so one vertical unit
@@ -145,9 +146,8 @@ export function OurStory() {
         <div className="mx-auto max-w-[64rem] lg:max-w-[80rem]">
           <SectionHeading tone="white" title="Our Story" kicker="How it began" />
 
-          {/* Scrapbook thread. Camera charm hangs over the top; the spine runs
-              down the centre on sm+, and on mobile the per-item connector
-              segments join into one continuous centre thread. */}
+          {/* Scrapbook thread. Camera charm hangs over the top of the vine,
+              which runs the length of the memories at every width. */}
           {/* The scrapbook is two columns either side of the thread, so the
               text column is only ever half of this minus the gutter. At the
               phone-first 52rem that left ~35 characters a line on a desktop —
@@ -166,27 +166,53 @@ export function OurStory() {
             <CameraCharm className="pointer-events-none absolute left-1/2 top-0 z-20 w-24 -translate-x-1/2 -translate-y-[85%] sm:w-28" />
 
 
-            {/* No mobile `space-y`: each item opens with its own thread
-                segment, and a list gap ABOVE that segment made the thread sit
-                40px below the previous memory but only 12px above the next
-                polaroid — one continuous line with visibly unequal ends. The
-                segment's own `my-6` is the whole gap now, so it is symmetric by
-                construction. */}
             {/* The vine is absolutely positioned over this wrapper, so the
                 wrapper must bound exactly the rows it threads — hence the ol
                 sits in its own relative box rather than the section's.
-                `--row-h` is the fixed sm+ row height the vine's 100-unit lobes
-                are mapped onto. It must clear the tallest memory (polaroid
-                16rem + date + title + body ≈ 36rem) DIVIDED BY `VINE_DWELL` —
-                anything taller than the held run pokes out into the crossings
-                and the vine is drawn over the text. */}
-            <div className="relative sm:[--row-h:44rem]">
-              <Vine rows={MEMORIES.length} />
-              <VineFlorals rows={MEMORIES.length} />
-              {/* Pixel counterpart of VINE_LEAD (sm+ only — on a phone the
-                  charm sits on its own thread segment already). */}
-              <div aria-hidden className="hidden sm:block sm:h-[calc(var(--row-h)*0.2)]" />
-              <ol className="relative sm:space-y-0">
+                `--row-h` is the fixed row height the vine's 100-unit lobes are
+                mapped onto. It must clear the TALLEST memory with room to
+                spare, because the sweep between two lobes cuts across the
+                block's own column partway down the row: past roughly 0.89 of
+                the row on mobile, the vine is drawn through the body text.
+
+                Mobile is the taller row despite its smaller polaroid — its 62%
+                column wraps the longest memory to far more lines than the
+                desktop's 42% of a much wider section. 46rem puts the worst row
+                at 0.86 (measured 320-430px); if the copy grows, raise this.
+                Re-measure by sampling the path (`getPointAtLength`) against
+                each block's rect — eyeballing a near-miss at the crossing is
+                unreliable. */}
+            <div className="relative [--row-h:46rem] sm:[--row-h:44rem]">
+              {/* The mobile pair is bled out past the page gutter so the lobes
+                  land ON the screen edge; the memories keep the gutter.
+
+                  Widened and shifted rather than un-inset: these are absolutely
+                  positioned at `inset-0 size-full`, and the explicit size is
+                  what makes the <svg> stretch at all — so the bleed has to come
+                  from the width, with a translate to recentre it. A plain
+                  translate cannot scale the stroke here (it is translate-only,
+                  and the stroke is `non-scaling-stroke` regardless). */}
+              <Vine
+                rows={MEMORIES.length}
+                reach={VINE_REACH.mobile}
+                className={cn(BLEED_X, 'sm:hidden')}
+              />
+              <Vine rows={MEMORIES.length} reach={VINE_REACH.desktop} className="hidden sm:block" />
+              <VineFlorals
+                rows={MEMORIES.length}
+                reach={VINE_REACH.mobile}
+                edgeZone={SPRIG_EDGE_ZONE}
+                unitAspect={VINE_UNIT_ASPECT.mobile}
+                className={cn(BLEED_X, 'sm:hidden')}
+              />
+              <VineFlorals
+                rows={MEMORIES.length}
+                reach={VINE_REACH.desktop}
+                className="hidden sm:block"
+              />
+              {/* Pixel counterpart of VINE_LEAD. */}
+              <div aria-hidden className="h-[calc(var(--row-h)*0.2)]" />
+              <ol className="relative">
               {MEMORIES.map((m, i) => {
                 // One-sided rows: the whole memory (polaroid + text) sits on
                 // the side the vine bulges toward for this row.
@@ -195,40 +221,41 @@ export function OurStory() {
                   <li
                     key={m.date}
                     className={cn(
-                      'relative flex flex-col items-center sm:h-[var(--row-h)] sm:justify-center sm:items-start'
+                      'relative flex h-[var(--row-h)] flex-col items-center justify-center sm:items-start'
                     )}
                   >
-                    {/* Mobile-only thread segment joining items into one thread.
-                        `my-6` is the only vertical gap between memories on a
-                        phone (see the note on the <ol>), so it reads the same
-                        above and below the line. */}
-                    <span
-                      aria-hidden
-                      className="my-6 h-16 w-[2px] rounded-full bg-paper sm:hidden"
-                    />
-
                     {/* One-sided memory: polaroid and text stacked together in
-                        a single half-width block. There is no connector rule
-                        any more — the vine itself curves into the block, so a
-                        straight tick off it would only fight the curve.
-                        `sm:w-[46%]` leaves the middle of the section clear for
-                        the vine's swing between the two sides. */}
+                        a single block. There is no connector rule — the vine
+                        itself curves into the block, so a straight tick off it
+                        would only fight the curve. The width leaves the middle
+                        of the section clear for the vine's swing between the
+                        two sides; mobile takes 62% because a 42% column at
+                        phone width is narrower than the polaroid, and its vine
+                        swings out to the screen edge to make room (see
+                        `VINE_REACH`). Widening the column costs row height
+                        twice over — the block's inner edge moves toward the
+                        centre line, which the vine reaches halfway through its
+                        sweep — so 62% only works because the lobes are at 0 and
+                        100 rather than 28 and 72. */}
                     <motion.div
                       initial={reduce ? undefined : { opacity: 0, y: 24 }}
                       whileInView={reduce ? undefined : { opacity: 1, y: 0 }}
                       viewport={{ once: true, amount: 0.2 }}
                       transition={{ duration: 0.7, ease: 'easeOut' }}
                       className={cn(
-                        'flex flex-col items-center sm:w-[42%]',
-                        // Nest the memory INSIDE the bay: right rows span
-                        // 58-100%, left rows 0-42%, while this row's vine is
-                        // held at the opposite 28 / 72. The sweep only reaches
-                        // this far across close to the row boundaries, above
-                        // and below the block — so the memory keeps its bay
-                        // without the vine having to run dead straight beside
-                        // it. Pulling it in to the centre line instead is what
-                        // forced the squared-off dwell.
-                        onRight ? 'sm:ml-[58%] sm:items-start' : 'sm:mr-[58%] sm:items-end'
+                        'flex w-[62%] flex-col items-center sm:w-[42%]',
+                        // Nest the memory INSIDE the bay: on sm+ right rows
+                        // span 58-100%, left rows 0-42%, while this row's vine
+                        // is held at the opposite 28 / 72 (38-100% against
+                        // 0/100 on mobile). The sweep only reaches this far across
+                        // close to the row boundaries, above and below the
+                        // block — so the memory keeps its bay without the vine
+                        // having to run dead straight beside it. Pulling it in
+                        // to the centre line instead is what forced the
+                        // squared-off dwell.
+                        onRight
+                          ? 'ml-[38%] items-start sm:ml-[58%]'
+                          : 'mr-[38%] items-end sm:mr-[58%]'
                       )}
                     >
                       <Polaroid memory={m} reduce={reduce} onOpen={() => setActive(m)} />
@@ -241,8 +268,8 @@ export function OurStory() {
                           // Flush edge faces the vine, ragged edge faces the
                           // empty outer margin — so the text reads as sitting
                           // against the curve.
-                          'mt-6 max-w-sm px-2 text-center',
-                          onRight ? 'sm:text-left' : 'sm:text-right'
+                          'mt-6 max-w-sm px-2',
+                          onRight ? 'text-left' : 'text-right'
                         )}
                       >
                         <p className="font-sans text-label font-medium uppercase tracking-[0.16em] text-paper">
@@ -260,21 +287,15 @@ export function OurStory() {
                   row). Without it the wrapper is `rows` rows tall while the
                   viewBox is taller, so every lobe is squeezed short of its row
                   and the crossings drift up into the memories. */}
-              <div aria-hidden className="hidden sm:block sm:h-[calc(var(--row-h)*0.2)]" />
+              <div aria-hidden className="h-[calc(var(--row-h)*0.2)]" />
             </div>
 
-            {/* The thread ends at a pair of hand-drawn wedding rings — same
-                idea as the getaway car closing the rail in `DayItself`. On
-                mobile a thread segment carries down to it (the sm+ spine stops
-                just above the drawing). */}
+            {/* The vine ends at a pair of hand-drawn wedding rings — same idea
+                as the getaway car closing the rail in `DayItself`. */}
             <div className="relative flex flex-col items-center">
-              <span
-                aria-hidden
-                className="my-6 h-16 w-[2px] rounded-full bg-paper sm:hidden"
-              />
               <InkCharm
                 src="/icons/hand_drawn/illustrations/wedding-rings-linework.svg"
-                className="aspect-[211.1815/126.2234] w-44 sm:mt-8 sm:w-52"
+                className="aspect-[211.1815/126.2234] mt-8 w-44 sm:w-52"
               />
             </div>
           </div>
@@ -307,14 +328,62 @@ export function OurStory() {
 const VINE_SIDE = (i: number) => (i % 2 === 0 ? 'right' : 'left');
 
 /**
- * Horizontal reach of a lobe, in the vine's 0–100 viewBox units.
+ * How far a lobe reaches from the centre line, in the vine's 0–100 viewBox
+ * units — a lobe sits at `50 ± reach`.
  *
  * The vine bulges AWAY from its row's content: the curve swings out to the
  * empty half and the memory sits in the pocket it leaves behind, the way the
  * reference design nests its text inside each bend. (Bulging toward the content
  * instead puts the line under the text and wastes the open half.)
+ *
+ * A parameter rather than a constant because the two breakpoints need
+ * different swings: on a phone the memory column has to be far wider to hold a
+ * legible polaroid, so the vine is pushed out to the margins to leave room for
+ * it. See `VINE_REACH`.
  */
-const VINE_X = { right: 72, left: 28 } as const;
+const vineX = (reach: number) => ({ right: 50 + reach, left: 50 - reach }) as const;
+
+/**
+ * Lobe reach per breakpoint. `sm` is the original 72/28 design; `base` swings
+ * all the way to 0/100 — and because the mobile vine layer is bled out past the
+ * page gutter (see the row wrapper), that is the screen edge itself rather than
+ * the text column's edge.
+ *
+ * Reaching further is not just a look: the memory column has to be wide enough
+ * to hold a polaroid at phone width, so it crosses the section's centre line,
+ * and the vine sweeps through that column's x-range partway down every row. The
+ * further out the lobes sit, the later in the sweep that happens and the more
+ * of the row the memory can occupy before the line runs through its text.
+ */
+const VINE_REACH = { mobile: 50, desktop: 22 } as const;
+
+/**
+ * Widens an `inset-0` layer by one page gutter on each side, so it spans the
+ * screen rather than the text column. Used by the mobile vine and its florals.
+ *
+ * `overflow-hidden` crops at the layer's own edge, which after the bleed IS the
+ * screen edge: a lobe sitting on x=0 has no margin left to grow into, so the
+ * sprigs there run off the page. Cropping them reads as the vine carrying on
+ * past the frame — and without it they widen the document and the whole page
+ * scrolls sideways.
+ */
+const BLEED_X = 'w-[calc(100%+var(--spacing-gutter)*2)] -translate-x-gutter overflow-hidden';
+
+/**
+ * How close to the screen edge a mobile sprig may sit, in viewBox units, before
+ * it grows back toward the middle of the page instead of off it.
+ *
+ * Nothing is ever skipped for being near the edge — the bends carry foliage like
+ * the rest of the stem, they just turn round. That leaves ~2px of the outermost
+ * drawing past the edge at the very apex, which the layer's own clip takes:
+ * a sprig is pinned by a point on its stalk, so it always spreads SIDEWAYS from
+ * that point by some fraction of its width, and where the vine is exactly on
+ * the screen edge there is no width of screen left for it. Rotating cannot
+ * remove that (it only chooses which of the drawing's dimensions runs
+ * horizontally) — measured lifts from 8 to 88 all made it worse, not better.
+ */
+const SPRIG_EDGE_ZONE = 26;
+
 const VINE_OPPOSITE = { right: 'left', left: 'right' } as const;
 
 /**
@@ -369,12 +438,13 @@ const vineHeight = (rows: number) => VINE_LEAD + rows * VINE_ROW + VINE_TAIL;
  * Shared by the drawn path and by VineFlorals, so the drawings sit on the same
  * curve the stroke follows.
  */
-function vineNodes(rows: number): Array<[number, number]> {
+function vineNodes(rows: number, reach: number): Array<[number, number]> {
   const pad = (VINE_ROW * (1 - VINE_DWELL)) / 2;
+  const lobe = vineX(reach);
   return [
     [50, 0],
     ...Array.from({ length: rows }, (_, i) => {
-      const x = VINE_X[VINE_OPPOSITE[VINE_SIDE(i)]];
+      const x = lobe[VINE_OPPOSITE[VINE_SIDE(i)]];
       const y0 = VINE_LEAD + i * VINE_ROW;
       return [
         [x, y0 + pad],
@@ -386,7 +456,11 @@ function vineNodes(rows: number): Array<[number, number]> {
 }
 
 /**
- * The serpentine vine threading the memories (sm+ only).
+ * The serpentine vine threading the memories.
+ *
+ * Rendered twice — once per breakpoint, gated by `className` — because `reach`
+ * changes the path itself, and a path built in JS cannot be swapped by a media
+ * query the way a class can.
  *
  * Drawn in abstract units and stretched with `preserveAspectRatio="none"`: the
  * viewBox is 100 wide by `rows * VINE_ROW + VINE_TAIL` tall, and the element is
@@ -400,9 +474,9 @@ function vineNodes(rows: number): Array<[number, number]> {
  * giving every node a vertical tangent — that is what makes consecutive lobes
  * join as one continuous S rather than a chain of visible kinks.
  */
-function Vine({ rows }: { rows: number }) {
+function Vine({ rows, reach, className }: { rows: number; reach: number; className?: string }) {
   const height = vineHeight(rows);
-  const nodes = vineNodes(rows);
+  const nodes = vineNodes(rows, reach);
 
   const d = nodes
     .map(([x, y], i) => {
@@ -423,7 +497,11 @@ function Vine({ rows }: { rows: number }) {
       aria-hidden
       viewBox={`0 0 100 ${height}`}
       preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-0 hidden size-full overflow-visible sm:block"
+      // `size-full` is load-bearing: an <svg> has an intrinsic aspect ratio, so
+      // `inset-0` alone leaves it 100-units-wide-by-540-tall instead of
+      // stretching to the row stack. Bleed by overriding the WIDTH (see the row
+      // wrapper), never by dropping this.
+      className={cn('pointer-events-none absolute inset-0 size-full overflow-visible', className)}
     >
       {/* Drawn statically. A `pathLength` draw-on was tried and removed: the
           vine spans several viewports, so a scroll-triggered draw left the
@@ -494,7 +572,8 @@ const LEAF_S: Sprig = {
  * Two leaves between blooms rather than a strict bloom/leaf alternation — a
  * real stem carries more foliage than flower, and a 1:1 cycle at this spacing
  * read as a string of beads. `w` also steps around so no two neighbours are the
- * same size.
+ * same size, and steps down on mobile — the margin a sprig grows into is only
+ * 18% of the section there, so a desktop-sized bloom runs off the page.
  *
  * `lift` is how far the drawing swings toward the top of the page, measured
  * from the vine's own PERPENDICULAR at that point: 0 sticks straight out of
@@ -503,12 +582,12 @@ const LEAF_S: Sprig = {
  * the row grows into.
  */
 const SPRIG_CYCLE: Array<{ sprig: Sprig; w: string; lift: number }> = [
-  { sprig: BLOOM, w: 'w-14 lg:w-[4.5rem]', lift: 38 },
-  { sprig: LEAF_L, w: 'w-12 lg:w-16', lift: 22 },
-  { sprig: LEAF_S, w: 'w-9 lg:w-11', lift: 8 },
-  { sprig: BLOOM, w: 'w-11 lg:w-14', lift: 22 },
-  { sprig: LEAF_S, w: 'w-10 lg:w-12', lift: 34 },
-  { sprig: LEAF_L, w: 'w-11 lg:w-14', lift: 4 },
+  { sprig: BLOOM, w: 'w-10 sm:w-14 lg:w-[4.5rem]', lift: 38 },
+  { sprig: LEAF_L, w: 'w-8 sm:w-12 lg:w-16', lift: 22 },
+  { sprig: LEAF_S, w: 'w-7 sm:w-9 lg:w-11', lift: 8 },
+  { sprig: BLOOM, w: 'w-8 sm:w-11 lg:w-14', lift: 22 },
+  { sprig: LEAF_S, w: 'w-7 sm:w-10 lg:w-12', lift: 34 },
+  { sprig: LEAF_L, w: 'w-8 sm:w-11 lg:w-14', lift: 4 },
 ];
 
 /** How many drawings grow on the vine, per memory. */
@@ -526,10 +605,22 @@ const SPRIGS_PER_ROW = 3;
  *
  * A constant rather than the measured box on purpose: spacing must be identical
  * on the server and on first paint, or every sprig jumps once the
- * ResizeObserver reports. The ratio barely moves across breakpoints, and being
- * a few percent out only shifts a sprig along the stem.
+ * ResizeObserver reports. Being a few percent out only shifts a sprig along the
+ * stem.
+ *
+ * One value per breakpoint, though, because the ratio does NOT hold across them
+ * — it is the whole section's width against ONE row's height, and a phone is
+ * narrow with tall rows: 3.9px against 7.4px a unit at 390px, so 0.55, where the
+ * desktop's 11.5 against 7.0 gives 1.6. Sharing the desktop figure had the
+ * mobile sprigs measuring the diagonal crossings as three times longer than
+ * they draw, which spread the gaps by 66% (8% once split).
+ *
+ * The mobile figure is tuned for real phone widths, since the ratio still moves
+ * with the viewport inside one breakpoint: 0.55 holds the spread to 12-16%
+ * from 320 to 430px, at the cost of ~30% at the 639px top of the range. 0.62
+ * flattens it to ~20% everywhere if that ever matters more.
  */
-const VINE_UNIT_ASPECT = 1.6;
+const VINE_UNIT_ASPECT = { desktop: 1.6, mobile: 0.55 } as const;
 
 /** Steps per segment when flattening the curve to measure it. */
 const VINE_FLATTEN_STEPS = 48;
@@ -595,7 +686,8 @@ function sprigHeading(
 }
 
 /**
- * Brush-ink florals growing off the vine (sm+ only, like the vine itself).
+ * Brush-ink florals growing off the vine — one instance per breakpoint, like
+ * the vine itself (see `Vine`).
  *
  * Every sprig is planted ON the curve and grows AWAY from it: the point comes
  * from evaluating the same cubics the vine's `d` is built from, and the
@@ -638,9 +730,33 @@ function sprigHeading(
  * point (`transform-origin: 0 0`), so tilting swings the drawing about where it
  * joins the vine instead of sliding it off the line.
  */
-function VineFlorals({ rows }: { rows: number }) {
+function VineFlorals({
+  rows,
+  reach,
+  edgeZone = 0,
+  unitAspect = VINE_UNIT_ASPECT.desktop,
+  className,
+}: {
+  rows: number;
+  reach: number;
+  /** px-per-unit ratio between the vine's axes — see `VINE_UNIT_ASPECT`. */
+  unitAspect?: number;
+  /**
+   * Within this many viewBox units of the layer's left or right edge, a sprig
+   * grows INWARD instead of outward — needed once the vine reaches the edge of
+   * the SCREEN, where the margin it would normally grow into is gone. See
+   * `SPRIG_EDGE_ZONE`.
+   *
+   * In viewBox units rather than measured pixels on purpose: it must resolve
+   * identically on the server and on first paint, and the layer's real size is
+   * not known until the ResizeObserver fires. 0 disables it — the desktop vine
+   * never comes near its own edge.
+   */
+  edgeZone?: number;
+  className?: string;
+}) {
   const height = vineHeight(rows);
-  const nodes = vineNodes(rows);
+  const nodes = vineNodes(rows, reach);
   const reduce = !!useReducedMotion();
 
   const boxRef = useRef<HTMLDivElement>(null);
@@ -675,7 +791,7 @@ function VineFlorals({ rows }: { rows: number }) {
       const y = bez(py, py + bend, ny - bend, ny, t);
       const last = walk[walk.length - 1];
       if (last) {
-        run += Math.hypot((x - last.x) * VINE_UNIT_ASPECT, y - last.y);
+        run += Math.hypot((x - last.x) * unitAspect, y - last.y);
       }
       walk.push({ x, y, ...vineTangent(px, py, nx, ny, t), at: run });
     }
@@ -684,6 +800,10 @@ function VineFlorals({ rows }: { rows: number }) {
   // Keep the ends clear: the camera charm sits over the top of the vine and
   // the wedding rings under its tail, and a sprig there collides with the
   // drawing rather than reading as part of the stem.
+  //
+  // Nothing is excluded horizontally: sprigs are planted the whole way along
+  // the curve, including the apex of each bend where it meets the screen edge.
+  // What changes there is only the direction they grow — see `edgeZone`.
   const usable = walk.filter((p) => p.y > VINE_LEAD * 2 && p.y < height - VINE_TAIL * 2);
 
   // Then step along that clear stretch at a fixed interval. Half an interval of
@@ -705,12 +825,17 @@ function VineFlorals({ rows }: { rows: number }) {
     <div
       ref={boxRef}
       aria-hidden
-      className="pointer-events-none absolute inset-0 z-10 hidden sm:block"
+      className={cn('pointer-events-none absolute inset-0 z-10', className)}
     >
       {planted.map(({ x, y, dx, dy }, i) => {
         const { sprig, w, lift } = SPRIG_CYCLE[i % SPRIG_CYCLE.length];
         const row = Math.min(rows - 1, Math.max(0, Math.floor((y - VINE_LEAD) / VINE_ROW)));
-        const outward = VINE_OPPOSITE[VINE_SIDE(row)] === 'left' ? -1 : 1;
+        // Grow toward this row's empty margin — unless that margin has run out
+        // against the edge of the layer, in which case turn back inward and
+        // swing up the stem, by however far into the edge zone we are.
+        const away = VINE_OPPOSITE[VINE_SIDE(row)] === 'left' ? -1 : 1;
+        const margin = away < 0 ? x : 100 - x;
+        const outward = margin < edgeZone ? -away : away;
         // Mirror everything that grows right, so a leaf's stalk keeps facing
         // the vine instead of pointing away from it.
         const mirrored = outward > 0;
@@ -771,7 +896,7 @@ function Polaroid({
   const { image, caption, title, tilt } = memory;
   return (
     <figure
-      className="relative w-[min(74vw,15rem)] rounded-[2px] bg-paper p-3 pb-9 shadow-[0_14px_28px_-6px_color-mix(in_srgb,var(--ink)_50%,transparent),0_2px_5px_color-mix(in_srgb,var(--ink)_30%,transparent)] sm:w-64"
+      className="relative w-[min(56vw,13rem)] rounded-[2px] bg-paper p-3 pb-9 shadow-[0_14px_28px_-6px_color-mix(in_srgb,var(--ink)_50%,transparent),0_2px_5px_color-mix(in_srgb,var(--ink)_30%,transparent)] sm:w-64"
       style={{ transform: `rotate(${tilt}deg)` }}
     >
       <div className="relative aspect-square overflow-hidden rounded-[1px] bg-ink shadow-[inset_0_2px_10px_color-mix(in_srgb,var(--ink)_30%,transparent)]">
