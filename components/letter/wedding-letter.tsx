@@ -1,4 +1,7 @@
 import { OpeningBackdrop } from '@/components/letter/opening-backdrop';
+// EnvelopeGallery is parked — kept in components/letter/envelope-gallery.tsx for
+// reuse later, intentionally not mounted here.
+// import { EnvelopeGallery } from '@/components/letter/envelope-gallery';
 import { Prenup } from '@/components/letter/prenup';
 import { DayItself } from '@/components/letter/day-itself';
 import { AttireGuide } from '@/components/letter/attire-guide';
@@ -32,6 +35,8 @@ export function WeddingLetter({ searchParams }: { searchParams: SearchParams }) 
           fades in over it, reaching flat green as Our Story ends (see
           opening-backdrop.tsx). Prenup below is the first paper ground again. */}
       <OpeningBackdrop />
+      {/* <EnvelopeGallery /> parked here — reinsert to bring the keepsake
+          envelope back between Our Story and Prenup. */}
       <Prenup />
       <DayItself />
       <AttireGuide />

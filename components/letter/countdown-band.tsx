@@ -3,6 +3,7 @@
 import { motion, useReducedMotion } from 'motion/react';
 import { AddToCalendar } from '@/components/letter/add-to-calendar';
 import { Countdown } from '@/components/countdown';
+import { HeartLocket } from '@/components/letter/heart-locket';
 
 /**
  * Countdown band — the middle of ONE continuous ink background that runs Hero →
@@ -44,9 +45,21 @@ export function CountdownBand() {
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       >
+        {/* Open heart locket with the couple's photos, hanging over the top of
+            the band — the same charm role the camera plays in Our Story, but
+            inlined (not masked) so the photos keep their colour while the
+            strokes take the paper tone. Stand-in shots from picsum.photos,
+            seeded like Our Story's — swap for real files under /public/ when
+            they land. */}
+        <HeartLocket
+          left="https://picsum.photos/seed/ww-locket-a/300/300"
+          right="https://picsum.photos/seed/ww-locket-b/300/300"
+          className="w-56 text-paper sm:w-72"
+        />
+
         {/* Quiet intro line — deliberately smaller than the count, so the
             section has one loud thing in it and not three. */}
-        <h2 className="font-sans text-subhead text-paper">
+        <h2 className="mt-8 font-sans text-subhead text-paper">
           counting down to the day
         </h2>
 
